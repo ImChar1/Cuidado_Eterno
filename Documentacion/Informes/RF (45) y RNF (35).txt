@@ -1,0 +1,84 @@
+REQUISITOS FUNCIONALES
+RF-01 El sistema debe presentar una página principal pública y responsiva que informe los servicios ofrecidos e incluya accesos directos al registro y autenticación.
+RF-02 Sistema de Ayuda (FAQ): El sistema debe proveer una sección de Preguntas Frecuentes categorizada para resolver dudas operativas, legales y financieras de los usuarios.
+RF-03 El sistema debe permitir la creación de cuentas de usuario validando matemáticamente el RUT y formato de correo, aplicando encriptación (hash SHA-256) a la contraseña antes de su almacenamiento.
+RF-04 El sistema debe autenticar las credenciales del usuario, generar un token JWT y redirigirlo automáticamente a su panel correspondiente según su rol (Cliente, Trabajador, Administrador). Debe bloquear la cuenta por 15 minutos tras 5 intentos fallidos.
+RF-05 El sistema debe proveer un mecanismo de recuperación de contraseña enviando un enlace de un solo uso y con tiempo de expiración (15 minutos) al correo registrado.
+RF-06 El sistema debe permitir al usuario cerrar su sesión, destruyendo inmediatamente el token de autenticación para prevenir accesos no autorizados.
+RF-07 El sistema debe permitir al cliente ingresar y guardar la ubicación topográfica exacta de la sepultura (Pabellón, Patio, Fila, Número) obligatoriamente.
+RF-08 El sistema debe permitir al cliente buscar registros por nombre o RUT y vincularlos formalmente a su perfil personal.
+RF-09 El sistema debe desplegar las características estructurales de la sepultura, destacando alertas sobre materiales delicados (ej. mármol) y restricciones de cuidado.
+RF-10 El sistema debe mostrar al cliente un listado en tiempo real con el estado de sus solicitudes activas (Pendiente, Asignada, En Revisión).
+RF-11 El sistema debe restringir la selección de fechas y horas de servicio exclusivamente a los bloques horarios habilitados por la administración del cementerio.
+RF-12 El sistema debe integrar una pasarela transaccional cifrada (TLS 1.2) para el pago de servicios, prohibiendo el almacenamiento local de datos de tarjetas bancarias.
+RF-13 El sistema debe emitir notificaciones automáticas al cliente cuando el trabajador registre su llegada al recinto y cuando el servicio sea aprobado como finalizado.
+RF-14 El sistema debe permitir al cliente acceder a las fotografías del estado previo y posterior de la sepultura, consultando directamente el almacenamiento seguro (Amazon S3).
+RF-15 El sistema debe habilitar un formulario de valoración (1 a 5 estrellas) inmodificable, disponible únicamente tras la finalización del servicio.
+RF-16 El sistema debe permitir la actualización de datos de contacto (teléfono, nombre), manteniendo el RUT y correo electrónico bloqueados por motivos de seguridad.
+RF-17 El sistema debe mantener y mostrar un registro cronológico paginado de todos los servicios contratados históricamente por el cliente.
+RF-18 El sistema debe mostrar visualmente el progreso en vivo de la orden, incluyendo tiempo estimado de finalización y bitácora del cuidador.
+RF-19 El sistema debe proveer un canal de texto bidireccional entre cliente y trabajador, funcional exclusivamente mientras la orden mantenga el estado "En Proceso".
+RF-20 El sistema debe permitir la anulación de una solicitud dentro de un margen de tiempo predefinido (ej. 15 minutos), liberando automáticamente el bloque horario.
+RF-21 El sistema debe bloquear el avance al proceso de pago hasta que el cliente confirme mediante verificación digital que posee la autorización legal para intervenir la sepultura.
+RF-22 El sistema debe permitir a la administración definir, habilitar o deshabilitar días hábiles y bloques horarios para toda la plataforma.
+RF-23 El sistema debe otorgar al administrador la facultad de bloquear cuentas, requiriendo el ingreso de un motivo de suspensión y denegando futuros accesos a dicho usuario.
+RF-24 El sistema debe presentar un panel centralizado con indicadores numéricos (KPI) y una tabla en vivo de las órdenes según su estado logístico.
+RF-25 El sistema debe permitir al administrador adjudicar órdenes pendientes solo a cuidadores cuyo estado sea "Disponible" y no presenten conflictos de horario.
+RF-26 El sistema debe autorizar al administrador a reprogramar o cancelar órdenes de clientes en casos excepcionales, generando notificaciones automáticas.
+RF-27 El sistema debe requerir que el administrador apruebe o rechace manualmente las fotografías finales subidas por el cuidador antes de liberar la orden al cliente.
+RF-28 El sistema debe bloquear a nivel de backend (API) cualquier intento de acceso a datos de facturación o perfiles de clientes por parte de usuarios con rol de trabajador.
+RF-29 El sistema debe permitir al administrador revisar la documentación de los postulantes para otorgar la activación o rechazo del perfil de cuidador.
+RF-30 El sistema debe emitir automáticamente un documento PDF estandarizado como comprobante formal por cada servicio pagado exitosamente.
+RF-31 El sistema debe calcular y mostrar ingresos totales y comisiones de la plataforma, filtrables por fechas y exportables a formato CSV/Excel.
+RF-32 El sistema debe proveer una vista optimizada para dispositivos móviles donde el trabajador visualice exclusivamente sus órdenes asignadas del día actual.
+RF-33 El sistema debe exponer una ruta pública con los requisitos laborales para iniciar el flujo de reclutamiento de nuevos cuidadores.
+RF-34 El sistema debe registrar los datos básicos del candidato, validando el RUT y correo para prevenir registros duplicados en la plataforma.
+RF-35 El sistema debe aplicar un cuestionario técnico obligatorio y registrar la puntuación obtenida en el perfil temporal del postulante.
+RF-36 El sistema debe permitir la subida de imágenes de identidad y antecedentes legales, enrutándolos directamente a almacenamiento encriptado (Amazon S3).
+RF-37 El sistema debe restringir el acceso a las funciones operativas del postulante, mostrando una pantalla de "En revisión" hasta que un administrador lo autorice.
+RF-38 El sistema debe permitir al trabajador registrar su información de pago (Cuenta RUT/Banco), la cual debe almacenarse cifrada en la base de datos.
+RF-39 El sistema debe proveer un selector para alternar la disponibilidad laboral, impidiendo el cambio a "No Disponible" si existen encargos activos en el día.
+RF-40 El sistema debe calcular y mostrar al trabajador un historial detallado y acumulado de los ingresos generados por los servicios completados.
+RF-41 El sistema debe registrar la marca de tiempo (Timestamp) exacta cuando el cuidador indica su llegada a la sepultura asignada.
+RF-42 El sistema debe permitir la subida optimizada de la fotografía del "Antes" únicamente después de haber registrado la llegada al sitio.
+RF-43 El sistema debe exigir la validación explícita (Checkbox) del uso de herramientas adecuadas antes de habilitar el cierre de la orden.
+RF-44 El sistema debe permitir al trabajador declarar incidencias (vandalismo, errores), requiriendo foto de respaldo, para pausar la orden y alertar a logística.
+RF-45 El sistema debe permitir la captura del estado "Después" de la sepultura, pasando el estado del encargo a "En Revisión" para el administrador.
+
+
+REQUISITOS NO FUNCIONALES 
+RNF-SEG-01 - Cifrado en Tránsito: El sistema debe cifrar toda la comunicación de red entre el navegador del cliente y el servidor utilizando obligatoriamente el protocolo TLS 1.2 o superior (HTTPS).
+RNF-SEG-02 - Criptografía de Credenciales: El sistema debe aplicar el algoritmo de hashing SHA-256 (familia SHA-2) con salt aleatorio a todas las contraseñas antes de almacenarlas en la base de datos, prohibiendo el almacenamiento en texto plano.
+RNF-SEG-03 - Control de Acceso (RBAC): El sistema debe verificar la validez y los permisos del token JWT en cada petición HTTP al backend (Spring Boot), retornando un error HTTP 403 Forbidden si un rol intenta acceder a un recurso no autorizado.
+RNF-SEG-04 - Aislamiento de Archivos Sensibles: El sistema debe almacenar las fotografías de las sepulturas y los documentos de identidad de los trabajadores en buckets de Amazon S3 configurados como privados, prohibiendo el acceso público directo mediante URL.
+RNF-SEG-05 - Trazabilidad y Auditoría: El sistema debe generar un registro inmutable (Log) en la base de datos frente a acciones críticas (pagos, eliminación de registros, cambios de estado), guardando el ID del usuario, fecha, hora exacta y dirección IP de origen.
+RNF-REN-06 - Tiempo de Respuesta: El sistema debe procesar y responder a las consultas de la interfaz de usuario en un tiempo máximo de 3 segundos bajo condiciones de conectividad estándar (3G/4G).
+RNF-REN-07 - Optimización de Evidencias: El sistema debe comprimir automáticamente las fotografías tomadas por los cuidadores en la aplicación móvil antes de su transmisión, limitando el tamaño del archivo para ahorrar consumo de datos móviles.
+RNF-REN-08 - Paginación de Datos: El sistema debe limitar las consultas masivas a la base de datos (como el historial de servicios o la lista de usuarios) implementando paginación por defecto (ej. máximo 20 registros por página) para evitar sobrecargas de memoria.
+RNF-USA-09 - Diseño Adaptativo (Mobile-First): El sistema debe adaptar su interfaz gráfica (desarrollada en React) de forma fluida a dispositivos móviles, tablets y monitores de escritorio, garantizando la operatividad sin necesidad de hacer zoom horizontal.
+RNF-USA-10 - Prevención de Errores Críticos (Heurísticas): El sistema debe requerir una confirmación explícita mediante una ventana emergente (Modal) antes de ejecutar cualquier acción destructiva o irreversible (ej. "Cancelar solicitud" o "Bloquear usuario").
+RNF-USA-11 - Recuperación y Mensajes Claros: El sistema debe capturar las excepciones del servidor y traducirlas a mensajes de error amigables para el usuario final, evitando mostrar códigos de error de base de datos o jerga técnica (ej. "Error 500" o "NullPointerException").
+RNF-DIS-12 - Recuperación ante Desastres (Backups): El sistema debe apoyarse en la configuración de Amazon RDS para realizar copias de seguridad automatizadas de la base de datos relacional (MySQL), asegurando la retención de datos en caso de falla crítica.
+RNF-DIS-13 - Arquitectura de Despliegue: El sistema debe ser desplegado siguiendo el patrón de Monolito Modular, alojando el servidor de aplicaciones en instancias de Amazon EC2 mediante contenedores (Docker) para aislar el entorno de ejecución.
+RNF-DIS-14 - Gestión de Conexiones (Proxy): El sistema debe utilizar Nginx como proxy inverso para gestionar y balancear las peticiones HTTP entrantes antes de derivarlas a la aplicación Spring Boot.
+RNF-USA-15 - Visibilidad del Estado del Sistema (Heurística 1): El sistema debe proporcionar retroalimentación visual inmediata (ej. barras de progreso, spinners o mensajes de "Procesando") para cualquier petición al servidor que tome más de 1 segundo (ej. subida de fotografías a S3 o validación del pago).
+RNF-USA-16 - Lenguaje Natural y Contextual (Heurística 2): El sistema debe utilizar terminología propia del contexto funerario chileno (ej. "Sepultura", "Cuidador", "Patio", "Pabellón") en todas las interfaces, prohibiendo la visualización de jerga técnica de software o nombres de variables de la base de datos.
+RNF-USA-17 - Libertad y Control del Usuario (Heurística 3): El sistema debe incluir botones de "Atrás" o "Cancelar" claramente visibles en todos los flujos de múltiples pasos (como el agendamiento del servicio o el formulario de postulación), permitiendo al usuario una salida de emergencia sin cerrar la aplicación.
+RNF-USA-18 - Consistencia Visual y Estándares (Heurística 4): El sistema debe mantener una paleta de colores, jerarquía de tamaños de letra (mínimo 16px para lectura base) y comportamiento de botones estandarizado en todas las pantallas de React, para que el usuario no deba dudar si diferentes palabras o íconos significan la misma acción.
+RNF-USA-19 - Reconocimiento sobre Recuerdo (Heurística 6): El sistema debe pre-cargar o autocompletar la información ya conocida del usuario (ej. nombre, correo o sepulturas guardadas previamente) en los formularios transaccionales, para minimizar la carga de memoria cognitiva del cliente.
+RNF-USA-20 - Diseño Minimalista y Contraste para Exteriores (Heurística 8): El panel móvil del módulo trabajador debe utilizar un diseño de alto contraste y áreas de toque (Touch Targets) de al menos 44x44 píxeles en sus botones principales, para asegurar su legibilidad y operatividad bajo la luz solar directa del cementerio.
+RNF-USA-21 - Ayuda Contextual Integrada (Heurística 10): El sistema debe proveer íconos de información (Tooltips) junto a los campos de entrada que puedan generar dudas (ej. instrucciones visuales de dónde encontrar el "Número de Fila" en una tumba), guiando al usuario sin obligarlo a abandonar la pantalla en la que se encuentra.
+RNF-SEG-22 - Cumplimiento Legal de Privacidad: El sistema debe cumplir estrictamente con la Ley 19.628 sobre protección de la vida privada en Chile para el tratamiento, almacenamiento y anonimización de los datos personales de clientes y trabajadores.
+RNF-SEG-23 - Estándares de Hashing Avanzado: El sistema debe almacenar las contraseñas de todos los perfiles utilizando algoritmos de hash seguros con salting dinámico, garantizando la protección contra ataques de fuerza bruta.
+RNF-SEG-24 - Aislamiento de Datos por Rol (RBAC Estricto): El sistema debe garantizar a nivel lógico que un cuidador jamás tenga acceso a los datos de facturación del cliente, ni un cliente a los datos personales del cuidador más allá de la información pública de su perfil.
+RNF-SEG-25 - Acceso Temporal a Evidencias (S3): El sistema debe generar tokens temporales de visualización (Pre-Signed URLs) en el frontend para mostrar las fotografías de evidencia almacenadas en los buckets privados, evitando el acceso directo no autorizado.
+RNF-SEG-26 - Auditoría Transaccional y de Calidad: El sistema debe generar logs de auditoría inmutables (registrando actor y marca de tiempo) específicamente para cada transacción financiera y para cada aprobación o rechazo en el control de calidad.
+RNF-SEG-27 - Integridad Transaccional del Flujo: El sistema debe bloquear a nivel de base de datos el flujo del trabajador, rechazando la inserción de la "Foto Después" si no existe un registro previo (timestamp) válido de la "Foto Antes".
+RNF-USA-28 - Arquitectura Multiplataforma (PWA): El sistema debe construirse bajo un enfoque de Aplicación Web Progresiva (PWA) o Web Responsive, garantizando el acceso universal desde cualquier navegador y eliminando la dependencia de tiendas de aplicaciones nativas.
+RNF-USA-29 - Accesibilidad Visual en Terreno: La interfaz móvil del cuidador debe cumplir con los estándares internacionales de accesibilidad WCAG 2.1 nivel AA, utilizando obligatoriamente esquemas de alto contraste para garantizar la lectura bajo luz solar directa.
+RNF-USA-30 - Ergonomía Táctil (Touch Targets): El sistema debe dimensionar los botones principales de acción en la vista móvil (ej. "Subir Foto", "Marcar Llegada") con un área táctil mínima de 48x48 píxeles, facilitando la interacción a trabajadores que utilicen guantes ligeros.
+RNF-REN-31 - Disponibilidad de Servicio (SLA): El sistema debe mantener una disponibilidad operativa (Uptime) del 99.5% a nivel de servidor, garantizada de forma crítica durante los horarios hábiles de funcionamiento del cementerio.
+RNF-REN-32 - Compatibilidad Multi-Navegador (Cross-Browser): El sistema debe garantizar un renderizado y funcionamiento sin errores en las versiones estables más recientes de los principales navegadores del mercado (Google Chrome, Safari, Mozilla Firefox y Edge).
+RNF-REN-33 - Rendimiento de Carga en Redes Móviles: El sistema debe cargar las interfaces principales (Dashboard y Catálogo de Servicios) en un tiempo máximo de 3 segundos al ser accedido mediante una conexión de red móvil 4G estándar.
+RNF-REN-34 - Optimización Client-Side de Imágenes: El sistema debe ejecutar una compresión automática de imágenes vía JavaScript/HTML5 en el navegador del usuario, limitando el peso del archivo a un máximo de 2MB antes de iniciar la subida al servidor, para proteger el plan de datos del trabajador.
+RNF-REN-35 - Escalabilidad de Base de Datos: El modelo de base de datos relacional debe ser diseñado soportando principios de escalabilidad horizontal (ej. normalización adecuada y uso de IDs universales), permitiendo a futuro la multi-tenencia (incorporar otros cementerios municipales sin reestructurar el esquema).
