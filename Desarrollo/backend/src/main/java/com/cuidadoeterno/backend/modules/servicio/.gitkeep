@@ -1,0 +1,15 @@
+#   Este es el corazón de la aplicación móvil (el "Uber" de cementerios). 
+#   Controla los flujos de contratación, la asignación y las evidencias 
+#   fotográficas del "antes y después".
+
+#   Tablas que van aquí:
+
+#   SOLICITUD_SERVICIO
+
+#   DETALLE_ORDEN
+
+#   TIPO_SERVICIO
+
+#   REGISTRO_EVIDENCIA
+
+#   CALIFICACION (La reseña que deja el cliente al cuidador)

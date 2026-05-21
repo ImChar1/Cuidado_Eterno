@@ -1,0 +1,7 @@
+#   Controla el flujo de caja, tanto lo que entra por el cliente como lo que sale para pagarle al cuidador.
+
+#   Tablas que van aquí:
+
+#   PAGO_SOLICITUD
+
+#   PAGO_CUIDADOR
