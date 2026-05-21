@@ -1,0 +1,9 @@
+#   El ecosistema de insumos, materiales y puntos donde se venden los productos para realizar las mantenciones.
+
+#   Tablas que van aquí:
+
+#   CATALOGO_PRODUCTO
+
+#   PUESTO_VENTA
+
+#   RETIRO_INSUMO (El cuidador retirando materiales para trabajar)

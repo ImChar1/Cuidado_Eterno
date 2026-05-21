@@ -1,0 +1,13 @@
+#   Aquí agrupamos todo lo físico y geográfico. El cliente necesita saber 
+#   dónde está la tumba, en qué cementerio, comuna y región. Al estar 
+#   juntas, puedes hacer un controlador que busque "sepulturas por cementerio" fácilmente.
+
+#   Tablas que van aquí:
+
+#   ESPACIO
+
+#   TIPO_ESPACIO
+
+#   CEMENTERIO
+
+#   COMUNA, PROVINCIA, REGION (Las tablas geográficas base)
