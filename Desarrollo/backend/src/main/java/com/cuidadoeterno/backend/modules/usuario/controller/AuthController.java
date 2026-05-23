@@ -2,8 +2,10 @@ package com.cuidadoeterno.backend.modules.usuario.controller;
 
 import com.cuidadoeterno.backend.modules.usuario.dto.LoginRequestDTO;
 import com.cuidadoeterno.backend.modules.usuario.dto.LoginResponseDTO;
+import com.cuidadoeterno.backend.modules.usuario.dto.PerfilDTO;
 import com.cuidadoeterno.backend.modules.usuario.dto.RegistroClienteDTO;
 import com.cuidadoeterno.backend.modules.usuario.dto.RegistroCuidadorDTO;
+import com.cuidadoeterno.backend.shared.security.JwtUtil;
 import com.cuidadoeterno.backend.modules.usuario.service.AuthService;
 import com.cuidadoeterno.backend.shared.response.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -26,9 +28,7 @@ import org.springframework.web.bind.annotation.*;
  * Endpoints públicos (no requieren token):
  *   POST /auth/login
  *   POST /auth/registro/cliente
- *                                      IMPORTANTE FALTA CREAR UN ARCHIVO PERFIL DTO
- *                                         LUEGO MODIFICAR EL AUTHSERVICE Y EL OTRO SERVICE 
- *                                         
+ *
  * Endpoints protegidos (requieren token + rol):
  *   POST /auth/registro/cuidador  → solo ADMINISTRADOR
  *   GET  /auth/perfil             → cualquier usuario autenticado
@@ -41,9 +41,11 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
 
     private final AuthService authService;
+    private final JwtUtil jwtUtil;
 
-    public AuthController(AuthService authService) {
+    public AuthController(AuthService authService, JwtUtil jwtUtil) {
         this.authService = authService;
+        this.jwtUtil = jwtUtil;
     }
 
     // ── ENDPOINTS PÚBLICOS ──────────────────────────────────────────────────────
@@ -206,61 +208,41 @@ public class AuthController {
     /**
      * GET /api/v1/auth/perfil
      *
-     * Devuelve los datos del usuario actualmente autenticado.
-     * Android usa este endpoint para refrescar los datos del perfil
-     * sin hacer un nuevo login.
+     * Devuelve los datos completos del usuario autenticado.
+     * Los campos varían según el rol: CLIENTE, CUIDADOR o ADMINISTRADOR.
+     * Android usa este endpoint para refrescar el perfil sin nuevo login.
      *
-     * Acceso: cualquier usuario autenticado (CLIENTE, CUIDADOR, ADMINISTRADOR)
-     *
+     * Acceso: cualquier usuario autenticado
      * Header requerido: Authorization: Bearer <token>
-     *
-     * Respuesta 200:
-     * {
-     *   "success": true,
-     *   "message": "OK",
-     *   "data": {
-     *     "token": null,
-     *     "tipo": "Bearer",
-     *     "rol": "CLIENTE",
-     *     "idPersona": 1,
-     *     "nombre": "Juan",
-     *     "apPaterno": "Pérez",
-     *     "email": "juan@email.com"
-     *   }
-     * }
-     *
-     * Nota: este endpoint requiere que AuthService exponga un método
-     * obtenerPerfil(String nombreUsuario). Se implementa en la siguiente
-     * iteración del módulo cuando se defina el PerfilDTO completo.
      */
     @Operation(
         summary = "Perfil del usuario autenticado",
-        description = "Retorna los datos del usuario que posee el token JWT actual.",
+        description = "Retorna datos completos según el rol: CLIENTE, CUIDADOR o ADMINISTRADOR.",
         security = @SecurityRequirement(name = "bearerAuth")
     )
+    @ApiResponses({
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Perfil obtenido"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "Token inválido o expirado"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Usuario no encontrado")
+    })
     @GetMapping("/perfil")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<ApiResponse<String>> perfil(
+    public ResponseEntity<ApiResponse<PerfilDTO>> perfil(
             @RequestHeader("Authorization") String authHeader) {
 
-        // Extraemos el nombre de usuario del header para identificar al llamante
-        // En la siguiente iteración esto llamará a authService.obtenerPerfil()
-        String token = authHeader.substring(7);
-        return ResponseEntity.ok(
-            ApiResponse.ok("Endpoint activo. Implementación de perfil en siguiente iteración.", token)
-        );
+        String nombreUsuario = jwtUtil.extraerNombreUsuario(authHeader.substring(7));
+        PerfilDTO perfil = authService.obtenerPerfil(nombreUsuario);
+        return ResponseEntity.ok(ApiResponse.ok("Perfil obtenido exitosamente", perfil));
     }
 
     /**
      * GET /api/v1/auth/perfil/{id}
      *
-     * Devuelve los datos de cualquier usuario por su id_persona.
-     * Solo el ADMINISTRADOR puede consultar perfiles de otros usuarios.
+     * Devuelve el perfil de cualquier usuario por su id_persona.
+     * Útil para que el administrador consulte datos de clientes o cuidadores.
      *
      * Acceso: ROLE_ADMINISTRADOR
-     *
      * Header requerido: Authorization: Bearer <token>
-     *
      * Path variable: id → id_persona en tabla PERSONA
      */
     @Operation(
@@ -275,10 +257,8 @@ public class AuthController {
     })
     @GetMapping("/perfil/{id}")
     @PreAuthorize("hasRole('ADMINISTRADOR')")
-    public ResponseEntity<ApiResponse<String>> perfilPorId(@PathVariable Integer id) {
-        // Implementación completa en siguiente iteración con PerfilDTO
-        return ResponseEntity.ok(
-            ApiResponse.ok("Endpoint activo para id: " + id + ". Implementación en siguiente iteración.", null)
-        );
+    public ResponseEntity<ApiResponse<PerfilDTO>> perfilPorId(@PathVariable Integer id) {
+        PerfilDTO perfil = authService.obtenerPerfilPorId(id);
+        return ResponseEntity.ok(ApiResponse.ok("Perfil obtenido exitosamente", perfil));
     }
 }
