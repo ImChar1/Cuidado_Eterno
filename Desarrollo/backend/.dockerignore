@@ -1,0 +1,42 @@
+# ============================================================
+# .dockerignore
+# Ubicación: backend/.dockerignore
+#
+# QUÉ HACE:
+#   Le dice a Docker qué archivos NO copiar al contexto de build.
+#   Sin este archivo Docker enviaría TODA la carpeta backend al daemon,
+#   incluyendo target/ que puede pesar cientos de MB.
+#   Con este archivo el build es más rápido y la imagen más limpia.
+#
+# CÓMO SE COMUNICA:
+#   Docker lo lee automáticamente antes de ejecutar el Dockerfile.
+#   Aplica al COPY del Dockerfile — los archivos listados aquí
+#   no son accesibles dentro del proceso de build.
+# ============================================================
+
+# Carpeta de compilación — se genera durante el build, no se necesita
+target/
+
+# Archivos del IDE — no tienen efecto en el build
+.idea/
+*.iml
+.vscode/
+*.code-workspace
+
+# Variables de entorno locales — NUNCA deben entrar a la imagen
+.env
+.env.*
+!.env.example
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# Documentación
+README.md
+HELP.md
+
+# Logs locales
+*.log
+logs/
