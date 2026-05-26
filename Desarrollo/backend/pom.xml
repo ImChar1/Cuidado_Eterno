@@ -62,6 +62,13 @@
 			<version>${jjwt.version}</version>
 			<scope>runtime</scope>
 		</dependency>
+
+		<!-- ===================== TRANSBANK ===================== -->
+		<dependency> 
+			<groupId>com.github.transbankdevelopers</groupId> 
+			<artifactId>transbank-sdk-java</artifactId> 
+			<version>6.1.0</version> 
+		</dependency>
  
 		<!-- ===================== DOCUMENTACIÓN ===================== -->
 		
