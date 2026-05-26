@@ -1,0 +1,111 @@
+# ============================================================
+# docker-compose.yml
+# Ubicación: raíz del proyecto (CUIDADO_ETERNO/Desarrollo/)
+#
+# QUÉ HACE:
+#   Orquesta los dos contenedores para desarrollo local:
+#   - db:      imagen MariaDB 11 con la BD inicializada
+#   - backend: imagen Spring Boot construida desde el Dockerfile
+#
+# CÓMO SE COMUNICA:
+#   Lee las variables del archivo .env en la misma carpeta.
+#   Inyecta esas variables como variables de entorno en cada contenedor.
+#   El backend usa "db" como hostname para conectar a MariaDB porque
+#   Docker Compose crea una red interna donde los servicios se
+#   resuelven por nombre. "db" apunta a la IP interna del contenedor.
+#
+# USO:
+#   Levantar todo:    docker-compose up -d
+#   Ver logs:         docker-compose logs -f
+#   Detener todo:     docker-compose down
+#   Borrar volúmenes: docker-compose down -v
+# ============================================================
+
+services:
+
+  # ── Base de datos MariaDB ─────────────────────────────────
+  db:
+    image: mariadb:11
+    container_name: cuidado_eterno_db
+    restart: unless-stopped
+
+    environment:
+      # Variables leídas desde .env en la raíz del proyecto
+      MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      MARIADB_DATABASE: ${DB_NAME}
+      MARIADB_USER: ${DB_USER}
+      MARIADB_PASSWORD: ${DB_PASSWORD}
+
+    ports:
+      # Puerto 3306 expuesto al host para conectarte con DBeaver/TablePlus
+      # En producción (AWS) este puerto NO se expone al exterior
+      - "3306:3306"
+
+    volumes:
+      # Volumen nombrado: persiste los datos entre reinicios del contenedor
+      - db_data:/var/lib/mysql
+
+      # Script SQL que MariaDB ejecuta automáticamente la PRIMERA vez
+      # que el contenedor arranca y la BD está vacía.
+      # Ruta corregida según tu estructura:
+      # raíz/infra/Script_bd/cuidado_eterno_mysql.sql
+      - ./infra/Script_bd/cuidado_eterno_mysql.sql:/docker-entrypoint-initdb.d/01_schema.sql
+
+      # Si también quieres cargar el seed de datos automáticamente,
+      # descomenta la siguiente línea (debe ejecutarse después del schema):
+      # - ./infra/Script_bd/seed_data.sql:/docker-entrypoint-initdb.d/02_seed.sql
+
+    healthcheck:
+      # MariaDB incluye healthcheck.sh desde la versión 10.x
+      # --connect verifica que el servidor acepta conexiones
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s   # tiempo de gracia antes del primer check
+
+  # ── Backend Spring Boot ───────────────────────────────────
+  backend:
+    build:
+      # Docker busca el Dockerfile en backend/Dockerfile
+      # (imagen 2 de tu estructura: backend/Dockerfile)
+      context: ./backend
+      dockerfile: Dockerfile
+
+    container_name: cuidado_eterno_backend
+    restart: unless-stopped
+
+    ports:
+      # Puerto 8080: Android y Swagger acceden por aquí en desarrollo
+      - "8080:8080"
+
+    environment:
+      # "db" es el nombre del servicio de arriba.
+      # Docker Compose lo resuelve a la IP interna del contenedor MariaDB.
+      # application.yml lee DB_URL y lo usa en spring.datasource.url
+      DB_URL: jdbc:mariadb://db:3306/${DB_NAME}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRATION: ${JWT_EXPIRATION:-86400000}
+      SWAGGER_ENABLED: ${SWAGGER_ENABLED:-true}
+
+    depends_on:
+      db:
+        # El backend no arranca hasta que la BD pase el healthcheck
+        condition: service_healthy
+
+    # Red explícita para que ambos servicios se comuniquen por nombre
+    networks:
+      - cuidado_eterno_net
+
+# La BD también se conecta a la misma red interna
+networks:
+  cuidado_eterno_net:
+    driver: bridge
+
+volumes:
+  # Volumen nombrado gestionado por Docker.
+  # Los datos persisten aunque el contenedor se elimine.
+  # Solo se pierden con: docker-compose down -v
+  db_data:
