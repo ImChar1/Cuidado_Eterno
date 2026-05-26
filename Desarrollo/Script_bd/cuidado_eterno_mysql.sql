@@ -306,6 +306,79 @@ CREATE TABLE PAGO_SOLICITUD (
         REFERENCES TIPO_PAGO (id_tipo_pago)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
  
+-- ------------------------------------------------------------
+-- TRANSACCION_PAGO  –  Webpay Plus (Transbank)
+-- Registra el ciclo completo de cada transacción iniciada con
+-- Webpay Plus: desde el token de inicio hasta la confirmación
+-- o anulación. Se relaciona 1-a-1 con PAGO_SOLICITUD.
+-- ------------------------------------------------------------
+
+CREATE TABLE TRANSACCION_PAGO (
+    -- ── Clave primaria ──────────────────────────────────────
+    id_transaccion_pago     INT UNSIGNED        NOT NULL AUTO_INCREMENT,
+
+    -- ── Relación con el pago registrado en el sistema ──────
+    id_transaccion          INT UNSIGNED        NOT NULL,   -- FK → PAGO_SOLICITUD
+
+    -- ── Datos de inicio de transacción (initTransaction) ───
+    token_ws                VARCHAR(64)         NOT NULL,   -- Token único devuelto por Transbank al iniciar
+    orden_compra            VARCHAR(26)         NOT NULL,   -- Identificador único de la orden en tu sistema
+    session_id              VARCHAR(61)         NOT NULL,   -- ID de sesión del comercio
+    monto                   DECIMAL(10,2)       NOT NULL,   -- Monto de la transacción (CLP sin decimales reales)
+    url_retorno             VARCHAR(500)        NOT NULL,   -- URL de retorno configurada al iniciar
+    url_webpay              VARCHAR(500)        NULL,       -- URL de Webpay a la que se redirige al usuario
+
+    -- ── Estado del flujo ────────────────────────────────────
+    -- 'iniciada' | 'pendiente' | 'autorizada' | 'rechazada' | 'anulada' | 'reembolsada' | 'expirada'
+    estado_transaccion      VARCHAR(20)         NOT NULL DEFAULT 'iniciada',
+
+    -- ── Respuesta de confirmación (commit) ──────────────────
+    vci                     VARCHAR(6)          NULL,       -- Resultado validación cuota (VD, VN, VC, SI, S2, NC…)
+    response_code           SMALLINT            NULL,       -- 0 = aprobada; otro valor = rechazo
+    tipo_pago               VARCHAR(5)          NULL,       -- VD=débito, VN=crédito normal, VC=cuotas, SI/S2/NC/VP
+    numero_cuotas           TINYINT UNSIGNED    NULL,       -- Número de cuotas (0 si no aplica)
+    monto_cuota             DECIMAL(10,2)       NULL,       -- Monto por cuota (NULL si no aplica)
+    codigo_autorizacion     VARCHAR(6)          NULL,       -- Código de autorización del emisor
+    ultimos_4_digitos       CHAR(4)             NULL,       -- Últimos 4 dígitos de la tarjeta
+    numero_tarjeta          VARCHAR(19)         NULL,       -- PAN enmascarado (puede incluir asteriscos)
+    tipo_tarjeta            VARCHAR(10)         NULL,       -- 'Crédito' | 'Débito' | 'Prepago'
+    fecha_transaccion_tbk   DATETIME            NULL,       -- Timestamp devuelto por Transbank al confirmar
+    fecha_contable          DATE                NULL,       -- Fecha contable de la transacción
+
+    -- ── Anulación / reversa ─────────────────────────────────
+    es_anulacion            TINYINT(1)          NOT NULL DEFAULT 0,
+    monto_anulacion         DECIMAL(10,2)       NULL,       -- Monto anulado (puede ser parcial)
+    fecha_anulacion         DATETIME            NULL,       -- Momento en que se procesó la anulación
+    token_anulacion         VARCHAR(64)         NULL,       -- Token de la transacción de anulación
+    codigo_accion_anulacion VARCHAR(6)          NULL,       -- Código devuelto por el endpoint de anulación
+
+    -- ── Información del comercio ────────────────────────────
+    codigo_comercio         VARCHAR(12)         NULL,       -- Código de comercio Transbank
+    codigo_tienda           VARCHAR(12)         NULL,       -- Código de sucursal / tienda (multitienda)
+
+    -- ── Auditoría ───────────────────────────────────────────
+    ambiente                VARCHAR(10)         NOT NULL DEFAULT 'produccion',  -- 'integracion' | 'produccion'
+    ip_cliente              VARCHAR(45)         NULL,       -- IP del usuario al momento de pagar (IPv4/IPv6)
+    user_agent              VARCHAR(500)        NULL,       -- Navegador / dispositivo del usuario
+    payload_respuesta       JSON                NULL,       -- JSON raw de la respuesta de Transbank (para auditoría)
+    intentos_confirmacion   TINYINT UNSIGNED    NOT NULL DEFAULT 0,  -- Cuántas veces se llamó a commit
+    fecha_creacion          DATETIME            NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    fecha_actualizacion     DATETIME            NOT NULL DEFAULT CURRENT_TIMESTAMP
+                                                            ON UPDATE CURRENT_TIMESTAMP,
+
+    -- ── Constraints ─────────────────────────────────────────
+    CONSTRAINT TRANSACCION_PAGO_PK          PRIMARY KEY (id_transaccion_pago),
+    CONSTRAINT TRANSACCION_PAGO_PAGO_FK     FOREIGN KEY (id_transaccion)
+        REFERENCES PAGO_SOLICITUD (id_transaccion),
+    CONSTRAINT TRANSACCION_PAGO_TOKEN_UQ    UNIQUE (token_ws),
+    CONSTRAINT TRANSACCION_PAGO_ORDEN_UQ    UNIQUE (orden_compra)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+  COMMENT='Ciclo completo de cada transacción Webpay Plus con Transbank';
+
+CREATE INDEX IDX_TRANSPAGO_ESTADO    ON TRANSACCION_PAGO (estado_transaccion);
+CREATE INDEX IDX_TRANSPAGO_FECHA     ON TRANSACCION_PAGO (fecha_creacion);
+CREATE INDEX IDX_TRANSPAGO_RESPONSE  ON TRANSACCION_PAGO (response_code);
+
 CREATE TABLE SOLICITUD_SERVICIO (
     id_solicitud        INT UNSIGNED    NOT NULL AUTO_INCREMENT,
     id_persona          INT UNSIGNED    NOT NULL,
