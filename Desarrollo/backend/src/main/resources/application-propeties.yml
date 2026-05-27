@@ -22,8 +22,6 @@ spring:
   # ── Base de datos ───────────────────────────────────────────
   # DB_URL en docker-compose apunta al servicio "db" por nombre:
   #   jdbc:mariadb://db:3306/cuidado_eterno
-  # Docker resuelve "db" a la IP interna del contenedor MariaDB.
-  # En AWS, "db" se reemplaza por la IP privada de la EC2 de BD.
   datasource:
     url: ${DB_URL:jdbc:mariadb://localhost:3306/cuidado_eterno}
     username: ${DB_USER:root}
