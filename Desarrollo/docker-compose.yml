@@ -49,7 +49,7 @@ services:
       # que el contenedor arranca y la BD está vacía.
       # Ruta corregida según tu estructura:
       # raíz/infra/Script_bd/cuidado_eterno_mysql.sql
-      - ./Script_bd/cuidado_eterno_mysql.sql:/docker-entrypoint-initdb.d/01_schema.sql
+      - ./infra/Script_bd/cuidado_eterno_mysql.sql:/docker-entrypoint-initdb.d/01_schema.sql
 
       # Si también quieres cargar el seed de datos automáticamente,
       # descomenta la siguiente línea (debe ejecutarse después del schema):
@@ -80,7 +80,9 @@ services:
       - "8080:8080"
 
     environment:
-      
+      # "db" es el nombre del servicio de arriba.
+      # Docker Compose lo resuelve a la IP interna del contenedor MariaDB.
+      # application.yml lee DB_URL y lo usa en spring.datasource.url
       DB_URL: jdbc:mariadb://db:3306/${DB_NAME}
       DB_USER: ${DB_USER}
       DB_PASSWORD: ${DB_PASSWORD}
