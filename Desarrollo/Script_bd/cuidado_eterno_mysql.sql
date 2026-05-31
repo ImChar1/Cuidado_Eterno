@@ -2,26 +2,27 @@
 -- CUIDADO ETERNO - DDL MySQL/MariaDB
 -- Corregido desde Oracle SQL Developer Data Modeler
 -- ============================================================
- 
+USE cuidado_eterno;
+
 SET FOREIGN_KEY_CHECKS = 0;
  
 -- ------------------------------------------------------------
 -- CATÁLOGOS BASE (sin dependencias)
 -- ------------------------------------------------------------
  
-CREATE TABLE ROL (
+CREATE TABLE IF NOT EXISTS ROL (
     id_rol      INT UNSIGNED    NOT NULL AUTO_INCREMENT,
     nombre_rol  VARCHAR(30)     NOT NULL,
     CONSTRAINT ROL_PK PRIMARY KEY (id_rol)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
  
-CREATE TABLE REGION (
+CREATE TABLE IF NOT EXISTS REGION (
     id_region       INT UNSIGNED    NOT NULL AUTO_INCREMENT,
     nombre_region   VARCHAR(50)     NOT NULL,
     CONSTRAINT REGION_PK PRIMARY KEY (id_region)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
  
-CREATE TABLE PROVINCIA (
+CREATE TABLE IF NOT EXISTS PROVINCIA (
     id_provincia        INT UNSIGNED    NOT NULL AUTO_INCREMENT,
     nombre_provincia    VARCHAR(50)     NOT NULL,
     id_region           INT UNSIGNED    NOT NULL,
@@ -30,7 +31,7 @@ CREATE TABLE PROVINCIA (
         REFERENCES REGION (id_region)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
  
-CREATE TABLE COMUNA (
+CREATE TABLE IF NOT EXISTS COMUNA (
     id_comuna       INT UNSIGNED    NOT NULL AUTO_INCREMENT,
     nombre_comuna   VARCHAR(50)     NOT NULL,
     id_provincia    INT UNSIGNED    NOT NULL,
@@ -39,7 +40,7 @@ CREATE TABLE COMUNA (
         REFERENCES PROVINCIA (id_provincia)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
  
-CREATE TABLE HORARIO (
+CREATE TABLE IF NOT EXISTS HORARIO (
     id_horario              INT UNSIGNED    NOT NULL AUTO_INCREMENT,
     dia_semana              VARCHAR(12)     NOT NULL,
     hora_inicio             TIME            NOT NULL,
@@ -48,13 +49,13 @@ CREATE TABLE HORARIO (
     CONSTRAINT HORARIO_PK PRIMARY KEY (id_horario)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
  
-CREATE TABLE TIPO_CUENTA (
+CREATE TABLE IF NOT EXISTS TIPO_CUENTA (
     id_tipo_cuenta  INT UNSIGNED    NOT NULL AUTO_INCREMENT,
     nombre_tipo     VARCHAR(20)     NOT NULL,
     CONSTRAINT TIPO_CUENTA_PK PRIMARY KEY (id_tipo_cuenta)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
  
-CREATE TABLE TIPO_ESPACIO (
+CREATE TABLE IF NOT EXISTS TIPO_ESPACIO (
     id_tipo_espacio     INT UNSIGNED    NOT NULL AUTO_INCREMENT,
     nombre_tipo         VARCHAR(30)     NOT NULL,
     descripcion         VARCHAR(255)    NOT NULL,
@@ -62,7 +63,7 @@ CREATE TABLE TIPO_ESPACIO (
     CONSTRAINT TIPO_ESPACIO_PK PRIMARY KEY (id_tipo_espacio)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
  
-CREATE TABLE TIPO_SOLICITUD (
+CREATE TABLE IF NOT EXISTS TIPO_SOLICITUD (
     id_tipo_solic           INT UNSIGNED    NOT NULL AUTO_INCREMENT,
     nombre_servicio         VARCHAR(100)    NOT NULL,
     descripcion             VARCHAR(255)    NOT NULL,
@@ -73,14 +74,14 @@ CREATE TABLE TIPO_SOLICITUD (
     CONSTRAINT TIPO_SOLICITUD_PK PRIMARY KEY (id_tipo_solic)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
  
-CREATE TABLE TIPO_PAGO (
+CREATE TABLE IF NOT EXISTS TIPO_PAGO (
     id_tipo_pago    INT UNSIGNED    NOT NULL AUTO_INCREMENT,
     nombre_metodo   VARCHAR(50)     NOT NULL,
     activo          TINYINT(1)      NOT NULL DEFAULT 1,
     CONSTRAINT TIPO_PAGO_PK PRIMARY KEY (id_tipo_pago)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
  
-CREATE TABLE CALIFICACION (
+CREATE TABLE IF NOT EXISTS CALIFICACION (
     id_calificacion     INT UNSIGNED    NOT NULL AUTO_INCREMENT,
     puntuacion          TINYINT UNSIGNED NOT NULL,
     comentario          VARCHAR(255)    NOT NULL,
@@ -88,7 +89,7 @@ CREATE TABLE CALIFICACION (
     CONSTRAINT CALIFICACION_PK PRIMARY KEY (id_calificacion)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
  
-CREATE TABLE PRODUCTO (
+CREATE TABLE IF NOT EXISTS PRODUCTO (
     id_producto     INT UNSIGNED    NOT NULL AUTO_INCREMENT,
     nombre          VARCHAR(100)    NOT NULL,
     descripcion     VARCHAR(255)    NOT NULL,
@@ -103,7 +104,7 @@ CREATE TABLE PRODUCTO (
 -- CREDENCIAL
 -- ------------------------------------------------------------
  
-CREATE TABLE CREDENCIAL (
+CREATE TABLE IF NOT EXISTS CREDENCIAL (
     id_credencial       INT UNSIGNED    NOT NULL AUTO_INCREMENT,
     nombre_usuario      VARCHAR(50)     NOT NULL UNIQUE,
     clave_hash          VARCHAR(255)    NOT NULL,
@@ -120,7 +121,7 @@ CREATE TABLE CREDENCIAL (
 -- PERSONA y subtipos
 -- ------------------------------------------------------------
  
-CREATE TABLE PERSONA (
+CREATE TABLE IF NOT EXISTS PERSONA (
     id_persona      INT UNSIGNED    NOT NULL AUTO_INCREMENT,
     rut             VARCHAR(12)     NOT NULL UNIQUE,
     nombre          VARCHAR(50)     NOT NULL,
@@ -136,7 +137,7 @@ CREATE TABLE PERSONA (
         REFERENCES CREDENCIAL (id_credencial)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
  
-CREATE TABLE ADMINISTRADOR (
+CREATE TABLE IF NOT EXISTS ADMINISTRADOR (
     id_persona      INT UNSIGNED    NOT NULL,
     nivel_acceso    VARCHAR(30)     NOT NULL,
     cargo           VARCHAR(50)     NOT NULL,
@@ -146,7 +147,7 @@ CREATE TABLE ADMINISTRADOR (
         REFERENCES PERSONA (id_persona)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
  
-CREATE TABLE CLIENTE (
+CREATE TABLE IF NOT EXISTS CLIENTE (
     id_persona          INT UNSIGNED    NOT NULL,
     fecha_registro      DATE            NOT NULL,
     pref_notificacion   VARCHAR(20)     NOT NULL DEFAULT 'email',
@@ -156,7 +157,7 @@ CREATE TABLE CLIENTE (
         REFERENCES PERSONA (id_persona)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
  
-CREATE TABLE CUIDADOR (
+CREATE TABLE IF NOT EXISTS CUIDADOR (
     id_persona              INT UNSIGNED    NOT NULL,
     id_horario              INT UNSIGNED    NOT NULL,
     calificacion_promedio   DECIMAL(3,2)    NOT NULL DEFAULT 0.00,
@@ -174,7 +175,7 @@ CREATE TABLE CUIDADOR (
 -- CUENTA BANCO y PAGO CUIDADOR
 -- ------------------------------------------------------------
  
-CREATE TABLE CUENTA_BANCO (
+CREATE TABLE IF NOT EXISTS CUENTA_BANCO (
     id_cuenta       INT UNSIGNED    NOT NULL AUTO_INCREMENT,
     id_persona      INT UNSIGNED    NOT NULL,
     id_tipo_cuenta  INT UNSIGNED    NOT NULL,
@@ -190,7 +191,7 @@ CREATE TABLE CUENTA_BANCO (
         REFERENCES TIPO_CUENTA (id_tipo_cuenta)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
  
-CREATE TABLE PAGO_CUIDADOR (
+CREATE TABLE IF NOT EXISTS PAGO_CUIDADOR (
     id_pago_cuidador    INT UNSIGNED    NOT NULL AUTO_INCREMENT,
     id_cuenta           INT UNSIGNED    NOT NULL,
     id_tipo_pago        INT UNSIGNED    NOT NULL,
@@ -210,7 +211,7 @@ CREATE TABLE PAGO_CUIDADOR (
 -- GEOGRAFÍA Y CEMENTERIO
 -- ------------------------------------------------------------
  
-CREATE TABLE CEMENTERIO (
+CREATE TABLE IF NOT EXISTS CEMENTERIO (
     id_cementerio       INT UNSIGNED    NOT NULL AUTO_INCREMENT,
     id_comuna           INT UNSIGNED    NOT NULL,
     id_horario          INT UNSIGNED    NOT NULL,
@@ -225,7 +226,7 @@ CREATE TABLE CEMENTERIO (
         REFERENCES HORARIO (id_horario)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
  
-CREATE TABLE ESPACIO (
+CREATE TABLE IF NOT EXISTS ESPACIO (
     id_espacio          INT UNSIGNED    NOT NULL AUTO_INCREMENT,
     id_tipo_espacio     INT UNSIGNED    NOT NULL,
     id_cementerio       INT UNSIGNED    NOT NULL,
@@ -240,7 +241,7 @@ CREATE TABLE ESPACIO (
         REFERENCES CEMENTERIO (id_cementerio)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
  
-CREATE TABLE FALLECIDO (
+CREATE TABLE IF NOT EXISTS FALLECIDO (
     id_fallecido    INT UNSIGNED    NOT NULL AUTO_INCREMENT,
     id_espacio      INT UNSIGNED    NULL,
     rut_fallecido   VARCHAR(12)     NOT NULL,
@@ -258,7 +259,7 @@ CREATE TABLE FALLECIDO (
 -- PUESTO DE VENTA Y CATÁLOGO
 -- ------------------------------------------------------------
  
-CREATE TABLE PUESTO_VENTA (
+CREATE TABLE IF NOT EXISTS PUESTO_VENTA (
     id_puesto       INT UNSIGNED    NOT NULL AUTO_INCREMENT,
     id_cementerio   INT UNSIGNED    NOT NULL,
     nombre_local    VARCHAR(100)    NOT NULL,
@@ -270,7 +271,7 @@ CREATE TABLE PUESTO_VENTA (
         REFERENCES CEMENTERIO (id_cementerio)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
  
-CREATE TABLE CATALOGO_PRODUCTO (
+CREATE TABLE IF NOT EXISTS CATALOGO_PRODUCTO (
     id_catalogo     INT UNSIGNED    NOT NULL AUTO_INCREMENT,
     id_puesto       INT UNSIGNED    NOT NULL,
     id_producto     INT UNSIGNED    NOT NULL,
@@ -288,7 +289,7 @@ CREATE TABLE CATALOGO_PRODUCTO (
 -- SOLICITUD Y PAGOS
 -- ------------------------------------------------------------
  
-CREATE TABLE PAGO_SOLICITUD (
+CREATE TABLE IF NOT EXISTS PAGO_SOLICITUD (
     id_transaccion      INT UNSIGNED    NOT NULL AUTO_INCREMENT,
     id_tipo_pago        INT UNSIGNED    NOT NULL,
     monto_total         DECIMAL(10,2)   NOT NULL,
@@ -306,80 +307,7 @@ CREATE TABLE PAGO_SOLICITUD (
         REFERENCES TIPO_PAGO (id_tipo_pago)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
  
--- ------------------------------------------------------------
--- TRANSACCION_PAGO  –  Webpay Plus (Transbank)
--- Registra el ciclo completo de cada transacción iniciada con
--- Webpay Plus: desde el token de inicio hasta la confirmación
--- o anulación. Se relaciona 1-a-1 con PAGO_SOLICITUD.
--- ------------------------------------------------------------
-
-CREATE TABLE TRANSACCION_PAGO (
-    -- ── Clave primaria ──────────────────────────────────────
-    id_transaccion_pago     INT UNSIGNED        NOT NULL AUTO_INCREMENT,
-
-    -- ── Relación con el pago registrado en el sistema ──────
-    id_transaccion          INT UNSIGNED        NOT NULL,   -- FK → PAGO_SOLICITUD
-
-    -- ── Datos de inicio de transacción (initTransaction) ───
-    token_ws                VARCHAR(64)         NOT NULL,   -- Token único devuelto por Transbank al iniciar
-    orden_compra            VARCHAR(26)         NOT NULL,   -- Identificador único de la orden en tu sistema
-    session_id              VARCHAR(61)         NOT NULL,   -- ID de sesión del comercio
-    monto                   DECIMAL(10,2)       NOT NULL,   -- Monto de la transacción (CLP sin decimales reales)
-    url_retorno             VARCHAR(500)        NOT NULL,   -- URL de retorno configurada al iniciar
-    url_webpay              VARCHAR(500)        NULL,       -- URL de Webpay a la que se redirige al usuario
-
-    -- ── Estado del flujo ────────────────────────────────────
-    -- 'iniciada' | 'pendiente' | 'autorizada' | 'rechazada' | 'anulada' | 'reembolsada' | 'expirada'
-    estado_transaccion      VARCHAR(20)         NOT NULL DEFAULT 'iniciada',
-
-    -- ── Respuesta de confirmación (commit) ──────────────────
-    vci                     VARCHAR(6)          NULL,       -- Resultado validación cuota (VD, VN, VC, SI, S2, NC…)
-    response_code           SMALLINT            NULL,       -- 0 = aprobada; otro valor = rechazo
-    tipo_pago               VARCHAR(5)          NULL,       -- VD=débito, VN=crédito normal, VC=cuotas, SI/S2/NC/VP
-    numero_cuotas           TINYINT UNSIGNED    NULL,       -- Número de cuotas (0 si no aplica)
-    monto_cuota             DECIMAL(10,2)       NULL,       -- Monto por cuota (NULL si no aplica)
-    codigo_autorizacion     VARCHAR(6)          NULL,       -- Código de autorización del emisor
-    ultimos_4_digitos       CHAR(4)             NULL,       -- Últimos 4 dígitos de la tarjeta
-    numero_tarjeta          VARCHAR(19)         NULL,       -- PAN enmascarado (puede incluir asteriscos)
-    tipo_tarjeta            VARCHAR(10)         NULL,       -- 'Crédito' | 'Débito' | 'Prepago'
-    fecha_transaccion_tbk   DATETIME            NULL,       -- Timestamp devuelto por Transbank al confirmar
-    fecha_contable          DATE                NULL,       -- Fecha contable de la transacción
-
-    -- ── Anulación / reversa ─────────────────────────────────
-    es_anulacion            TINYINT(1)          NOT NULL DEFAULT 0,
-    monto_anulacion         DECIMAL(10,2)       NULL,       -- Monto anulado (puede ser parcial)
-    fecha_anulacion         DATETIME            NULL,       -- Momento en que se procesó la anulación
-    token_anulacion         VARCHAR(64)         NULL,       -- Token de la transacción de anulación
-    codigo_accion_anulacion VARCHAR(6)          NULL,       -- Código devuelto por el endpoint de anulación
-
-    -- ── Información del comercio ────────────────────────────
-    codigo_comercio         VARCHAR(12)         NULL,       -- Código de comercio Transbank
-    codigo_tienda           VARCHAR(12)         NULL,       -- Código de sucursal / tienda (multitienda)
-
-    -- ── Auditoría ───────────────────────────────────────────
-    ambiente                VARCHAR(10)         NOT NULL DEFAULT 'produccion',  -- 'integracion' | 'produccion'
-    ip_cliente              VARCHAR(45)         NULL,       -- IP del usuario al momento de pagar (IPv4/IPv6)
-    user_agent              VARCHAR(500)        NULL,       -- Navegador / dispositivo del usuario
-    payload_respuesta       JSON                NULL,       -- JSON raw de la respuesta de Transbank (para auditoría)
-    intentos_confirmacion   TINYINT UNSIGNED    NOT NULL DEFAULT 0,  -- Cuántas veces se llamó a commit
-    fecha_creacion          DATETIME            NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    fecha_actualizacion     DATETIME            NOT NULL DEFAULT CURRENT_TIMESTAMP
-                                                            ON UPDATE CURRENT_TIMESTAMP,
-
-    -- ── Constraints ─────────────────────────────────────────
-    CONSTRAINT TRANSACCION_PAGO_PK          PRIMARY KEY (id_transaccion_pago),
-    CONSTRAINT TRANSACCION_PAGO_PAGO_FK     FOREIGN KEY (id_transaccion)
-        REFERENCES PAGO_SOLICITUD (id_transaccion),
-    CONSTRAINT TRANSACCION_PAGO_TOKEN_UQ    UNIQUE (token_ws),
-    CONSTRAINT TRANSACCION_PAGO_ORDEN_UQ    UNIQUE (orden_compra)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
-  COMMENT='Ciclo completo de cada transacción Webpay Plus con Transbank';
-
-CREATE INDEX IDX_TRANSPAGO_ESTADO    ON TRANSACCION_PAGO (estado_transaccion);
-CREATE INDEX IDX_TRANSPAGO_FECHA     ON TRANSACCION_PAGO (fecha_creacion);
-CREATE INDEX IDX_TRANSPAGO_RESPONSE  ON TRANSACCION_PAGO (response_code);
-
-CREATE TABLE SOLICITUD_SERVICIO (
+CREATE TABLE IF NOT EXISTS SOLICITUD_SERVICIO (
     id_solicitud        INT UNSIGNED    NOT NULL AUTO_INCREMENT,
     id_persona          INT UNSIGNED    NOT NULL,
     id_tipo_solic       INT UNSIGNED    NOT NULL,
@@ -401,7 +329,7 @@ CREATE TABLE SOLICITUD_SERVICIO (
 -- DETALLE ORDEN Y TABLAS DEPENDIENTES
 -- ------------------------------------------------------------
  
-CREATE TABLE DETALLE_ORDEN (
+CREATE TABLE IF NOT EXISTS DETALLE_ORDEN (
     id_orden                INT UNSIGNED    NOT NULL AUTO_INCREMENT,
     id_solicitud            INT UNSIGNED    NOT NULL,
     id_persona_cuidador     INT UNSIGNED    NOT NULL,
@@ -428,7 +356,7 @@ CREATE TABLE DETALLE_ORDEN (
         REFERENCES ESPACIO (id_espacio)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
  
-CREATE TABLE REGISTRO_EVIDENCIA (
+CREATE TABLE IF NOT EXISTS REGISTRO_EVIDENCIA (
     id_evidencia        INT UNSIGNED    NOT NULL AUTO_INCREMENT,
     id_orden            INT UNSIGNED    NOT NULL,
     url_foto            VARCHAR(500)    NOT NULL,
@@ -441,7 +369,7 @@ CREATE TABLE REGISTRO_EVIDENCIA (
         REFERENCES DETALLE_ORDEN (id_orden)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
  
-CREATE TABLE RETIRO_INSUMO (
+CREATE TABLE IF NOT EXISTS RETIRO_INSUMO (
     id_retiro       INT UNSIGNED    NOT NULL AUTO_INCREMENT,
     id_orden        INT UNSIGNED    NOT NULL,
     id_puesto       INT UNSIGNED    NOT NULL,
