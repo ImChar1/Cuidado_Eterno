@@ -70,6 +70,19 @@ Todos los comandos se ejecutan desde la carpeta `Desarrollo/`.
 ```bash
 # Construir la imagen del backend y levantar ambos contenedores
 docker compose up --build -d
+
+#Otros comandos
+
+# Esto SÍ ejecuta los scripts (volumen vacío)
+docker compose down -v        # borra el volumen
+docker compose up -d          # crea volumen nuevo → scripts corren
+
+# Esto NO ejecuta los scripts (volumen con datos)
+docker compose down           # detiene, conserva volumen
+docker compose up -d          # reanuda → scripts NO corren
+
+docker compose restart        # → scripts NO corren
+
 ```
 
 Docker Compose hace lo siguiente en orden:
