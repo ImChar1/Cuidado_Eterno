@@ -25,44 +25,34 @@ services:
 
   # ── Base de datos MariaDB ─────────────────────────────────
   db:
-    image: mariadb:11
+    build:
+      # Contexto: la raíz de Desarrollo/ donde está el docker-compose.yml
+      # Dockerfile: ruta relativa desde ese contexto
+      context: .
+      dockerfile: infra/db/Dockerfile
+ 
     container_name: cuidado_eterno_db
     restart: unless-stopped
-
+ 
     environment:
-      # Variables leídas desde .env en la raíz del proyecto
       MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
       MARIADB_DATABASE: ${DB_NAME}
       MARIADB_USER: ${DB_USER}
       MARIADB_PASSWORD: ${DB_PASSWORD}
-
+ 
     ports:
-      # Puerto 3306 expuesto al host para conectarte con DBeaver/TablePlus
-      # En producción (AWS) este puerto NO se expone al exterior
       - "3306:3306"
-
+ 
     volumes:
-      # Volumen nombrado: persiste los datos entre reinicios del contenedor
+      # Solo el volumen de datos — los scripts ya están en la imagen
       - db_data:/var/lib/mysql
-
-      # Script SQL que MariaDB ejecuta automáticamente la PRIMERA vez
-      # que el contenedor arranca y la BD está vacía.
-      # Ruta corregida según tu estructura:
-      # raíz/infra/Script_bd/cuidado_eterno_mysql.sql
-      - ./infra/Script_bd/cuidado_eterno_mysql.sql:/docker-entrypoint-initdb.d/01_schema.sql
-
-      # Si también quieres cargar el seed de datos automáticamente,
-      # descomenta la siguiente línea (debe ejecutarse después del schema):
-      # - ./infra/Script_bd/seed_data.sql:/docker-entrypoint-initdb.d/02_seed.sql
-
+ 
     healthcheck:
-      # MariaDB incluye healthcheck.sh desde la versión 10.x
-      # --connect verifica que el servidor acepta conexiones
       test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
       interval: 10s
       timeout: 5s
       retries: 5
-      start_period: 30s   # tiempo de gracia antes del primer check
+      start_period: 30s
 
   # ── Backend Spring Boot ───────────────────────────────────
   backend:
@@ -80,9 +70,6 @@ services:
       - "8080:8080"
 
     environment:
-      # "db" es el nombre del servicio de arriba.
-      # Docker Compose lo resuelve a la IP interna del contenedor MariaDB.
-      # application.yml lee DB_URL y lo usa en spring.datasource.url
       DB_URL: jdbc:mariadb://db:3306/${DB_NAME}
       DB_USER: ${DB_USER}
       DB_PASSWORD: ${DB_PASSWORD}
