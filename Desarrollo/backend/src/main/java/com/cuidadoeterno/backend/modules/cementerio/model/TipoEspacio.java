@@ -22,4 +22,7 @@ public class TipoEspacio {
 
     @Column(name = "descripcion", length = 255)
     private String descripcion;
+
+    @Column(name = "nivel_complejidad", nullable = false)
+    private Integer nivelComplejidad;
 }

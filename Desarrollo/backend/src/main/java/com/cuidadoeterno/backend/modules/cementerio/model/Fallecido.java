@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.sql.Date;
 import java.time.LocalDate;
 
 @Entity
@@ -19,11 +20,20 @@ public class Fallecido {
     @Column(name = "id_fallecido", nullable = false, updatable = false)
     private Integer idFallecido;
 
-    @Column(name = "nombre_completo", nullable = false, length = 150)
-    private String nombreCompleto;
+    @Column(name = "nombres", nullable = false, length = 100)
+    private String nombres;
+
+    @Column(name = "apellidos", nullable = false, length = 150)
+    private String apellidos;
+
+    @Column(name = "fecha_nacimiento", nullable = false, length = 150)
+    private LocalDate fechaDeNacimiento;
 
     @Column(name = "fecha_defuncion")
     private LocalDate fechaDefuncion;
+
+    @Column(name = "epitafo", length = 255)
+    private String epitafo;
 
     // Relación: Un fallecido descansa en un Espacio específico
     @ManyToOne(fetch = FetchType.LAZY)

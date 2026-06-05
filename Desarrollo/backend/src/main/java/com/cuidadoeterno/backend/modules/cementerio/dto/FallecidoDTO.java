@@ -8,7 +8,9 @@ import java.time.LocalDate;
 @Setter
 public class FallecidoDTO {
     private Integer idFallecido;
-    private String nombreCompleto;
+    private String nombres;
+    private String apellidos;
+    private LocalDate fechaDeNacimiento;
     private LocalDate fechaDefuncion;
     
     // Solo necesitamos el ID del espacio para vincularlo a una tumba existente

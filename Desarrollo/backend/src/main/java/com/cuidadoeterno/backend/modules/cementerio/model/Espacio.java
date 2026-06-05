@@ -31,6 +31,15 @@ public class Espacio {
     @Column(name = "coordenada_longitud", precision = 11, scale = 8)
     private BigDecimal coordenadaLongitud;
 
+    @Column(name = "material_principal", length = 50)
+    private String materialPrincipal;
+
+    @Column(name = "estado_fisico", length = 20)
+    private String estadoFisico;
+
+    @Column(name = "url_foto_referencia", length = 500)
+    private String urlFotoReferencial;
+
     // Relación: Muchos Espacios pertenecen a un Cementerio
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_cementerio", nullable = false)

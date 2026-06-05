@@ -54,7 +54,12 @@ public class SecurityConfig {
     private static final String[] RUTAS_PUBLICAS = {
         "/auth/**",           // login y registro
         "/swagger-ui/**",     // documentación (deshabilitar en prod con variable de entorno)
-        "/api-docs/**"
+        "/api-docs/**",
+        "/api-docs/**",
+        "/swagger-ui.html",         
+        "/swagger-ui/index.html",   
+        "/api-docs/swagger-config",
+        "/v3/api-docs/**" 
     };
 
     // ── Cadena de filtros ───────────────────────────────────────────────────────

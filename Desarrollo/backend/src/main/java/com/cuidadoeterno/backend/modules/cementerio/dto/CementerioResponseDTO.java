@@ -11,6 +11,5 @@ public class CementerioResponseDTO {
     private Integer idCementerio;
     private String nombreCementerio;
     private String direccion;
-    private String telefonoContacto;
     private String nombreComuna; // Aliviamos la carga de red mandando solo el texto
 }
