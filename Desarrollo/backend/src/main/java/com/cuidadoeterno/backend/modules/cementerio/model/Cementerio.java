@@ -1,5 +1,7 @@
 package com.cuidadoeterno.backend.modules.cementerio.model;
 
+import java.math.BigDecimal;
+
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -23,8 +25,11 @@ public class Cementerio {
     @Column(name = "direccion", nullable = false, length = 200)
     private String direccion;
 
-    @Column(name = "telefono_contacto", length = 20)
-    private String telefonoContacto;
+    @Column(name = "latitud", nullable = false, precision = 10, scale = 7)
+    private BigDecimal latitud;
+
+    @Column(name = "longitud", nullable = false, precision = 10, scale = 7)
+    private BigDecimal longitud;
 
     // Relación: Muchos Cementerios están en una Comuna
     @ManyToOne(fetch = FetchType.LAZY)

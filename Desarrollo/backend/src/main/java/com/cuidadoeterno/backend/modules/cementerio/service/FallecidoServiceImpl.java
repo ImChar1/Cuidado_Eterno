@@ -26,8 +26,10 @@ public class FallecidoServiceImpl implements FallecidoService {
                 .orElseThrow(() -> new IllegalArgumentException("El espacio o tumba no existe."));
 
         Fallecido nuevoFallecido = new Fallecido();
-        nuevoFallecido.setNombreCompleto(request.getNombreCompleto());
+        nuevoFallecido.setNombres(request.getNombres());
+        nuevoFallecido.setApellidos(request.getApellidos());
         nuevoFallecido.setFechaDefuncion(request.getFechaDefuncion());
+        nuevoFallecido.setFechaDeNacimiento(request.getFechaDeNacimiento());
         nuevoFallecido.setEspacio(espacio);
 
         return fallecidoRepository.save(nuevoFallecido);

@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class OrdenResponseDTO {
     private Integer idOrden;
-    private String tipoServicio; // "Jardinería"
+    private String nombreServicio; // "Jardinería"
     private LocalDateTime fechaProgramada;
     private String estadoOrden; // "pendiente", "completada"
     private BigDecimal montoTotal;

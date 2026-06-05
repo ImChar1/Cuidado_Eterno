@@ -72,24 +72,26 @@ Todos los comandos se ejecutan desde la carpeta `Desarrollo/`.
 docker compose up --build -d
 
 #Otros comandos
-
-# Esto SÍ ejecuta los scripts (volumen vacío)
-docker compose down -v        # borra el volumen
-docker compose up -d          # crea volumen nuevo → scripts corren
-
-# Esto NO ejecuta los scripts (volumen con datos)
-docker compose down           # detiene, conserva volumen
-docker compose up -d          # reanuda → scripts NO corren
-
-docker compose restart        # → scripts NO corren
+docker compose restart        # → scripts NO corren solo se reinician la imagenes ya construidas.
 
 ```
 
 Docker Compose hace lo siguiente en orden:
 1. Levanta el contenedor `db` (MariaDB 11)
 2. Espera el healthcheck de la BD (`healthcheck.sh --connect`)
+
+  -docker compose up --build d db (db es el nombre del servicio en el docker-compose).
+  -docker compose logs -f db (para verificar "[NOTE] mariadbd: redy for connections).
+  -verificar si se crearon las tablas correctamente por el DDL con:
+  [docker exec -it cuidado_eterno_db mariadb -u ce_user -pce_pass cuidado_eterno -e "SHOW TABLES;"] PARA POWERSHELL.
+  -verificar si se poblaron las tablas correctamente por el script DML con:
+  [docker exec -it cuidado_eterno_db mariadb -u ce_user -pce_pass cuidado_eterno -e "SELECT nombre_rol FROM ROL;"] PARA POWERSHELL
+  -Para conectarse a la BD y explorar realizando cualquier tipo de Query:
+  [docker exec -it cuidado_eterno_db mariadb -u ce_user -pce_pass cuidado_eterno] PARA POWERSHELL (salir con exit).
+
 3. Levanta `backend` (Spring Boot) solo cuando la BD está lista
-4. El script SQL `infra/Script_bd/cuidado_eterno_mysql.sql` inicializa el esquema automáticamente la primera vez
+  -docker compose up --build -d backend (para construir el servicio del backend en el docker-compose)
+  -docker compose logs -f backend (para verificar el "")
 
 ### 3.2 Arranques posteriores (imagen ya construida)
 
@@ -130,6 +132,13 @@ docker compose restart backend
 
 ```bash
 docker compose up --build -d backend
+```
+
+### 3.7 Construir la imagen borrando el cache y luego levantar las imagenes.
+
+```
+docker compose build --no-cache
+docker compose up -d
 ```
 
 ---

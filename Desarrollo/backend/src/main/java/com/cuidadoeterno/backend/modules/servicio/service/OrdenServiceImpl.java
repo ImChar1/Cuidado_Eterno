@@ -80,7 +80,7 @@ public class OrdenServiceImpl implements OrdenService {
         return solicitudes.stream().map(solicitud -> {
             return new OrdenResponseDTO(
                     solicitud.getIdSolicitud(),
-                    solicitud.getTipoSolicitud().getNombreTipo(),
+                    solicitud.getTipoSolicitud().getNombreServicio(),
                     solicitud.getFechaSolicitud(),
                     "pendiente", // O el estado derivado de DetalleOrden
                     new java.math.BigDecimal("0.00") // Aquí se extraería el monto

@@ -17,9 +17,18 @@ public class TipoSolicitud {
     @Column(name = "id_tipo_solicitud", nullable = false, updatable = false)
     private Integer idTipoSolicitud;
 
-    @Column(name = "nombre_tipo", nullable = false, length = 50)
-    private String nombreTipo;
+    @Column(name = "nombre_servicio", nullable = false, length = 100)
+    private String nombreServicio;
 
     @Column(name = "descripcion", length = 255)
     private String descripcion;
+
+    @Column(name = "duracion_estimada_min", nullable = false)
+    private Short duracionEstimadaMin;
+
+    @Column(name = "requiere_insumos", nullable = false, columnDefinition = "TINYINT(1) DEFAULT 0")
+    private boolean requiereInsumos = false;
+
+    @Column(name = "estado_sv", nullable = false, columnDefinition = "TINYINT(1) DEFAULT 1")
+    private boolean estadoSv = true;
 }

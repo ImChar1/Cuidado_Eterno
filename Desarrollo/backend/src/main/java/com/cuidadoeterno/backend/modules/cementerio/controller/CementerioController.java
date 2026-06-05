@@ -68,7 +68,6 @@ public class CementerioController {
                         c.getIdCementerio(),
                         c.getNombreCementerio(),
                         c.getDireccion(),
-                        c.getTelefonoContacto(),
                         c.getComuna().getNombreComuna()
                 )).collect(Collectors.toList());
         return ResponseEntity.ok(dtos);
@@ -81,7 +80,6 @@ public class CementerioController {
                         c.getIdCementerio(),
                         c.getNombreCementerio(),
                         c.getDireccion(),
-                        c.getTelefonoContacto(),
                         c.getComuna().getNombreComuna()
                 )).collect(Collectors.toList());
         return ResponseEntity.ok(dtos);
