@@ -13,5 +13,5 @@ public interface SolicitudServicioRepository extends JpaRepository<SolicitudServ
     // Trae todas las solicitudes de un cliente ordenadas de la más reciente a la más antigua
     List<SolicitudServicio> findByIdClienteOrderByFechaSolicitudDesc(Integer idCliente);
 
-    Optional<SolicitudServicio> findByIdTransaccion(Integer idTransaccion);
+    Optional<SolicitudServicio> findByPagoSolicitudIdTransaccion(Integer idTransaccion);
 }

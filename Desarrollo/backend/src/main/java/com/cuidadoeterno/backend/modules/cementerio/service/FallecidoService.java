@@ -8,4 +8,5 @@ import java.util.List;
 public interface FallecidoService {
     Fallecido registrarFallecido(FallecidoDTO request);
     List<Fallecido> buscarFallecidosPorEspacio(Integer idEspacio);
+    List<Fallecido> findByNombreCompleto(String nombre);
 }

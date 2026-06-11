@@ -57,7 +57,7 @@ public class Persona {
     /**
      * 'M' = Masculino, 'F' = Femenino, 'O' = Otro
      */
-    @Column(name = "genero", nullable = false, length = 1)
+    @Column(name = "genero", nullable = false, columnDefinition = "CHAR(1)", length = 1)
     private String genero;
 
     // ── Relaciones ──────────────────────────────────────────────────────────────

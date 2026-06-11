@@ -46,10 +46,11 @@ public class SolicitudServicio {
     // Relación con el pago asociado (se asigna al iniciar el pago)
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_transaccion")
-    private PagoSolicitud pagoSolicitud;
+    private PagoSolicitud pagoSolicitud; // ¡Cambio clave aquí!
 
     // Conveniencia para el servicio: expone el id sin cargar la entidad completa
-    public Integer getIdTransaccion() {
+    // Le cambiamos el nombre para que no pelee con el Getter de Lombok
+    public Integer getTransaccionId() {
         return pagoSolicitud != null ? pagoSolicitud.getIdTransaccion() : null;
     }
 }
