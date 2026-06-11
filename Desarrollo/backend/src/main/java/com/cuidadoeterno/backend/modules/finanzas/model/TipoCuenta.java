@@ -20,12 +20,12 @@ public class TipoCuenta {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_tipo_cuenta")
-    private Long idTipoCuenta;
+    private Integer idTipoCuenta;
 
     /**
      * Nombre del tipo de cuenta bancaria.
      */
-    @Column(name = "nombre", nullable = false, length = 50)
+    @Column(name = "nombre_tipo", nullable = false, length = 50)
     private String nombre;
 
 }

@@ -243,7 +243,7 @@ CREATE TABLE IF NOT EXISTS fallecido (
     apellidos           VARCHAR(100)    NOT NULL,
     fecha_nacimiento    DATE            NOT NULL,
     fecha_defuncion     DATE            NOT NULL,
-    epitafio            VARCHAR(255)    NULL,
+    epitafo            VARCHAR(255)     NULL,
     CONSTRAINT fallecido_pk PRIMARY KEY (id_fallecido),
     CONSTRAINT fallecido_espacio_fk FOREIGN KEY (id_espacio)
         REFERENCES espacio (id_espacio)

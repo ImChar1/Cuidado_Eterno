@@ -45,7 +45,7 @@ public class PagoSolicitud {
     @Column(name = "cuotas")
     private Integer cuotas;
 
-    @Column(name = "ultimos_4_digitos", length = 4)
+    @Column(name = "ultimos_4_digitos", columnDefinition = "CHAR(4)", length = 4)
     private String ultimos4Digitos;
 
     @Column(name = "fecha_transaccion")

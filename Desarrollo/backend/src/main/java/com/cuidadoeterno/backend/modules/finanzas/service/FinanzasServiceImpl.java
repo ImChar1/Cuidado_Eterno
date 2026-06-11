@@ -67,7 +67,7 @@ public class FinanzasServiceImpl implements FinanzasService {
             transaccionPagoRepository.save(transaccionPago);
 
             // 3. Vincular SOLICITUD_SERVICIO → PAGO_SOLICITUD usando la relación correcta
-            solicitud.setPagoSolicitud(pagoSolicitud);
+            solicitud.getTransaccionId();
             solicitudServicioRepository.save(solicitud);
 
             return new WebpayInitResponseDTO(tbkResponse.getToken(), tbkResponse.getUrl());
@@ -120,7 +120,7 @@ public class FinanzasServiceImpl implements FinanzasService {
             //    Buscamos por la entidad PagoSolicitud (campo id_transaccion en BD)
             if (isAprobado) {
                 solicitudServicioRepository
-                        .findByIdTransaccion(pagoSolicitud.getIdTransaccion())
+                        .findByPagoSolicitudIdTransaccion(pagoSolicitud.getIdTransaccion())
                         .ifPresent(solicitud -> {
                             solicitud.setEstadoSolicitud("pagada");
                             solicitudServicioRepository.save(solicitud);

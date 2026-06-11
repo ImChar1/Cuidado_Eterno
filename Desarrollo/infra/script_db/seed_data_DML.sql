@@ -147,7 +147,7 @@ INSERT INTO espacio (id_tipo_espacio, id_cementerio, sector_pabellon, numero_sep
 -- 13. FALLECIDO (depende de ESPACIO)
 --     Se removió rut_fallecido conforme al nuevo DDL
 -- ============================================================
-INSERT INTO fallecido (id_espacio, nombres, apellidos, fecha_nacimiento, fecha_defuncion, epitafio) VALUES
+INSERT INTO fallecido (id_espacio, nombres, apellidos, fecha_nacimiento, fecha_defuncion, epitafo) VALUES
     (1, 'Manuel Eduardo',   'Soto Ramírez',    '1940-05-12', '2020-11-03', 'Amado esposo y padre, siempre en nuestros corazones'),
     (2, 'Carmen Rosa',      'Díaz Moreno',     '1935-09-28', '2019-06-15', 'Tu amor nos guía eternamente'),
     (3, 'Roberto Andrés',   'Vega Castillo',   '1928-01-07', '2021-03-22', 'Descansa en paz, buen hombre'),

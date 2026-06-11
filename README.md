@@ -170,7 +170,7 @@ curl -X POST http://localhost:8080/api/v1/auth/login \
 ### 4.3 Abrir Swagger UI
 
 ```
-http://localhost:8080/api/v1/swagger-ui.html
+http://localhost:8080/api/v1/swagger-ui/swagger-ui/index.html
 ```
 
 ### 4.4 Conectarse a la BD desde DBeaver / TablePlus

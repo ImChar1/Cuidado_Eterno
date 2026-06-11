@@ -21,7 +21,7 @@ public class CuentaBanco {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_cuenta")
-    private Long idCuenta;
+    private Integer idCuenta;
 
     /**
      * FK → CUIDADOR.id_persona

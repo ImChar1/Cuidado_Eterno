@@ -37,6 +37,13 @@ public class FallecidoServiceImpl implements FallecidoService {
 
     @Override
     @Transactional(readOnly = true)
+    public List<Fallecido> findByNombreCompleto(String nombre) {
+        // Aquí llamas al método que corregimos con @Query en el Repositorio
+        return fallecidoRepository.findByNombreCompleto(nombre);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public List<Fallecido> buscarFallecidosPorEspacio(Integer idEspacio) {
         return fallecidoRepository.findByEspacioIdEspacio(idEspacio);
     }

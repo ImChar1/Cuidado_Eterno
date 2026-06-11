@@ -67,7 +67,7 @@ public class TransaccionPago {
     @Column(name = "codigo_autorizacion", length = 6)
     private String codigoAutorizacion;
 
-    @Column(name = "ultimos_4_digitos", length = 4)
+    @Column(name = "ultimos_4_digitos", columnDefinition = "CHAR(4)", length = 4)
     private String ultimos4Digitos;
 
     @Column(name = "numero_tarjeta", length = 19)
