@@ -3,6 +3,7 @@ package com.cuidadoeterno.backend.modules.usuario.dto;
 import jakarta.validation.constraints.*;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 
 /**
  * DTO de entrada para el endpoint POST /auth/registro/cuidador
@@ -85,12 +86,35 @@ public record RegistroCuidadorDTO(
 
     // ── Datos de CUIDADOR ───────────────────────────────────────────────────────
 
-    /**
-     * ID del horario asignado por el administrador.
-     * El horario debe existir previamente en la tabla HORARIO.
-     */
-    @NotNull(message = "El horario es obligatorio para registrar un cuidador")
-    @Positive(message = "El id del horario debe ser un número positivo")
-    Integer idHorario
+    // ── Disponibilidad del cuidador ─────────────────────────────────────────────
+    // Ya no se asigna un horario fijo de cementerio.
+    // El cuidador declara en qué días puede trabajar y en qué horario.
+    // La validación contra el horario del cementerio ocurre al aceptar una solicitud.
+
+    @NotBlank(message = "Los días de disponibilidad son obligatorios")
+    String disponibilidadDias,          // "lunes,martes,miercoles"
+
+    @NotNull(message = "La hora de inicio es obligatoria")
+    LocalTime disponibilidadHoraInicio,
+
+    @NotNull(message = "La hora de fin es obligatoria")
+    LocalTime disponibilidadHoraFin,
+
+    // ── Documentación de certificación ─────────────────────────────────────────
+
+    @NotBlank(message = "La URL de certificación es obligatoria")
+    @Size(max = 500)
+    String urlCertificacion,
+
+    @NotBlank(message = "El tipo de documento es obligatorio")
+    @Pattern(
+        regexp = "^(cedula|certificado_municipal|registro_cementerio|otro)$",
+        message = "Tipo de documento no válido"
+    )
+    String tipoDocumento,
+
+    // Opcional: número de registro si el documento lo tiene
+    @Size(max = 50)
+    String numeroRegistro
 
 ) {}

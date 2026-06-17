@@ -11,4 +11,6 @@ public interface RegistroEvidenciaRepository extends JpaRepository<RegistroEvide
 
     // Trae todas las fotos (antes, durante, después) asociadas a un servicio específico
     List<RegistroEvidencia> findByDetalleOrdenIdOrden(Integer idOrden);
+
+    boolean existsByDetalleOrdenIdOrden(Integer idOrden);
 }

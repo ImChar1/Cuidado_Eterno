@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/api/inventario")
+@RequestMapping("/inventario")
 @RequiredArgsConstructor
 @CrossOrigin(origins = "*") // Para evitar problemas de CORS al probar con el emulador de Android
 public class InventarioController {

@@ -1,7 +1,5 @@
 package com.cuidadoeterno.backend.modules.usuario.service;
-
-import com.cuidadoeterno.backend.modules.cementerio.model.Horario;
-import com.cuidadoeterno.backend.modules.cementerio.repository.HorarioRepository;
+ 
 import com.cuidadoeterno.backend.modules.usuario.dto.*;
 import com.cuidadoeterno.backend.modules.usuario.model.*;
 import com.cuidadoeterno.backend.modules.usuario.repository.*;
@@ -13,12 +11,14 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
+ 
 import java.time.LocalDate;
-
+import java.util.List;
+import java.util.stream.Collectors;
+ 
 @Service
 public class AuthServiceImpl implements AuthService {
-
+ 
     private final AuthenticationManager authenticationManager;
     private final JwtUtil jwtUtil;
     private final PasswordEncoder passwordEncoder;
@@ -27,8 +27,11 @@ public class AuthServiceImpl implements AuthService {
     private final CredencialRepository credencialRepository;
     private final ClienteRepository clienteRepository;
     private final CuidadorRepository cuidadorRepository;
-    private final HorarioRepository horarioRepository;
-
+ 
+    // CAMBIO: se eliminó HorarioRepository porque el cuidador
+    // ya no se asigna a un horario fijo al registrarse.
+    // El horario relevante es el del cementerio de cada solicitud.
+ 
     public AuthServiceImpl(
             AuthenticationManager authenticationManager,
             JwtUtil jwtUtil,
@@ -37,72 +40,67 @@ public class AuthServiceImpl implements AuthService {
             PersonaRepository personaRepository,
             CredencialRepository credencialRepository,
             ClienteRepository clienteRepository,
-            CuidadorRepository cuidadorRepository,
-            HorarioRepository horarioRepository) {
-        this.authenticationManager    = authenticationManager;
-        this.jwtUtil                  = jwtUtil;
-        this.passwordEncoder          = passwordEncoder;
-        this.rolRepository            = rolRepository;
-        this.personaRepository        = personaRepository;
-        this.credencialRepository     = credencialRepository;
-        this.clienteRepository        = clienteRepository;
-        this.cuidadorRepository       = cuidadorRepository;
-        this.horarioRepository        = horarioRepository;
+            CuidadorRepository cuidadorRepository) {
+        this.authenticationManager = authenticationManager;
+        this.jwtUtil               = jwtUtil;
+        this.passwordEncoder       = passwordEncoder;
+        this.rolRepository         = rolRepository;
+        this.personaRepository     = personaRepository;
+        this.credencialRepository  = credencialRepository;
+        this.clienteRepository     = clienteRepository;
+        this.cuidadorRepository    = cuidadorRepository;
     }
-
+ 
     // ── LOGIN ───────────────────────────────────────────────────────────────────
-
+ 
     @Override
     public LoginResponseDTO login(LoginRequestDTO dto) {
-
-        // Spring Security valida usuario + contraseña con PBKDF2
-        // BadCredentialsException si falla → GlobalExceptionHandler → 401
         authenticationManager.authenticate(
             new UsernamePasswordAuthenticationToken(dto.nombreUsuario(), dto.clave())
         );
-
+ 
         Credencial credencial = credencialRepository
             .findByNombreUsuario(dto.nombreUsuario())
             .orElseThrow(() -> new BusinessException(
                 "Error al cargar credencial", HttpStatus.INTERNAL_SERVER_ERROR
             ));
-
+ 
         String nombreRol = credencial.getRol().getNombreRol();
-
+ 
         Persona persona = personaRepository
             .findByCredencial_IdCredencial(credencial.getIdCredencial())
             .orElseThrow(() -> new BusinessException(
                 "No se encontró persona asociada", HttpStatus.INTERNAL_SERVER_ERROR
             ));
-
+ 
         String token = jwtUtil.generarToken(dto.nombreUsuario(), nombreRol);
-
+ 
         return new LoginResponseDTO(
             token, nombreRol,
             persona.getIdPersona(), persona.getNombre(),
             persona.getApPaterno(), persona.getEmail()
         );
     }
-
+ 
     // ── REGISTRO CLIENTE ────────────────────────────────────────────────────────
-
+ 
     @Override
     @Transactional
     public void registrarCliente(RegistroClienteDTO dto) {
         validarDuplicados(dto.rut(), dto.email(), dto.nombreUsuario());
-
+ 
         Rol rol = rolRepository.findByNombreRol("CLIENTE")
             .orElseThrow(() -> new BusinessException(
                 "Rol CLIENTE no configurado", HttpStatus.INTERNAL_SERVER_ERROR
             ));
-
+ 
         Credencial credencial = new Credencial();
         credencial.setNombreUsuario(dto.nombreUsuario());
         credencial.setClaveHash(passwordEncoder.encode(dto.clave()));
         credencial.setRol(rol);
         credencial.setEstadoCuenta("activa");
         credencial.setIntentosFallidos(0);
-
+ 
         Cliente cliente = new Cliente();
         cliente.setRut(dto.rut());
         cliente.setNombre(dto.nombre());
@@ -118,35 +116,29 @@ public class AuthServiceImpl implements AuthService {
             dto.prefNotificacion() != null ? dto.prefNotificacion() : "email"
         );
         cliente.setEstadoCliente("activo");
-
+ 
         clienteRepository.save(cliente);
     }
-
+ 
     // ── REGISTRO CUIDADOR ───────────────────────────────────────────────────────
-
+ 
     @Override
     @Transactional
     public void registrarCuidador(RegistroCuidadorDTO dto) {
         validarDuplicados(dto.rut(), dto.email(), dto.nombreUsuario());
-
-        Horario horario = horarioRepository.findById(dto.idHorario())
-            .orElseThrow(() -> new BusinessException(
-                "El horario con id " + dto.idHorario() + " no existe",
-                HttpStatus.NOT_FOUND
-            ));
-
+ 
         Rol rol = rolRepository.findByNombreRol("CUIDADOR")
             .orElseThrow(() -> new BusinessException(
                 "Rol CUIDADOR no configurado", HttpStatus.INTERNAL_SERVER_ERROR
             ));
-
+ 
         Credencial credencial = new Credencial();
         credencial.setNombreUsuario(dto.nombreUsuario());
         credencial.setClaveHash(passwordEncoder.encode(dto.clave()));
         credencial.setRol(rol);
         credencial.setEstadoCuenta("activa");
         credencial.setIntentosFallidos(0);
-
+ 
         Cuidador cuidador = new Cuidador();
         cuidador.setRut(dto.rut());
         cuidador.setNombre(dto.nombre());
@@ -157,60 +149,92 @@ public class AuthServiceImpl implements AuthService {
         cuidador.setFechaNacimiento(dto.fechaNacimiento());
         cuidador.setGenero(dto.genero());
         cuidador.setCredencial(credencial);
-        cuidador.setHorario(horario);
         cuidador.setFechaIngreso(LocalDate.now());
         cuidador.setEstadoVerificacion("pendiente");
         cuidador.setEstadoDisponibilidad("disponible");
-
+ 
+        // NUEVO: disponibilidad declarada por el cuidador
+        cuidador.setDisponibilidadDias(dto.disponibilidadDias());
+        cuidador.setDisponibilidadHoraInicio(dto.disponibilidadHoraInicio());
+        cuidador.setDisponibilidadHoraFin(dto.disponibilidadHoraFin());
+ 
+        // NUEVO: documentación de certificación
+        cuidador.setUrlCertificacion(dto.urlCertificacion());
+        cuidador.setTipoDocumento(dto.tipoDocumento());
+        cuidador.setNumeroRegistro(dto.numeroRegistro());
+ 
         cuidadorRepository.save(cuidador);
     }
-
-    // ── OBTENER PERFIL ──────────────────────────────────────────────────────────
-
+ 
+    // ── PERFIL ──────────────────────────────────────────────────────────────────
+ 
     @Override
     @Transactional(readOnly = true)
     public PerfilDTO obtenerPerfil(String nombreUsuario) {
-
         Credencial credencial = credencialRepository
             .findByNombreUsuario(nombreUsuario)
             .orElseThrow(() -> new BusinessException(
                 "Usuario no encontrado", HttpStatus.NOT_FOUND
             ));
-
+ 
         Persona persona = personaRepository
             .findByCredencial_IdCredencial(credencial.getIdCredencial())
             .orElseThrow(() -> new BusinessException(
                 "Perfil no encontrado", HttpStatus.NOT_FOUND
             ));
-
+ 
         return construirPerfil(persona, credencial);
     }
-
+ 
     @Override
     @Transactional(readOnly = true)
     public PerfilDTO obtenerPerfilPorId(Integer idPersona) {
-
         Persona persona = personaRepository.findById(idPersona)
             .orElseThrow(() -> new BusinessException(
                 "Usuario con id " + idPersona + " no encontrado",
                 HttpStatus.NOT_FOUND
             ));
-
+ 
         return construirPerfil(persona, persona.getCredencial());
     }
-
+ 
+    // ── ADMINISTRACIÓN DE CUIDADORES ────────────────────────────────────────────
+ 
+    @Override
+    @Transactional
+    public void cambiarEstadoVerificacion(Integer idPersona, String nuevoEstado) {
+        // Validar que el estado sea uno de los permitidos
+        if (!nuevoEstado.equals("verificado") && !nuevoEstado.equals("rechazado")) {
+            throw new BusinessException(
+                "Estado inválido. Use 'verificado' o 'rechazado'",
+                HttpStatus.BAD_REQUEST
+            );
+        }
+ 
+        Cuidador cuidador = cuidadorRepository.findById(idPersona)
+            .orElseThrow(() -> new BusinessException(
+                "Cuidador no encontrado", HttpStatus.NOT_FOUND
+            ));
+ 
+        cuidador.setEstadoVerificacion(nuevoEstado);
+        cuidadorRepository.save(cuidador);
+    }
+ 
+    @Override
+    @Transactional(readOnly = true)
+    public List<PerfilDTO> listarCuidadoresPorEstado(String estado) {
+        // Usa el método del repositorio que ya tienes: findByEstadoVerificacion
+        return cuidadorRepository.findByEstadoVerificacion(estado)
+            .stream()
+            .map(cuidador -> construirPerfil(cuidador, cuidador.getCredencial()))
+            .collect(Collectors.toList());
+    }
+ 
     // ── Métodos privados ────────────────────────────────────────────────────────
-
-    /**
-     * Construye el PerfilDTO detectando el subtipo real de Persona
-     * (Cliente, Cuidador o Administrador) con instanceof.
-     * Los campos exclusivos de cada rol se añaden solo si aplican.
-     */
+ 
     private PerfilDTO construirPerfil(Persona persona, Credencial credencial) {
-
         String rol = credencial.getRol().getNombreRol();
-
-        // Campos comunes a todos los roles
+ 
         PerfilDTO.Builder builder = PerfilDTO.builder()
             .idPersona(persona.getIdPersona())
             .nombre(persona.getNombre())
@@ -223,35 +247,30 @@ public class AuthServiceImpl implements AuthService {
             .rol(rol)
             .nombreUsuario(credencial.getNombreUsuario())
             .estadoCuenta(credencial.getEstadoCuenta());
-
-        // Campos exclusivos según el subtipo
+ 
         if (persona instanceof Cliente c) {
             builder
                 .fechaRegistro(c.getFechaRegistro())
                 .prefNotificacion(c.getPrefNotificacion())
                 .estadoCliente(c.getEstadoCliente());
-
+ 
         } else if (persona instanceof Cuidador c) {
             builder
                 .calificacionPromedio(c.getCalificacionPromedio())
                 .estadoVerificacion(c.getEstadoVerificacion())
                 .estadoDisponibilidad(c.getEstadoDisponibilidad())
                 .fechaIngresoCuidador(c.getFechaIngreso());
-
+ 
         } else if (persona instanceof Administrador a) {
             builder
                 .nivelAcceso(a.getNivelAcceso())
                 .cargo(a.getCargo())
                 .fechaIngresoAdmin(a.getFechaIngreso());
         }
-
+ 
         return builder.build();
     }
-
-    /**
-     * Valida que RUT, email y nombre de usuario no estén ya registrados.
-     * Falla rápido antes de cualquier escritura en BD.
-     */
+ 
     private void validarDuplicados(String rut, String email, String nombreUsuario) {
         if (personaRepository.existsByRut(rut)) {
             throw new BusinessException(

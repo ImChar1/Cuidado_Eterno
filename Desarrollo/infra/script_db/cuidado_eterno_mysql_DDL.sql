@@ -150,17 +150,21 @@ CREATE TABLE IF NOT EXISTS cliente (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
  
 CREATE TABLE IF NOT EXISTS cuidador (
-    id_persona              INT UNSIGNED    NOT NULL,
-    id_horario              INT UNSIGNED    NOT NULL,
-    calificacion_promedio   DECIMAL(3,2)    NOT NULL DEFAULT 0.00,
-    estado_verificacion     VARCHAR(20)     NOT NULL DEFAULT 'pendiente',
-    estado_disponibilidad   VARCHAR(20)     NOT NULL DEFAULT 'disponible',
-    fecha_ingreso           DATE            NOT NULL,
+    id_persona                  INT UNSIGNED    NOT NULL,
+    id_horario                  INT UNSIGNED    NOT NULL,
+    calificacion_promedio       DECIMAL(3,2)    NOT NULL DEFAULT 0.00,
+    estado_verificacion         VARCHAR(20)     NOT NULL DEFAULT 'pendiente',
+    estado_disponibilidad       VARCHAR(20)     NOT NULL DEFAULT 'disponible',
+    fecha_ingreso               DATE            NOT NULL,
+    disponibilidad_dias         VARCHAR(100)    NULL,
+    disponibilidad_hora_inicio  TIME            NULL,
+    disponibilidad_hora_fin     TIME            NULL,
+    url_certificacion           VARCHAR(500)    NULL,
+    tipo_documento              VARCHAR(50)     NULL,
+    numero_registro             VARCHAR(50)     NULL,
     CONSTRAINT cuidador_pk PRIMARY KEY (id_persona),
     CONSTRAINT cuidador_persona_fk FOREIGN KEY (id_persona)
-        REFERENCES persona (id_persona),
-    CONSTRAINT cuidador_horario_fk FOREIGN KEY (id_horario)
-        REFERENCES horario (id_horario)
+        REFERENCES persona (id_persona)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
  
 -- ------------------------------------------------------------

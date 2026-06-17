@@ -11,8 +11,14 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class OrdenResponseDTO {
     private Integer idOrden;
-    private String nombreServicio; // "Jardinería"
+    private Integer idSolicitud;          // ← para rastrear la solicitud origen
+    private String nombreServicio;         // tipo de servicio: "Limpieza básica"
+    private String nombreCuidador;         // nombre del cuidador asignado
+    private String ubicacionEspacio;       // ubicacion_interna del espacio
+    private LocalDateTime fechaCreacion;
     private LocalDateTime fechaProgramada;
-    private String estadoOrden; // "pendiente", "completada"
+    private String estadoOrden;
     private BigDecimal montoTotal;
+    private Boolean tieneEvidencia;        // ← para saber si ya subieron fotos
+    private Boolean tieneCalificacion;     // ← para saber si ya calificaron
 }

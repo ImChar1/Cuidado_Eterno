@@ -10,6 +10,7 @@ import java.util.List;
 @Setter
 public class OrdenRequestDTO {
     private Integer idCliente;
+    private Integer idCuidador;
     private Integer idTipoSolicitud; // Ej: 1 para Jardinería, 2 para Limpieza
     private Integer idEspacio; // La tumba exacta
     private LocalDateTime fechaProgramada;

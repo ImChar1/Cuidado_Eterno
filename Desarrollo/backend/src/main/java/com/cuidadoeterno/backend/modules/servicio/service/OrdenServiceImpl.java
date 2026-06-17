@@ -4,14 +4,21 @@ import com.cuidadoeterno.backend.modules.cementerio.model.Espacio;
 import com.cuidadoeterno.backend.modules.cementerio.repository.EspacioRepository;
 import com.cuidadoeterno.backend.modules.inventario.model.PuestoVenta;
 import com.cuidadoeterno.backend.modules.inventario.repository.PuestoVentaRepository;
+import com.cuidadoeterno.backend.modules.usuario.repository.CuidadorRepository;
 import com.cuidadoeterno.backend.modules.servicio.dto.*;
 import com.cuidadoeterno.backend.modules.servicio.model.*;
 import com.cuidadoeterno.backend.modules.servicio.repository.*;
+import com.cuidadoeterno.backend.modules.usuario.model.Cuidador;
+import com.cuidadoeterno.backend.shared.exception.BusinessException;
+
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -28,6 +35,7 @@ public class OrdenServiceImpl implements OrdenService {
     // Repositorios de otros módulos
     private final EspacioRepository espacioRepository;
     private final PuestoVentaRepository puestoVentaRepository;
+    private final CuidadorRepository cuidadorRepository;
 
     @Override
     @Transactional
@@ -37,6 +45,15 @@ public class OrdenServiceImpl implements OrdenService {
                 .orElseThrow(() -> new IllegalArgumentException("Tipo de solicitud no válido"));
         Espacio espacio = espacioRepository.findById(request.getIdEspacio())
                 .orElseThrow(() -> new IllegalArgumentException("El espacio no existe"));
+        Cuidador cuidador = cuidadorRepository.findById(request.getIdCuidador())
+                .orElseThrow(() -> new IllegalArgumentException("Cuidador no encontrado"));
+
+        if (!"verificado".equals(cuidador.getEstadoVerificacion())) {
+            throw new BusinessException(
+                "Tu cuenta está pendiente de verificación por el administrador",
+                HttpStatus.FORBIDDEN
+            );
+        }
 
         // 2. Crear la Cabecera de la Solicitud
         SolicitudServicio solicitud = new SolicitudServicio();
@@ -72,21 +89,58 @@ public class OrdenServiceImpl implements OrdenService {
     }
 
     @Override
-    @Transactional(readOnly = true)
-    public List<OrdenResponseDTO> obtenerHistorialCliente(Integer idCliente) {
-        // Obtenemos cabeceras del cliente, y para cada una podríamos buscar su orden (simplificado para el DTO)
-        List<SolicitudServicio> solicitudes = solicitudRepository.findByIdClienteOrderByFechaSolicitudDesc(idCliente);
-        
-        return solicitudes.stream().map(solicitud -> {
+@Transactional(readOnly = true)
+public List<OrdenResponseDTO> obtenerHistorialCliente(Integer idCliente) {
+    List<SolicitudServicio> solicitudes = solicitudRepository
+        .findByIdClienteOrderByFechaSolicitudDesc(idCliente);
+
+    return solicitudes.stream().map(solicitud -> {
+        // Buscar el detalle de orden asociado a esta solicitud
+        Optional<DetalleOrden> ordenOpt = detalleOrdenRepository
+            .findBySolicitudServicioIdSolicitud(solicitud.getIdSolicitud());
+
+        if (ordenOpt.isEmpty()) {
+            // La solicitud existe pero aún no tiene cuidador asignado
             return new OrdenResponseDTO(
-                    solicitud.getIdSolicitud(),
-                    solicitud.getTipoSolicitud().getNombreServicio(),
-                    solicitud.getFechaSolicitud(),
-                    "pendiente", // O el estado derivado de DetalleOrden
-                    new java.math.BigDecimal("0.00") // Aquí se extraería el monto
+                null,
+                solicitud.getIdSolicitud(),
+                solicitud.getTipoSolicitud().getNombreServicio(),
+                "Sin asignar",
+                null,
+                solicitud.getFechaSolicitud(),
+                null,
+                solicitud.getEstadoSolicitud(),
+                solicitud.getTotalCompra(),
+                false,
+                false
             );
-        }).collect(Collectors.toList());
-    }
+        }
+
+        DetalleOrden orden = ordenOpt.get();
+        String nombreCuidador = orden.getCuidador().getNombre()
+            + " " + orden.getCuidador().getApPaterno();
+
+        boolean tieneEvidencia = evidenciaRepository
+            .existsByDetalleOrdenIdOrden(orden.getIdOrden());
+
+        boolean tieneCalificacion = calificacionRepository
+            .findByDetalleOrdenIdOrden(orden.getIdOrden()).isPresent();
+
+        return new OrdenResponseDTO(
+            orden.getIdOrden(),
+            solicitud.getIdSolicitud(),
+            solicitud.getTipoSolicitud().getNombreServicio(),
+            nombreCuidador,
+            orden.getEspacio().getSectorPabellon() + " - N°" + orden.getEspacio().getNumeroSepultura(),
+            orden.getFechaCreacion(),
+            orden.getFechaProgramada(),
+            orden.getEstadoOrden(),
+            orden.getMontoTotal(),
+            tieneEvidencia,
+            tieneCalificacion
+        );
+    }).collect(Collectors.toList());
+}
 
     @Override
     @Transactional
@@ -122,6 +176,12 @@ public class OrdenServiceImpl implements OrdenService {
         orden.setEstadoOrden("completada");
         detalleOrdenRepository.save(orden);
 
+        Cuidador cuidador = orden.getCuidador();
+        cuidador.setEstadoDisponibilidad("disponible");
+        cuidadorRepository.save(cuidador);
+
         return calificacionRepository.save(calificacion);
     }
+
+    
 }
