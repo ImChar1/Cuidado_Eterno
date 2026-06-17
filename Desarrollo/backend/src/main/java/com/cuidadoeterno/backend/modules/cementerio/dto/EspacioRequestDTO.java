@@ -13,4 +13,6 @@ public class EspacioRequestDTO {
     private String numeroSepultura;
     private BigDecimal coordenadaLatitud;
     private BigDecimal coordenadaLongitud;
+    private String materialPrincipal;
+    private String estadoFisico;
 }
