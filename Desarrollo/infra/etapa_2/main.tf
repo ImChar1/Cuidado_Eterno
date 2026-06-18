@@ -134,6 +134,34 @@ resource "aws_security_group" "sg_backend" {
   }
 }
 
+#Security Group para la Base de Datos
+resource "aws_security_group" "sg_database" {
+  name        = "${var.project_name}-sg-database"
+  description = "Permitir trafico de BD solo desde el Backend"
+  vpc_id      = aws_vpc.main.id
+
+  ingress {
+    description     = "MariaDB desde Backend"
+    from_port       = 3306
+    to_port         = 3306
+    protocol        = "tcp"
+    security_groups = [aws_security_group.sg_backend.id]
+  }
+  ingress {
+    description     = "SSH desde Proxy (Bastion)"
+    from_port       = 22
+    to_port         = 22
+    protocol        = "tcp"
+    security_groups = [aws_security_group.sg_proxy.id]
+  }
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
 data "aws_ami" "amazon_linux" {
   most_recent = true
   owners      = ["amazon"]
@@ -165,7 +193,7 @@ resource "aws_instance" "proxy" {
   tags = { Name = "${var.project_name}-ec2-proxy" }
 }
 
-# Servidor 2: El Backend + BD (Privado)
+# Servidor 2: El Backend (Privado)
 resource "aws_instance" "backend" {
   ami                    = data.aws_ami.amazon_linux.id
   instance_type          = "t3.small" # t3.small recomendado para correr Java + MariaDB
@@ -192,4 +220,46 @@ resource "aws_instance" "backend" {
   EOF
 
   tags = { Name = "${var.project_name}-ec2-backend" }
+}
+
+# Servidor 3: La Base de Datos MariaDB (Privado)
+resource "aws_instance" "database" {
+  ami                    = data.aws_ami.amazon_linux.id
+  instance_type          = "t3.small" 
+  subnet_id              = aws_subnet.private.id
+  vpc_security_group_ids = [aws_security_group.sg_database.id]
+  key_name               = var.key_pair_name
+  iam_instance_profile   = aws_iam_instance_profile.ec2_profile.name
+
+  # PROTECCIÓN CONTRA BORRADO DESDE LA CONSOLA DE AWS
+  disable_api_termination = true 
+
+  user_data = <<-EOF
+    #!/bin/bash
+    yum update -y
+    yum install -y docker aws-cli cronie
+    systemctl start docker
+    systemctl enable docker
+    systemctl start crond
+    systemctl enable crond
+    usermod -aG docker ec2-user
+    
+    curl -SL "https://github.com/docker/compose/releases/latest/download/docker-compose-linux-x86_64" -o /usr/local/bin/docker-compose
+    chmod +x /usr/local/bin/docker-compose
+    ln -sf /usr/local/bin/docker-compose /usr/bin/docker-compose
+    
+    mkdir -p /home/ec2-user/app/backups
+    chown -R ec2-user:ec2-user /home/ec2-user/app
+
+    # CREACIÓN AUTOMÁTICA DEL CRONJOB DE RESPALDO (A LAS 2 AM)
+    echo "0 2 * * * root docker exec cuidado_eterno_db mariadb-dump -u ce_user -pce_pass cuidado_eterno > /home/ec2-user/app/backups/cuidado_eterno_\$(date +\%Y\%m\%d).sql" > /etc/cron.d/db_backup
+    chmod 0644 /etc/cron.d/db_backup
+  EOF
+
+  tags = { Name = "${var.project_name}-ec2-database" }
+
+  # PROTECCIÓN CONTRA TERRAFORM DESTROY
+  lifecycle {
+    prevent_destroy = true 
+  }
 }
