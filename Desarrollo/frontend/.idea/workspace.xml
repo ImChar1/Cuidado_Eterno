@@ -4,7 +4,28 @@
     <option name="autoReloadType" value="NONE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="0a5e6cb3-aef2-4f7e-a9bd-704ddf2da012" name="Changes" comment="" />
+    <list default="true" id="1e0d50f2-b1cf-419f-9a4e-1ad95acd5ef5" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/../../.bashrc" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/java/com/cuidadoeterno/app/core/network/ApiResponse.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/java/com/cuidadoeterno/app/modules/usuario/data/remote/AuthApiService.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/java/com/cuidadoeterno/app/modules/usuario/data/repository/AuthRepository.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/gradle.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/gradle.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/app/build.gradle.kts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/cuidadoeterno/app/core/network/ApiClient.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/cuidadoeterno/app/core/network/ApiClient.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/cuidadoeterno/app/core/network/AuthInterceptor.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/cuidadoeterno/app/core/network/AuthInterceptor.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/cuidadoeterno/app/core/network/NetworkResult.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/cuidadoeterno/app/core/network/NetworkResult.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/cuidadoeterno/app/core/session/SessionManager.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/cuidadoeterno/app/core/session/SessionManager.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/cuidadoeterno/app/modules/usuario/data/model/LoginRequest.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/cuidadoeterno/app/modules/usuario/data/model/LoginRequest.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/cuidadoeterno/app/modules/usuario/data/model/LoginResponse.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/cuidadoeterno/app/modules/usuario/data/model/LoginResponse.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/cuidadoeterno/app/modules/usuario/data/model/PerfilResponse.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/cuidadoeterno/app/modules/usuario/data/model/PerfilResponse.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/cuidadoeterno/app/modules/usuario/data/model/RegistroClienteRequest.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/cuidadoeterno/app/modules/usuario/data/model/RegistroClienteRequest.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/cuidadoeterno/app/modules/usuario/data/model/RegistroCuidadorRequest.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/cuidadoeterno/app/modules/usuario/data/model/RegistroCuidadorRequest.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/cuidadoeterno/app/modules/usuario/ui/login/LoginScreen.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/cuidadoeterno/app/modules/usuario/ui/login/LoginScreen.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/cuidadoeterno/app/modules/usuario/ui/login/LoginViewModel.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/cuidadoeterno/app/modules/usuario/ui/login/LoginViewModel.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/cuidadoeterno/app/navigation/NavGraph.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/cuidadoeterno/app/navigation/NavGraph.kt" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -19,23 +40,6 @@
       <ProjectState />
     </projectState>
   </component>
-  <component name="ExternalProjectsManager">
-    <system id="GRADLE">
-      <state>
-        <projects_view>
-          <tree_state>
-            <expand>
-              <path>
-                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
-                <item name="CuidadoEterno" type="f1a62948:ProjectNode" />
-              </path>
-            </expand>
-            <select />
-          </tree_state>
-        </projects_view>
-      </state>
-    </system>
-  </component>
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
       <list>
@@ -46,10 +50,11 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/../.." />
   </component>
-  <component name="ProjectColorInfo"><![CDATA[{
-  "associatedIndex": 1
-}]]></component>
-  <component name="ProjectId" id="3FBRAI6jBcW8RFtzh9D7PA5SwLp" />
+  <component name="ProjectColorInfo">{
+  &quot;customColor&quot;: &quot;&quot;,
+  &quot;associatedIndex&quot;: 1
+}</component>
+  <component name="ProjectId" id="3FHI26T8LyYIqcvORZZ5xFizqPm" />
   <component name="ProjectLevelVcsManager">
     <ConfirmationsSetting value="2" id="Add" />
   </component>
@@ -59,14 +64,14 @@
   </component>
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
-    "ModuleVcsDetector.initialDetectionPerformed": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.cidr.known.project.marker": "true",
     "RunOnceActivity.git.unshallow": "true",
     "RunOnceActivity.readMode.enableVisualFormatting": "true",
     "cf.first.check.clang-format": "false",
     "cidr.known.project.marker": "true",
-    "git-widget-placeholder": "feature/frontend"
+    "git-widget-placeholder": "Merging feature/frontend",
+    "ignore.virus.scanning.warn.message": "true"
   }
 }]]></component>
   <component name="RunManager">
@@ -145,11 +150,11 @@
   </component>
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
-      <changelist id="0a5e6cb3-aef2-4f7e-a9bd-704ddf2da012" name="Changes" comment="" />
-      <created>1781546333868</created>
+      <changelist id="1e0d50f2-b1cf-419f-9a4e-1ad95acd5ef5" name="Changes" comment="" />
+      <created>1781725366306</created>
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
-      <updated>1781546333868</updated>
+      <updated>1781725366306</updated>
     </task>
     <servers />
   </component>
