@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/api/cementerios")
+@RequestMapping("/cementerios")
 @RequiredArgsConstructor
 @CrossOrigin(origins = "*") // Permite peticiones desde emuladores o dispositivos físicos
 public class CementerioController {
@@ -92,16 +92,7 @@ public class CementerioController {
     @PostMapping("/espacios")
     public ResponseEntity<?> registrarEspacio(@RequestBody EspacioRequestDTO request) {
         try {
-            Espacio nuevoEspacio = espacioService.registrarNuevoEspacio(
-                    request.getIdCementerio(),
-                    request.getIdTipoEspacio(),
-                    request.getSectorPabellon(),
-                    request.getNumeroSepultura(),
-                    request.getCoordenadaLatitud(),
-                    request.getCoordenadaLongitud()
-            );
-            
-            // Retornamos el ID asignado para que Android sepa con qué espacio trabajar
+            Espacio nuevoEspacio = espacioService.registrarNuevoEspacio(request);
             return ResponseEntity.status(HttpStatus.CREATED).body(nuevoEspacio.getIdEspacio());
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());

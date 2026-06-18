@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/v1/finanzas/webpay")
+@RequestMapping("/finanzas/webpay")
 @RequiredArgsConstructor
 @Tag(name = "Finanzas - Webpay", description = "Integración con Transbank Webpay Plus")
 public class FinanzasController {

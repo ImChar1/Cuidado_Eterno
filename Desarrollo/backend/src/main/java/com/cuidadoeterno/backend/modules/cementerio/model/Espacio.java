@@ -38,7 +38,7 @@ public class Espacio {
     private String estadoFisico;
 
     @Column(name = "url_foto_referencia", length = 500)
-    private String urlFotoReferencial;
+    private String urlFotoReferencia;
 
     // Relación: Muchos Espacios pertenecen a un Cementerio
     @ManyToOne(fetch = FetchType.LAZY)

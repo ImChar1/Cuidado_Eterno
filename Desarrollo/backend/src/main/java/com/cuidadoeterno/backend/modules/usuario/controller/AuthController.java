@@ -30,7 +30,7 @@ import org.springframework.web.bind.annotation.*;
  *   POST /auth/registro/cliente
  *
  * Endpoints protegidos (requieren token + rol):
- *   POST /auth/registro/cuidador  → solo ADMINISTRADOR
+ *   POST /auth/registro/cuidador  → cualquier usuario autenticado
  *   GET  /auth/perfil             → cualquier usuario autenticado
  *   GET  /auth/perfil/{id}        → solo ADMINISTRADOR
  *   POST /auth/logout             → cualquier usuario autenticado
@@ -135,46 +135,6 @@ public class AuthController {
     // ── ENDPOINTS PROTEGIDOS ────────────────────────────────────────────────────
 
     /**
-     * POST /api/v1/auth/registro/cuidador
-     *
-     * Registra un nuevo cuidador. Solo el ADMINISTRADOR puede hacerlo
-     * porque implica asignar un horario y validar identidad.
-     *
-     * Acceso: ROLE_ADMINISTRADOR
-     *
-     * Header requerido: Authorization: Bearer <token>
-     *
-     * Body: RegistroCuidadorDTO (ver DTO para campos requeridos)
-     *
-     * Respuesta 201:
-     * {
-     *   "success": true,
-     *   "message": "Cuidador registrado exitosamente"
-     * }
-     */
-    @Operation(
-        summary = "Registro de cuidador",
-        description = "Crea una cuenta de cuidador. Solo accesible por ADMINISTRADOR.",
-        security = @SecurityRequirement(name = "bearerAuth")
-    )
-    @ApiResponses({
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "201", description = "Cuidador creado"),
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Sin permisos de administrador"),
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Horario no encontrado"),
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "409", description = "RUT, email o usuario ya existe")
-    })
-    @PostMapping("/registro/cuidador")
-    @PreAuthorize("hasRole('ADMINISTRADOR')")
-    public ResponseEntity<ApiResponse<Void>> registrarCuidador(
-            @Valid @RequestBody RegistroCuidadorDTO dto) {
-
-        authService.registrarCuidador(dto);
-        return ResponseEntity
-            .status(HttpStatus.CREATED)
-            .body(ApiResponse.ok("Cuidador registrado exitosamente", null));
-    }
-
-    /**
      * POST /api/v1/auth/logout
      *
      * Cierre de sesión.
@@ -261,4 +221,6 @@ public class AuthController {
         PerfilDTO perfil = authService.obtenerPerfilPorId(id);
         return ResponseEntity.ok(ApiResponse.ok("Perfil obtenido exitosamente", perfil));
     }
+
+
 }

@@ -24,15 +24,7 @@ import java.time.LocalDate;
 @NoArgsConstructor
 public class Cuidador extends Persona {
 
-    /**
-     * FK → HORARIO.id_horario
-     * El horario del cuidador depende del horario del cementerio en que trabaja.
-     * LAZY porque no siempre necesitamos cargar el horario junto al cuidador.
-     */
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_horario", nullable = false)
-    private Horario horario;
-
+    
     /**
      * Promedio de calificaciones recibidas. Se actualiza al completar un servicio.
      * precision = 3, scale = 2 → valores posibles: 0.00 a 5.00
@@ -57,4 +49,23 @@ public class Cuidador extends Persona {
 
     @Column(name = "fecha_ingreso", nullable = false)
     private LocalDate fechaIngreso;
+
+    // Agregar estas columnas al modelo:
+    @Column(name = "url_certificacion", length = 500)
+    private String urlCertificacion;
+
+    @Column(name = "tipo_documento", length = 50)
+    private String tipoDocumento;
+
+    @Column(name = "numero_registro", length = 50)
+    private String numeroRegistro;
+
+    @Column(name = "disponibilidad_dias", length = 100)
+    private String disponibilidadDias;
+
+    @Column(name = "disponibilidad_hora_inicio")
+    private java.time.LocalTime disponibilidadHoraInicio;
+
+    @Column(name = "disponibilidad_hora_fin")
+    private java.time.LocalTime disponibilidadHoraFin;
 }

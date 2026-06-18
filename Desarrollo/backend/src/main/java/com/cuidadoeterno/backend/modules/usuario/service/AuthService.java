@@ -1,5 +1,7 @@
 package com.cuidadoeterno.backend.modules.usuario.service;
 
+import java.util.List;
+
 import com.cuidadoeterno.backend.modules.usuario.dto.LoginRequestDTO;
 import com.cuidadoeterno.backend.modules.usuario.dto.LoginResponseDTO;
 import com.cuidadoeterno.backend.modules.usuario.dto.PerfilDTO;
@@ -28,12 +30,12 @@ public interface AuthService {
 
     /**
      * Registra un nuevo cuidador.
-     * Solo accesible por ADMINISTRADOR (@PreAuthorize en el controller).
-     * Crea filas en PERSONA + CREDENCIAL + CUIDADOR de forma transaccional.
+     * Público — el cuidador se auto-registra y queda en estado 'pendiente'.
+     * El administrador lo verifica después con cambiarEstadoVerificacion().
      *
-     * @param dto datos del cuidador incluyendo id del horario asignado
-     * @throws com.cuidadoeterno.backend.shared.exception.BusinessException
-     *         si hay duplicados (409) o el horario no existe (404)
+     * Ya no recibe idHorario. El cuidador declara su disponibilidad
+     * (días y rango horario) y la validación contra el horario del
+     * cementerio ocurre al momento de aceptar una solicitud.
      */
     void registrarCuidador(RegistroCuidadorDTO dto);
 
@@ -61,4 +63,24 @@ public interface AuthService {
      *         si el id no existe (404)
      */
     PerfilDTO obtenerPerfilPorId(Integer idPersona);
+
+    // ── Administración de cuidadores ────────────────────────────────────────────
+ 
+    /**
+     * Cambia el estado de verificación de un cuidador.
+     * Solo accesible por ADMINISTRADOR.
+     *
+     * @param idPersona  PK del cuidador en tabla PERSONA
+     * @param nuevoEstado  'verificado' o 'rechazado'
+     */
+    void cambiarEstadoVerificacion(Integer idPersona, String nuevoEstado);
+ 
+    /**
+     * Lista cuidadores filtrados por estado de verificación.
+     * Usado por AdminController para ver pendientes, verificados o rechazados.
+     *
+     * @param estado  'pendiente', 'verificado' o 'rechazado'
+     * @return lista de PerfilDTO con datos del cuidador
+     */
+    List<PerfilDTO> listarCuidadoresPorEstado(String estado);
 }
