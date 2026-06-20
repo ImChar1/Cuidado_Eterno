@@ -1,30 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
+  <component name="AndroidLayouts">
+    <shared>
+      <config />
+    </shared>
+  </component>
   <component name="AutoImportSettings">
     <option name="autoReloadType" value="NONE" />
   </component>
   <component name="ChangeListManager">
     <list default="true" id="1e0d50f2-b1cf-419f-9a4e-1ad95acd5ef5" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/../../.bashrc" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/src/main/java/com/cuidadoeterno/app/core/network/ApiResponse.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/src/main/java/com/cuidadoeterno/app/modules/usuario/data/remote/AuthApiService.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/src/main/java/com/cuidadoeterno/app/modules/usuario/data/repository/AuthRepository.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/gradle.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/gradle.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/app/build.gradle.kts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/cuidadoeterno/app/core/network/ApiClient.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/cuidadoeterno/app/core/network/ApiClient.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/cuidadoeterno/app/core/network/AuthInterceptor.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/cuidadoeterno/app/core/network/AuthInterceptor.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/cuidadoeterno/app/core/network/NetworkResult.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/cuidadoeterno/app/core/network/NetworkResult.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/cuidadoeterno/app/core/session/SessionManager.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/cuidadoeterno/app/core/session/SessionManager.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/cuidadoeterno/app/modules/usuario/data/model/LoginRequest.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/cuidadoeterno/app/modules/usuario/data/model/LoginRequest.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/cuidadoeterno/app/modules/usuario/data/model/LoginResponse.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/cuidadoeterno/app/modules/usuario/data/model/LoginResponse.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/cuidadoeterno/app/modules/usuario/data/model/PerfilResponse.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/cuidadoeterno/app/modules/usuario/data/model/PerfilResponse.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/cuidadoeterno/app/modules/usuario/data/model/RegistroClienteRequest.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/cuidadoeterno/app/modules/usuario/data/model/RegistroClienteRequest.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/cuidadoeterno/app/modules/usuario/data/model/RegistroCuidadorRequest.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/cuidadoeterno/app/modules/usuario/data/model/RegistroCuidadorRequest.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/cuidadoeterno/app/modules/usuario/ui/login/LoginScreen.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/cuidadoeterno/app/modules/usuario/ui/login/LoginScreen.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/cuidadoeterno/app/modules/usuario/ui/login/LoginViewModel.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/cuidadoeterno/app/modules/usuario/ui/login/LoginViewModel.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/cuidadoeterno/app/navigation/NavGraph.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/cuidadoeterno/app/navigation/NavGraph.kt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -70,7 +56,7 @@
     "RunOnceActivity.readMode.enableVisualFormatting": "true",
     "cf.first.check.clang-format": "false",
     "cidr.known.project.marker": "true",
-    "git-widget-placeholder": "Merging feature/frontend",
+    "git-widget-placeholder": "feature/frontend",
     "ignore.virus.scanning.warn.message": "true"
   }
 }]]></component>
