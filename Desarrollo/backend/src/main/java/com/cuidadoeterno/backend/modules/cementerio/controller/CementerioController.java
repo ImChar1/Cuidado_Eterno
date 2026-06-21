@@ -61,6 +61,18 @@ public class CementerioController {
     // ============================================================
     // ENDPOINTS DE BÚSQUEDA Y CEMENTERIOS
     // ============================================================
+    @GetMapping
+    public ResponseEntity<List<CementerioResponseDTO>> listarTodos() {
+        List<CementerioResponseDTO> dtos = cementerioService.obtenerTodosCementerios()
+            .stream()
+            .map(c -> new CementerioResponseDTO(
+                c.getIdCementerio(),
+                c.getNombreCementerio(),
+                c.getDireccion(),
+                c.getComuna().getNombreComuna()
+            )).collect(Collectors.toList());
+        return ResponseEntity.ok(dtos);
+    }
 
     @GetMapping("/buscar")
     public ResponseEntity<List<CementerioResponseDTO>> buscarPorNombre(@RequestParam String nombre) {
