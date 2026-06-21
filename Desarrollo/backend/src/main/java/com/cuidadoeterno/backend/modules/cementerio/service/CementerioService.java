@@ -10,4 +10,5 @@ public interface CementerioService {
     List<TipoEspacio> obtenerTiposDeEspacio();
     List<Cementerio> obtenerCementeriosPorComuna(Integer idComuna);
     List<Cementerio> buscarCementeriosPorNombre(String nombre);
+    List<Cementerio> obtenerTodosCementerios();
 }

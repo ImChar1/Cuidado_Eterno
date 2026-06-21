@@ -54,4 +54,10 @@ public class CementerioServiceImpl implements CementerioService {
     public List<Cementerio> buscarCementeriosPorNombre(String nombre) {
         return cementerioRepository.findByNombreCementerioContainingIgnoreCase(nombre);
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<Cementerio> obtenerTodosCementerios() {
+        return cementerioRepository.findAll();
+    }
 }
