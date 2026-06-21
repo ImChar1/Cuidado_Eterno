@@ -10,7 +10,7 @@ public class FallecidoDTO {
     private Integer idFallecido;
     private String nombres;
     private String apellidos;
-    private LocalDate fechaDeNacimiento;
+    private LocalDate fechaNacimiento;
     private LocalDate fechaDefuncion;
     
     // Solo necesitamos el ID del espacio para vincularlo a una tumba existente

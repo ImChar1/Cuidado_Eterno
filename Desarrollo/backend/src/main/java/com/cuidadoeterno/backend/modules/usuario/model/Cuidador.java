@@ -17,7 +17,7 @@ import java.time.LocalDate;
  * - ManyToOne → HORARIO (el horario en que está disponible para trabajar)
  */
 @Entity
-@Table(name = "CUIDADOR")
+@Table(name = "cuidador")
 @PrimaryKeyJoinColumn(name = "id_persona")
 @Getter
 @Setter

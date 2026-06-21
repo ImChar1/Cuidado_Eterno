@@ -29,7 +29,7 @@ public class FallecidoServiceImpl implements FallecidoService {
         nuevoFallecido.setNombres(request.getNombres());
         nuevoFallecido.setApellidos(request.getApellidos());
         nuevoFallecido.setFechaDefuncion(request.getFechaDefuncion());
-        nuevoFallecido.setFechaDeNacimiento(request.getFechaDeNacimiento());
+        nuevoFallecido.setFechaNacimiento(request.getFechaNacimiento());
         nuevoFallecido.setEspacio(espacio);
 
         return fallecidoRepository.save(nuevoFallecido);

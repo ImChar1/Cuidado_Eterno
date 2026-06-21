@@ -8,7 +8,7 @@ import lombok.Setter;
 import java.math.BigDecimal;
 
 @Entity
-@Table(name = "CATALOGO_PRODUCTO", uniqueConstraints = {
+@Table(name = "catalogo_producto", uniqueConstraints = {
     // Garantiza que un puesto no tenga duplicado el mismo producto
     @UniqueConstraint(columnNames = {"id_puesto", "id_producto"})
 })

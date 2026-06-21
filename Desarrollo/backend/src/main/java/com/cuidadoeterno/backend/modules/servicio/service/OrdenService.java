@@ -12,4 +12,7 @@ public interface OrdenService {
     List<OrdenResponseDTO> obtenerHistorialCliente(Integer idCliente);
     RegistroEvidencia subirEvidencia(EvidenciaRequestDTO request);
     Calificacion calificarServicio(CalificacionRequestDTO request);
+    DetalleOrden aceptarSolicitud(Integer idOrden, Integer idCuidador);
+    List<OrdenResponseDTO> obtenerSolicitudesDisponibles(Integer idCementerio);
+    List<OrdenResponseDTO> obtenerHistorialCuidador(Integer idCuidador);
 }

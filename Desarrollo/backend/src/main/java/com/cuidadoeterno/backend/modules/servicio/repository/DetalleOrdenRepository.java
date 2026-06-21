@@ -17,4 +17,11 @@ public interface DetalleOrdenRepository extends JpaRepository<DetalleOrden, Inte
 
     // Permite ver el historial de mantenimientos que se le han hecho a una tumba en específico
     List<DetalleOrden> findByEspacioIdEspacio(Integer idEspacio);
+
+    List<DetalleOrden> findByEstadoOrdenAndEspacioCementerioIdCementerio(
+    String estadoOrden,
+    Integer idCementerio
+    );
+
+    List<DetalleOrden> findByCuidadorIdPersonaOrderByFechaCreacionDesc(Integer idCuidador);
 }

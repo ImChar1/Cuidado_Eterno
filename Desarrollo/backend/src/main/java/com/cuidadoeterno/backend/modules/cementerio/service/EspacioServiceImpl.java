@@ -54,10 +54,18 @@ public class EspacioServiceImpl implements EspacioService {
         nuevoEspacio.setTipoEspacio(tipoEspacio);
         nuevoEspacio.setSectorPabellon(request.getSectorPabellon());
         nuevoEspacio.setNumeroSepultura(request.getNumeroSepultura());
+        nuevoEspacio.setPisoNivel(request.getPisoNivel());
+        nuevoEspacio.setPasillo(request.getPasillo());
+
+        // Campos opcionales — el admin los completa después con GPS y evaluación física
         nuevoEspacio.setCoordenadaLatitud(request.getCoordenadaLatitud());
         nuevoEspacio.setCoordenadaLongitud(request.getCoordenadaLongitud());
-        nuevoEspacio.setMaterialPrincipal(request.getMaterialPrincipal());
-        nuevoEspacio.setEstadoFisico(request.getEstadoFisico());
+        nuevoEspacio.setMaterialPrincipal(
+            request.getMaterialPrincipal() != null ? request.getMaterialPrincipal() : "no_evaluado"
+        );
+        nuevoEspacio.setEstadoFisico(
+            request.getEstadoFisico() != null ? request.getEstadoFisico() : "no_evaluado"
+        );
 
         return espacioRepository.save(nuevoEspacio);
 }
