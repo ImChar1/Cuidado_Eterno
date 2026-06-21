@@ -2,16 +2,25 @@ package com.cuidadoeterno.app.navigation
 
 //NavHost con el grafo completo
 
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.navArgument
 import com.cuidadoeterno.app.core.network.ApiClient
 import com.cuidadoeterno.app.core.network.AuthInterceptor
 import com.cuidadoeterno.app.core.session.SessionManager
 import com.cuidadoeterno.app.core.session.dataStore
+import com.cuidadoeterno.app.modules.cementerio.data.remote.CementerioApiService
+import com.cuidadoeterno.app.modules.cementerio.data.repository.CementerioRepository
+import com.cuidadoeterno.app.modules.servicio.data.remote.ServicioApiService
+import com.cuidadoeterno.app.modules.servicio.data.repository.ServicioRepository
+import com.cuidadoeterno.app.modules.servicio.ui.home.HomeClienteScreen
+import com.cuidadoeterno.app.modules.servicio.ui.home.HomeClienteViewModel
+import com.cuidadoeterno.app.modules.servicio.ui.home.HomeCuidadorScreen
+import com.cuidadoeterno.app.modules.servicio.ui.home.HomeCuidadorViewModel
 import com.cuidadoeterno.app.modules.usuario.data.remote.AuthApiService
 import com.cuidadoeterno.app.modules.usuario.data.repository.AuthRepository
 import com.cuidadoeterno.app.modules.usuario.ui.login.LoginScreen
@@ -29,15 +38,21 @@ fun AppNavHost(navController: NavHostController) {
 
     val context = LocalContext.current
 
-    // ── Construcción manual de dependencias ─────────────────────────────────────
-    // Por ahora sin Hilt — instanciamos aquí directamente.
-    // Cuando integres Hilt, esto desaparece y usas hiltViewModel().
-    val sessionManager = SessionManager(context)
-    val authInterceptor = AuthInterceptor(sessionManager)
-    val retrofit = ApiClient.createRetrofit(authInterceptor)
-    val authApiService = retrofit.create(AuthApiService::class.java)
-    val authRepository = AuthRepository(authApiService, sessionManager)
+    // ── Construcción de dependencias ────────────────────────────────────────────
+    // Manual por ahora — cuando integres Hilt esto desaparece
+    val sessionManager    = SessionManager(context)
+    val authInterceptor   = AuthInterceptor(sessionManager)
+    val retrofit          = ApiClient.createRetrofit(authInterceptor)
 
+    val authApiService      = retrofit.create(AuthApiService::class.java)
+    val cementerioApiService = retrofit.create(CementerioApiService::class.java)
+    val servicioApiService  = retrofit.create(ServicioApiService::class.java)
+
+    val authRepository      = AuthRepository(authApiService, sessionManager)
+    val cementerioRepository = CementerioRepository(cementerioApiService)
+    val servicioRepository  = ServicioRepository(servicioApiService)
+
+    // ── Navegación ──────────────────────────────────────────────────────────────
     NavHost(
         navController = navController,
         startDestination = NavRoutes.LOGIN
@@ -48,8 +63,6 @@ fun AppNavHost(navController: NavHostController) {
             LoginScreen(
                 viewModel = LoginViewModel(authRepository),
                 onLoginExitoso = { rol ->
-                    // Navegar según el rol y limpiar el backstack
-                    // para que el botón atrás no vuelva al login
                     val destino = when (rol) {
                         "CLIENTE"       -> NavRoutes.HOME_CLIENTE
                         "CUIDADOR"      -> NavRoutes.HOME_CUIDADOR
@@ -66,7 +79,7 @@ fun AppNavHost(navController: NavHostController) {
             )
         }
 
-        // ── Selección de tipo de registro ───────────────────────────────────────
+        // ── Selección tipo de registro ──────────────────────────────────────────
         composable(NavRoutes.SELECCION_REGISTRO) {
             SeleccionRegistroScreen(
                 onIrARegistroCliente  = { navController.navigate(NavRoutes.REGISTRO_CLIENTE) },
@@ -80,7 +93,6 @@ fun AppNavHost(navController: NavHostController) {
             RegistroClienteScreen(
                 viewModel = RegistroClienteViewModel(authRepository),
                 onRegistroExitoso = {
-                    // Registro exitoso → ir al login para que inicie sesión
                     navController.navigate(NavRoutes.LOGIN) {
                         popUpTo(NavRoutes.LOGIN) { inclusive = true }
                     }
@@ -102,6 +114,52 @@ fun AppNavHost(navController: NavHostController) {
             )
         }
 
+        // ── Home Cliente ────────────────────────────────────────────────────────
+        composable(NavRoutes.HOME_CLIENTE) {
+            HomeClienteScreen(
+                viewModel = HomeClienteViewModel(servicioRepository, sessionManager),
+                onNuevaSolicitud = { navController.navigate(NavRoutes.CREAR_SOLICITUD) },
+                onVerHistorial   = { navController.navigate(NavRoutes.HISTORIAL_CLIENTE) },
+                onVerPerfil      = { navController.navigate(NavRoutes.PERFIL) },
+                onCerrarSesion   = {
+                    navController.navigate(NavRoutes.LOGIN) {
+                        popUpTo(0) { inclusive = true }
+                    }
+                }
+            )
+        }
+
+        // ── Home Cuidador ───────────────────────────────────────────────────────
+        composable(NavRoutes.HOME_CUIDADOR) {
+            HomeCuidadorScreen(
+                viewModel = HomeCuidadorViewModel(
+                    servicioRepository,
+                    cementerioRepository,
+                    sessionManager
+                ),
+                onVerHistorial   = { navController.navigate(NavRoutes.HISTORIAL_CUIDADOR) },
+                onVerPagos       = { /* pendiente módulo finanzas */ },
+                onVerPerfil      = { navController.navigate(NavRoutes.PERFIL) },
+                onCerrarSesion   = {
+                    navController.navigate(NavRoutes.LOGIN) {
+                        popUpTo(0) { inclusive = true }
+                    }
+                }
+            )
+        }
+
+        // ── Home Admin — placeholder hasta desarrollar panel admin ──────────────
+        composable(NavRoutes.HOME_ADMIN) {
+            PerfilScreen(
+                viewModel = PerfilViewModel(authRepository),
+                onLogout = {
+                    navController.navigate(NavRoutes.LOGIN) {
+                        popUpTo(0) { inclusive = true }
+                    }
+                }
+            )
+        }
+
         // ── Perfil ──────────────────────────────────────────────────────────────
         composable(NavRoutes.PERFIL) {
             PerfilScreen(
@@ -114,40 +172,32 @@ fun AppNavHost(navController: NavHostController) {
             )
         }
 
-        // ── Homes temporales por rol ────────────────────────────────────────────
-        // Placeholder hasta que desarrolles las pantallas de cada módulo.
-        // Muestran el perfil del usuario como pantalla principal por ahora.
-        composable(NavRoutes.HOME_CLIENTE) {
-            PerfilScreen(
-                viewModel = PerfilViewModel(authRepository),
-                onLogout = {
-                    navController.navigate(NavRoutes.LOGIN) {
-                        popUpTo(0) { inclusive = true }
-                    }
-                }
-            )
+        // ── Crear solicitud ─────────────────────────────────────────────────────
+        // Pantalla pendiente de desarrollo — placeholder temporal
+        composable(NavRoutes.CREAR_SOLICITUD) {
+            // CrearSolicitudScreen — se implementa en el siguiente paso
         }
 
-        composable(NavRoutes.HOME_CUIDADOR) {
-            PerfilScreen(
-                viewModel = PerfilViewModel(authRepository),
-                onLogout = {
-                    navController.navigate(NavRoutes.LOGIN) {
-                        popUpTo(0) { inclusive = true }
-                    }
-                }
+        // ── Detalle solicitud con parámetro idOrden ─────────────────────────────
+        composable(
+            route = NavRoutes.DETALLE_SOLICITUD,
+            arguments = listOf(
+                navArgument("idOrden") { type = NavType.IntType }
             )
+        ) { backStackEntry ->
+            val idOrden = backStackEntry.arguments?.getInt("idOrden") ?: 0
+            // DetalleSolicitudScreen — se implementa en el siguiente paso
         }
 
-        composable(NavRoutes.HOME_ADMIN) {
-            PerfilScreen(
-                viewModel = PerfilViewModel(authRepository),
-                onLogout = {
-                    navController.navigate(NavRoutes.LOGIN) {
-                        popUpTo(0) { inclusive = true }
-                    }
-                }
-            )
+        // ── Historial cliente ───────────────────────────────────────────────────
+        // Pendiente de desarrollo
+        composable(NavRoutes.HISTORIAL_CLIENTE) {
+            // HistorialClienteScreen — se implementa después
+        }
+
+        // ── Historial cuidador ──────────────────────────────────────────────────
+        composable(NavRoutes.HISTORIAL_CUIDADOR) {
+            // HistorialCuidadorScreen — se implementa después
         }
     }
 }
