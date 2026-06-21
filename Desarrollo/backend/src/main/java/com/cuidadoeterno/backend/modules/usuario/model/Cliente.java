@@ -16,7 +16,7 @@ import java.time.LocalDate;
  * lo que refleja exactamente el DDL generado.
  */
 @Entity
-@Table(name = "CLIENTE")
+@Table(name = "cliente")
 @PrimaryKeyJoinColumn(name = "id_persona")
 @Getter
 @Setter

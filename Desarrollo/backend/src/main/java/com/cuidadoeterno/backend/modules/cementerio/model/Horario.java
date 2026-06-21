@@ -17,7 +17,7 @@ import java.time.LocalTime;
  * - CUIDADOR   tiene FK → HORARIO
  */
 @Entity
-@Table(name = "HORARIO")
+@Table(name = "horario")
 @Getter
 @Setter
 @NoArgsConstructor

@@ -12,7 +12,7 @@ import java.time.LocalDate;
  * Subtipo de PERSONA. Gestiona el sistema y los cementerios asignados.
  */
 @Entity
-@Table(name = "ADMINISTRADOR")
+@Table(name = "administrador")
 @PrimaryKeyJoinColumn(name = "id_persona")
 @Getter
 @Setter

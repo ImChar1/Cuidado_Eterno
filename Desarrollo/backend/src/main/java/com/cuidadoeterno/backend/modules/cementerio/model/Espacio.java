@@ -7,7 +7,7 @@ import lombok.Setter;
 import java.math.BigDecimal;
 
 @Entity
-@Table(name = "ESPACIO")
+@Table(name = "espacio")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -18,10 +18,10 @@ public class Espacio {
     @Column(name = "id_espacio", nullable = false, updatable = false)
     private Integer idEspacio;
 
-    @Column(name = "sector_pabellon", length = 50)
+    @Column(name = "sector_pabellon", length = 50, nullable = false)
     private String sectorPabellon;
 
-    @Column(name = "numero_sepultura", length = 20)
+    @Column(name = "numero_sepultura", length = 20, nullable = false)
     private String numeroSepultura;
 
     // Precisión geográfica para el GPS
@@ -49,4 +49,10 @@ public class Espacio {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_tipo_espacio", nullable = false)
     private TipoEspacio tipoEspacio;
+
+    @Column(name = "piso_nivel", length = 20)
+    private String pisoNivel;
+
+    @Column(name = "pasillo", length = 50)
+    private String pasillo;
 }

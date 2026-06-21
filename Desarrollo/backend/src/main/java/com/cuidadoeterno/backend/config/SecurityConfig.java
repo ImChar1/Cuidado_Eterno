@@ -55,7 +55,6 @@ public class SecurityConfig {
         "/auth/**",           // login y registro
         "/swagger-ui/**",     // documentación (deshabilitar en prod con variable de entorno)
         "/api-docs/**",
-        "/api-docs/**",
         "/swagger-ui.html",         
         "/swagger-ui/index.html",   
         "/api-docs/swagger-config",

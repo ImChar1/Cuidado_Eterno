@@ -18,7 +18,7 @@ import java.time.LocalDate;
  * - OneToOne  ← CLIENTE / CUIDADOR / ADMINISTRADOR (subtipos)
  */
 @Entity
-@Table(name = "PERSONA")
+@Table(name = "persona")
 @Inheritance(strategy = InheritanceType.JOINED)
 @Getter
 @Setter

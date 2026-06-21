@@ -17,7 +17,7 @@ import java.time.LocalDateTime;
  * - OneToOne  ← PERSONA (una credencial pertenece a una persona)
  */
 @Entity
-@Table(name = "CREDENCIAL")
+@Table(name = "credencial")
 @Getter
 @Setter
 @NoArgsConstructor

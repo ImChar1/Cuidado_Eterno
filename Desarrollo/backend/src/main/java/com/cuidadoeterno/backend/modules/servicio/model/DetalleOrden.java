@@ -13,7 +13,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "DETALLE_ORDEN")
+@Table(name = "detalle_orden")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -54,6 +54,10 @@ public class DetalleOrden {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_espacio", nullable = false)
     private Espacio espacio;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_solicitud", nullable = false)
+    private SolicitudServicio solicitudServicio;
 
     // Cuidador asignado a esta orden
     @ManyToOne(fetch = FetchType.LAZY)

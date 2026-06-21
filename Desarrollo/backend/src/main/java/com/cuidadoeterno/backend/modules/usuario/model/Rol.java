@@ -11,7 +11,7 @@ import lombok.Setter;
  * Es la raíz de la cadena ROL → CREDENCIAL → PERSONA.
  */
 @Entity
-@Table(name = "ROL")
+@Table(name = "rol")
 @Getter
 @Setter
 @NoArgsConstructor

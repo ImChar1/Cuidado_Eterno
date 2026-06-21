@@ -7,6 +7,7 @@ import com.cuidadoeterno.backend.modules.cementerio.service.EspacioService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -94,6 +95,37 @@ public class CementerioController {
         try {
             Espacio nuevoEspacio = espacioService.registrarNuevoEspacio(request);
             return ResponseEntity.status(HttpStatus.CREATED).body(nuevoEspacio.getIdEspacio());
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+    /**
+     * POST /api/v1/cementerios/espacios/cliente
+     *
+     * Permite al cliente registrar el espacio de su difunto al crear una solicitud.
+     * Si el espacio ya existe (mismo sector + número + cementerio) lo retorna.
+     * Si no existe, lo crea con estado_fisico = 'no_evaluado' por defecto.
+     *
+     * Acceso: ROLE_CLIENTE
+     * Header requerido: Authorization: Bearer <token>
+     */
+    @PostMapping("/espacios/cliente")
+    @PreAuthorize("hasRole('CLIENTE')")
+    public ResponseEntity<?> registrarEspacioCliente(
+            @RequestBody EspacioRequestDTO request) {
+        try {
+            Espacio espacio = espacioService.registrarNuevoEspacio(request);
+            return ResponseEntity.status(HttpStatus.CREATED).body(
+                new EspacioResponseDTO(
+                    espacio.getIdEspacio(),
+                    espacio.getSectorPabellon(),
+                    espacio.getNumeroSepultura(),
+                    espacio.getPisoNivel(),
+                    espacio.getPasillo(),
+                    espacio.getTipoEspacio().getNombreTipo(),
+                    espacio.getCementerio().getNombreCementerio()
+                )
+            );
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
