@@ -13,8 +13,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
  
 import java.time.LocalDate;
-import java.util.List;
-import java.util.stream.Collectors;
  
 @Service
 public class AuthServiceImpl implements AuthService {
@@ -196,38 +194,6 @@ public class AuthServiceImpl implements AuthService {
             ));
  
         return construirPerfil(persona, persona.getCredencial());
-    }
- 
-    // ── ADMINISTRACIÓN DE CUIDADORES ────────────────────────────────────────────
- 
-    @Override
-    @Transactional
-    public void cambiarEstadoVerificacion(Integer idPersona, String nuevoEstado) {
-        // Validar que el estado sea uno de los permitidos
-        if (!nuevoEstado.equals("verificado") && !nuevoEstado.equals("rechazado")) {
-            throw new BusinessException(
-                "Estado inválido. Use 'verificado' o 'rechazado'",
-                HttpStatus.BAD_REQUEST
-            );
-        }
- 
-        Cuidador cuidador = cuidadorRepository.findById(idPersona)
-            .orElseThrow(() -> new BusinessException(
-                "Cuidador no encontrado", HttpStatus.NOT_FOUND
-            ));
- 
-        cuidador.setEstadoVerificacion(nuevoEstado);
-        cuidadorRepository.save(cuidador);
-    }
- 
-    @Override
-    @Transactional(readOnly = true)
-    public List<PerfilDTO> listarCuidadoresPorEstado(String estado) {
-        // Usa el método del repositorio que ya tienes: findByEstadoVerificacion
-        return cuidadorRepository.findByEstadoVerificacion(estado)
-            .stream()
-            .map(cuidador -> construirPerfil(cuidador, cuidador.getCredencial()))
-            .collect(Collectors.toList());
     }
  
     // ── Métodos privados ────────────────────────────────────────────────────────

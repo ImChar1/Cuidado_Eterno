@@ -48,8 +48,8 @@ FROM mariadb:11
 
 # Copiar los scripts SQL dentro de la imagen.
 # Rutas relativas al contexto definido en docker-compose (Desarrollo/).
-COPY script_db/cuidado_eterno_mariadb_DDL.sql /docker-entrypoint-initdb.d/01_schema.sql
-COPY script_db/seed_data_DML.sql            /docker-entrypoint-initdb.d/02_seed.sql
+COPY ./infra/script_db/cuidado_eterno_mariadb_DDL.sql /docker-entrypoint-initdb.d/01_schema.sql
+COPY ./infra/script_db/seed_data_DML.sql            /docker-entrypoint-initdb.d/02_seed.sql
 
 # El volumen de datos es externo.
 # MariaDB almacena los datos en /var/lib/mysql.

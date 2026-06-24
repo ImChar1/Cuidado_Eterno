@@ -1,7 +1,5 @@
 package com.cuidadoeterno.backend.modules.usuario.service;
 
-import java.util.List;
-
 import com.cuidadoeterno.backend.modules.usuario.dto.LoginRequestDTO;
 import com.cuidadoeterno.backend.modules.usuario.dto.LoginResponseDTO;
 import com.cuidadoeterno.backend.modules.usuario.dto.PerfilDTO;
@@ -64,23 +62,4 @@ public interface AuthService {
      */
     PerfilDTO obtenerPerfilPorId(Integer idPersona);
 
-    // ── Administración de cuidadores ────────────────────────────────────────────
- 
-    /**
-     * Cambia el estado de verificación de un cuidador.
-     * Solo accesible por ADMINISTRADOR.
-     *
-     * @param idPersona  PK del cuidador en tabla PERSONA
-     * @param nuevoEstado  'verificado' o 'rechazado'
-     */
-    void cambiarEstadoVerificacion(Integer idPersona, String nuevoEstado);
- 
-    /**
-     * Lista cuidadores filtrados por estado de verificación.
-     * Usado por AdminController para ver pendientes, verificados o rechazados.
-     *
-     * @param estado  'pendiente', 'verificado' o 'rechazado'
-     * @return lista de PerfilDTO con datos del cuidador
-     */
-    List<PerfilDTO> listarCuidadoresPorEstado(String estado);
 }

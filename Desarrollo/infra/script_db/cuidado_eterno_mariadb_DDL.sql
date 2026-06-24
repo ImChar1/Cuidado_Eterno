@@ -388,6 +388,7 @@ CREATE TABLE IF NOT EXISTS detalle_orden (
     fecha_programada        DATETIME        NOT NULL,
     monto_total             DECIMAL(10,2)   NOT NULL,
     estado_orden            VARCHAR(20)     NOT NULL DEFAULT 'pendiente',
+    sub_estado_orden        VARCHAR(30)     NOT NULL DEFAULT 'SIN_ASIGNAR',
     observaciones           VARCHAR(500)    NULL,
     cantidad_productos      INT UNSIGNED    NULL,
     precio_unitario         DECIMAL(10,2)   NULL,
@@ -403,6 +404,35 @@ CREATE TABLE IF NOT EXISTS detalle_orden (
         REFERENCES pago_cuidador (id_pago_cuidador),
     CONSTRAINT detalle_espacio_fk FOREIGN KEY (id_espacio)
         REFERENCES espacio (id_espacio)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- ------------------------------------------------------------
+-- BILLETERA VIRTUAL DEL CUIDADOR
+-- ------------------------------------------------------------
+
+CREATE TABLE IF NOT EXISTS billetera_virtual (
+    id_billetera        INT UNSIGNED    NOT NULL AUTO_INCREMENT,
+    id_cuidador         INT UNSIGNED    NOT NULL,
+    saldo_disponible    DECIMAL(10,2)   NOT NULL DEFAULT 0.00,
+    fecha_actualizacion DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT billetera_virtual_pk PRIMARY KEY (id_billetera),
+    CONSTRAINT billetera_cuidador_fk FOREIGN KEY (id_cuidador)
+        REFERENCES cuidador (id_persona)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS transaccion_billetera (
+    id_tx_billetera     INT UNSIGNED    NOT NULL AUTO_INCREMENT,
+    id_billetera        INT UNSIGNED    NOT NULL,
+    id_orden            INT UNSIGNED    NULL, -- Es Nullable porque un "retiro de fondos" no está atado a una orden
+    tipo_movimiento     VARCHAR(20)     NOT NULL, -- Ej: 'ABONO', 'RETIRO'
+    monto               DECIMAL(10,2)   NOT NULL,
+    descripcion         VARCHAR(255)    NOT NULL,
+    fecha_transaccion   DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT transaccion_billetera_pk PRIMARY KEY (id_tx_billetera),
+    CONSTRAINT tx_billetera_fk FOREIGN KEY (id_billetera)
+        REFERENCES billetera_virtual (id_billetera),
+    CONSTRAINT tx_orden_fk FOREIGN KEY (id_orden)
+        REFERENCES detalle_orden (id_orden)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
  
 -- ------------------------------------------------------------

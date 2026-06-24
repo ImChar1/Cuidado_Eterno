@@ -11,6 +11,12 @@ interface ServicioApiService {
     // ── CLIENTE ─────────────────────────────────────────────────────────────────
 
     /**
+     * GET /api/v1/tipos-solicitud
+     * Obtiene el catálogo de tipos de servicio disponibles.
+     */
+    @GET("tipos-solicitud")
+    suspend fun obtenerTiposSolicitud(): Response<ApiResponse<List<TipoSolicitudResponse>>>
+    /**
      * POST /api/v1/ordenes
      * El cliente crea una nueva solicitud de servicio.
      * Requiere: ROLE_CLIENTE
@@ -84,4 +90,25 @@ interface ServicioApiService {
         @Path("idOrden") idOrden: Int,
         @Body request: EvidenciaRequest
     ): Response<ApiResponse<Void>>
+
+    /**
+     * PATCH /api/v1/ordenes/{idOrden}/sub-estado
+     * Actualiza el sub-estado del servicio en tiempo real (Ej: EN_CAMINO, TRABAJANDO)
+     */
+    @PATCH("ordenes/{idOrden}/sub-estado")
+    suspend fun actualizarSubEstado(
+        @Path("idOrden") idOrden: Int,
+        @Query("idCuidador") idCuidador: Int,
+        @Query("nuevoSubEstado") nuevoSubEstado: String
+    ): Response<ApiResponse<OrdenResponse>>
+
+    /**
+     * PUT /api/v1/ordenes/{idOrden}/finalizar
+     * El cuidador finaliza la orden, recibiendo su pago en la billetera virtual.
+     * Requiere: ROLE_CUIDADOR
+     */
+    @PUT("ordenes/{idOrden}/finalizar")
+    suspend fun finalizarServicio(
+        @Path("idOrden") idOrden: Int
+    ): Response<ApiResponse<OrdenResponse>>
 }
