@@ -14,7 +14,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
- 
+import com.cuidadoeterno.backend.modules.servicio.model.enums.SubEstadoOrden;
+
 import java.util.List;
  
 @RestController
@@ -191,4 +192,66 @@ public class OrdenController {
         ordenService.subirEvidencia(request);
         return ResponseEntity.ok(ApiResponse.ok("Evidencia registrada exitosamente", null));
     }
+
+    /**
+     * PUT /api/v1/ordenes/{idOrden}/finalizar
+     *
+     * El cuidador marca el servicio como terminado tras subir la evidencia.
+     * Esto cambia el estado a "completada" y ABONA EL PAGO a su billetera virtual.
+     *
+     * Acceso: ROLE_CUIDADOR
+     */
+    @Operation(
+        summary = "Finalizar servicio (Cuidador)",
+        description = "Marca la orden como completada y deposita las ganancias en la billetera virtual del cuidador.",
+        security = @SecurityRequirement(name = "bearerAuth")
+    )
+    @PutMapping("/{idOrden}/finalizar")
+    @PreAuthorize("hasRole('CUIDADOR')")
+    public ResponseEntity<ApiResponse<Void>> finalizarServicioCuidador(
+            @PathVariable Integer idOrden) {
+ 
+        ordenService.finalizarServicioCuidador(idOrden);
+        return ResponseEntity.ok(ApiResponse.ok("Servicio finalizado y pago abonado exitosamente", null));
+    }
+
+    /**
+     * PATCH /api/v1/ordenes/{idOrden}/sub-estado
+     * El cuidador informa que está "En camino", "Comprando insumos", etc.
+     */
+    @PatchMapping("/{idOrden}/sub-estado")
+    public ResponseEntity<ApiResponse<OrdenResponseDTO>> actualizarSubEstadoEnVivo(
+            @PathVariable Integer idOrden,
+            @RequestParam Integer idCuidador,
+            @RequestParam SubEstadoOrden nuevoSubEstado) {
+            
+        DetalleOrden orden = ordenService.actualizarSubEstado(idOrden, idCuidador, nuevoSubEstado);
+        
+        // 1. Reconstruimos el nombre del cuidador de forma segura
+        String nombreCuidador = orden.getCuidador() != null
+            ? orden.getCuidador().getNombre() + " " + orden.getCuidador().getApPaterno()
+            : "Sin asignar";
+            
+        // 2. Usamos el constructor completo con los 12 parámetros requeridos
+        OrdenResponseDTO responseDTO = new OrdenResponseDTO(
+            orden.getIdOrden(),
+            orden.getSolicitudServicio().getIdSolicitud(),
+            orden.getSolicitudServicio().getTipoSolicitud().getNombreServicio(),
+            nombreCuidador,
+            orden.getEspacio().getSectorPabellon() + " - N°" + orden.getEspacio().getNumeroSepultura(),
+            orden.getFechaCreacion(),
+            orden.getFechaProgramada(),
+            orden.getEstadoOrden(),
+            orden.getMontoTotal(),
+            false, // tieneEvidencia (por defecto en falso para la actualización rápida)
+            false, // tieneCalificacion
+            orden.getSubEstadoOrden()
+        );
+        
+        // 3. CORRECCIÓN: Añadimos explícitamente el tipo <OrdenResponseDTO> para eliminar el fallo de inferencia
+        return ResponseEntity.ok(
+            ApiResponse.ok("Estado de transmisión actualizado con éxito", responseDTO)
+        );
+    }
+
 }

@@ -79,7 +79,7 @@ class CementerioRepository(
                 api.obtenerCementeriosPorComuna(idComuna)
             } else {
                 // Sin filtro de comuna — busca con string vacío para traer todos
-                api.buscarCementerios("")
+                api.listarTodosCementerios()
             }
             if (response.isSuccessful) {
                 NetworkResult.Success(response.body() ?: emptyList())
@@ -98,6 +98,18 @@ class CementerioRepository(
                 NetworkResult.Success(response.body() ?: emptyList())
             } else {
                 NetworkResult.Error("No se encontraron cementerios")
+            }
+        } catch (e: Exception) {
+            NetworkResult.Error("Sin conexión: ${e.message}")
+        }
+    }
+    suspend fun listarTodosCementerios(): NetworkResult<List<CementerioResponse>> {
+        return try {
+            val response = api.listarTodosCementerios()
+            if (response.isSuccessful) {
+                NetworkResult.Success(response.body() ?: emptyList())
+            } else {
+                NetworkResult.Error("Error al cargar todos los cementerios")
             }
         } catch (e: Exception) {
             NetworkResult.Error("Sin conexión: ${e.message}")

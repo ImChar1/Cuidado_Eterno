@@ -2,6 +2,7 @@ package com.cuidadoeterno.backend.modules.servicio.model;
 
 import com.cuidadoeterno.backend.modules.cementerio.model.Espacio;
 import com.cuidadoeterno.backend.modules.inventario.model.Producto;
+import com.cuidadoeterno.backend.modules.servicio.model.enums.SubEstadoOrden;
 import com.cuidadoeterno.backend.modules.usuario.model.Cuidador;
 import com.cuidadoeterno.backend.modules.finanzas.model.PagoCuidador;
 import jakarta.persistence.*;
@@ -47,6 +48,10 @@ public class DetalleOrden {
 
     @Column(name = "subtotal", precision = 10, scale = 2)
     private BigDecimal subtotal;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "sub_estado_orden", nullable = false)
+    private SubEstadoOrden subEstadoOrden = SubEstadoOrden.SIN_ASIGNAR;
 
     // ── Relaciones ──────────────────────────────────────────────────────────────
 

@@ -232,7 +232,8 @@ resource "aws_instance" "database" {
   iam_instance_profile   = aws_iam_instance_profile.ec2_profile.name
 
   # PROTECCIÓN CONTRA BORRADO DESDE LA CONSOLA DE AWS
-  disable_api_termination = true 
+  # COLOCAR TRUE PARA ACTIVAR Y NO BORRAR LOS DATOS DE LA BD
+  disable_api_termination = false 
 
   user_data = <<-EOF
     #!/bin/bash
@@ -259,7 +260,7 @@ resource "aws_instance" "database" {
   tags = { Name = "${var.project_name}-ec2-database" }
 
   # PROTECCIÓN CONTRA TERRAFORM DESTROY
-  lifecycle {
-    prevent_destroy = true 
-  }
+  #lifecycle {
+  #  prevent_destroy = true 
+  #}
 }

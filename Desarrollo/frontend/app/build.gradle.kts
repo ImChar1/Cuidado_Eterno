@@ -73,4 +73,7 @@ dependencies {
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
+
+    // CamaraAlt
+    implementation("androidx.compose.material:material-icons-extended")
 }

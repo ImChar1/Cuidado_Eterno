@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import com.cuidadoeterno.backend.modules.servicio.model.enums.SubEstadoOrden;
 
 @Getter
 @Setter
@@ -21,4 +22,6 @@ public class OrdenResponseDTO {
     private BigDecimal montoTotal;
     private Boolean tieneEvidencia;        // ← para saber si ya subieron fotos
     private Boolean tieneCalificacion;     // ← para saber si ya calificaron
+    
+    private SubEstadoOrden subEstadoOrden;
 }

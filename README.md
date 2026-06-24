@@ -81,11 +81,15 @@ Docker Compose hace lo siguiente en orden:
 2. Espera el healthcheck de la BD (`healthcheck.sh --connect`)
 
   -docker compose up --build d db (db es el nombre del servicio en el docker-compose).
+
   -docker compose logs -f db (para verificar "[NOTE] mariadbd: redy for connections).
+  
   -verificar si se crearon las tablas correctamente por el DDL con:
   [docker exec -it cuidado_eterno_db mariadb -u ce_user -pce_pass cuidado_eterno -e "SHOW TABLES;"] PARA POWERSHELL.
+  
   -verificar si se poblaron las tablas correctamente por el script DML con:
-  [docker exec -it cuidado_eterno_db mariadb -u ce_user -pce_pass cuidado_eterno -e "SELECT nombre_rol FROM ROL;"] PARA POWERSHELL
+  [docker exec -it cuidado_eterno_db mariadb -u ce_user -pce_pass cuidado_eterno -e "SELECT nombre_rol FROM rol;"] PARA POWERSHELL
+  
   -Para conectarse a la BD y explorar realizando cualquier tipo de Query:
   [docker exec -it cuidado_eterno_db mariadb -u ce_user -pce_pass cuidado_eterno] PARA POWERSHELL (salir con exit).
 
@@ -286,8 +290,14 @@ Al finalizar, `terraform apply` muestra los outputs: IPs públicas de las instan
 ### 6.4 Despliegue del backend en la EC2
 
 ```bash
-# Conectarse a la instancia EC2 del backend por SSH
-ssh -i <tu-clave.pem> ec2-user@<IP_PUBLICA_EC2_BACKEND>
+Dado que el backend está en una subred privada, debes conectarte haciendo un salto (Jump) a través del Proxy público.
+
+1. Descarga tu llave .pem desde AWS Academy (por defecto usa la llave 'vockey').
+2. Ajusta los permisos de tu llave (solo Mac/Linux):
+   chmod 400 ruta/a/tu/llave.pem
+
+3. Conéctate al backend saltando por el proxy:
+   ssh -J ec2-user@<IP_PUBLICA_PROXY> -i ruta/a/tu/llave.pem ec2-user@<IP_PRIVADA_BACKEND>
 
 # En la EC2: clonar el repositorio
 git clone https://github.com/<usuario>/Cuidado_Eterno.git

@@ -10,7 +10,18 @@ class ServicioRepository(
 ) {
 
     // ── CLIENTE ─────────────────────────────────────────────────────────────────
-
+    suspend fun obtenerTiposSolicitud(): NetworkResult<List<TipoSolicitudResponse>> {
+        return try {
+            val response = api.obtenerTiposSolicitud()
+            if (response.isSuccessful && response.body() != null) {
+                NetworkResult.Success(response.body()!!.data ?: emptyList())
+            } else {
+                NetworkResult.Error(response.body()?.message ?: "Error al cargar tipos de servicio")
+            }
+        } catch (e: Exception) {
+            NetworkResult.Error("Sin conexión: ${e.message}")
+        }
+    }
     suspend fun crearOrden(request: OrdenRequest): NetworkResult<Int> {
         return try {
             val response = api.crearOrden(request)
@@ -124,6 +135,38 @@ class ServicioRepository(
             }
         } catch (e: Exception) {
             NetworkResult.Error("Sin conexión: ${e.message}")
+        }
+    }
+
+    suspend fun finalizarServicio(idOrden: Int): NetworkResult<Unit> {
+        return try {
+            val response = api.finalizarServicio(idOrden)
+            if (response.isSuccessful) {
+                NetworkResult.Success(Unit)
+            } else {
+                NetworkResult.Error(response.body()?.message ?: "Error al finalizar el servicio")
+            }
+        } catch (e: Exception) {
+            NetworkResult.Error("Sin conexión: ${e.message}")
+        }
+    }
+
+    suspend fun actualizarSubEstado(
+        idOrden: Int,
+        idCuidador: Int,
+        nuevoSubEstado: String
+    ): NetworkResult<OrdenResponse> {
+        return try {
+            val response = api.actualizarSubEstado(idOrden, idCuidador, nuevoSubEstado)
+            if (response.isSuccessful && response.body()?.data != null) {
+                NetworkResult.Success(response.body()!!.data!!)
+            } else {
+                NetworkResult.Error(
+                    response.body()?.message ?: "Error al actualizar el estado del servicio"
+                )
+            }
+        } catch (e: Exception) {
+            NetworkResult.Error("Sin conexión al servidor: ${e.message}")
         }
     }
 }

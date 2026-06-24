@@ -66,6 +66,9 @@ interface CementerioApiService {
         @Query("nombre") nombre: String
     ): Response<List<CementerioResponse>>
 
+    @GET("cementerios")
+    suspend fun listarTodosCementerios(): Response<List<CementerioResponse>>
+
     // ── Espacios ────────────────────────────────────────────────────────────────
 
     /**

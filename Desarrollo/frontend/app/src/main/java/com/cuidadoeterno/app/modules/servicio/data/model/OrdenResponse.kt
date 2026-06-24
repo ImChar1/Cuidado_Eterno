@@ -21,5 +21,6 @@ data class OrdenResponse(
     val estadoOrden: String,
     val montoTotal: BigDecimal,
     val tieneEvidencia: Boolean,
-    val tieneCalificacion: Boolean
+    val tieneCalificacion: Boolean,
+    val subEstadoOrden: String?
 )
