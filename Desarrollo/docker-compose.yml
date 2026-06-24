@@ -80,10 +80,10 @@ services:
       JWT_EXPIRATION: ${JWT_EXPIRATION:-86400000}
       SWAGGER_ENABLED: ${SWAGGER_ENABLED:-true}
 
-    depends_on:
-      db:
+    #depends_on:
+      #db:
         # El backend no arranca hasta que la BD pase el healthcheck
-        condition: service_healthy
+        #condition: service_healthy
 
     # Red explícita para que ambos servicios se comuniquen por nombre
     networks:
