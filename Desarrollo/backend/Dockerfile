@@ -30,6 +30,7 @@ COPY pom.xml .
 COPY .mvn .mvn
 COPY mvnw .
 
+RUN chmod +x mvnw
 # Descarga dependencias sin compilar el código fuente todavía
 RUN ./mvnw dependency:go-offline -B
 

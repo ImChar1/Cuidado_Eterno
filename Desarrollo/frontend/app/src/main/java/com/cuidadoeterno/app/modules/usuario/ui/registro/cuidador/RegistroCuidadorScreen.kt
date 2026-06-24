@@ -1,6 +1,6 @@
 package com.cuidadoeterno.app.modules.usuario.ui.registro.cuidador
 
-
+import androidx.compose.material3.MenuAnchorType
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions

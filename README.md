@@ -242,7 +242,7 @@ crontab -e
 
 ## 6. Despliegue en AWS con Terraform
 
-La infraestructura se divide en dos etapas en `infra/etapa_1/` e `infra/etapa_2/`.
+La infraestructura se divide en dos etapas en `infra/etapa_1/` e `infra/etapa_2/`. Utilizamos una arquitectura de red privada, por lo que el acceso a los servidores de Aplicación y Base de Datos se realiza a través de un servidor Proxy (Bastion Host).
 
 ### 6.1 Prerrequisitos AWS
 
@@ -254,11 +254,9 @@ aws configure
 # AWS Secret Access Key: <pegar desde portal>
 # Default region name: us-east-1
 # Default output format: json
-```
 
 ### 6.2 Etapa 1 — Red y seguridad (VPC, subnets, security groups)
 
-```bash
 cd infra/etapa_1
 
 # Inicializar Terraform (descarga providers de AWS)
@@ -270,11 +268,9 @@ terraform plan
 # Aprovisionar la infraestructura de red
 terraform apply
 # Escribir "yes" cuando lo pida
-```
 
 ### 6.3 Etapa 2 — Instancias EC2 y S3
 
-```bash
 cd ../etapa_2
 
 terraform init
@@ -283,7 +279,6 @@ terraform plan
 # Aprovisionar las instancias EC2 y el bucket S3
 terraform apply
 # Escribir "yes" cuando lo pida
-```
 
 Al finalizar, `terraform apply` muestra los outputs: IPs públicas de las instancias y nombre del bucket.
 
@@ -296,23 +291,62 @@ Dado que el backend está en una subred privada, debes conectarte haciendo un sa
 2. Ajusta los permisos de tu llave (solo Mac/Linux):
    chmod 400 ruta/a/tu/llave.pem
 
-3. Conéctate al backend saltando por el proxy:
-   ssh -J ec2-user@<IP_PUBLICA_PROXY> -i ruta/a/tu/llave.pem ec2-user@<IP_PRIVADA_BACKEND>
+3. Conéctate a la db y al backend saltando por el proxy:
 
-# En la EC2: clonar el repositorio
-git clone https://github.com/<usuario>/Cuidado_Eterno.git
-cd Cuidado_Eterno/Desarrollo
+  # Ejemplo conectando al Backend:
+  ssh -o ProxyCommand="ssh -W %h:%p -i C:/Ruta/A/Tu/llave.pem ec2-user@<IP_PUBLICA_PROXY>" -i C:/Ruta/A/Tu/llave.pem ec2-user@<IP_PRIVADA_BACKEND>
 
-# Exportar variables de entorno de producción
-export DB_URL=jdbc:mariadb://<IP_PRIVADA_EC2_BD>:3306/cuidado_eterno
-export DB_USER=ce_user
-export DB_PASSWORD=<password_prod>
-export JWT_SECRET=<secret_prod_32_chars_minimo>
-export SWAGGER_ENABLED=false
+  # Ejemplo conectando a la BD:
+  ssh -o ProxyCommand="ssh -W %h:%p -i C:/Ruta/A/Tu/llave.pem ec2-user@<IP_PUBLICA_PROXY>" -i C:/Ruta/A/Tu/llave.pem ec2-user@<IP_PRIVADA_BD>
 
-# Construir y levantar el contenedor del backend
-docker compose up --build -d backend
-```
+
+  # En la EC2: clonar el repositorio
+  git clone https://github.com/<usuario>/Cuidado_Eterno.git
+  cd Cuidado_Eterno/Desarrollo
+
+  nano .env
+
+  #Despliegue de Servicios (Monorepo)
+  Utilizamos el mismo repositorio para ambos servidores, pero levantamos únicamente el contenedor correspondiente en cada máquina utilizando variables de entorno locales (.env).
+  
+  Servidor ------------------/-------- Rol ----------/------- Comando Docker a ejecutar
+  Servidor 3 (IP Privada BD) / Base de Datos MariaDB /sudo docker-compose up --build -d db
+  Servidor 2 (IP Privada Backend)API / Spring Boot  /sudo docker-compose up --build -d backend
+
+
+### 📄 Configuración de Archivos `.env`
+
+Para que la arquitectura separada funcione correctamente, debes crear un archivo `.env` en la ruta `Cuidado_Eterno/Desarrollo/` en cada servidor según corresponda:
+
+#### 1. En el Servidor de Base de Datos (`db`)
+Este archivo configura las credenciales con las que se inicializará el contenedor de MariaDB en su propia máquina.
+
+```properties
+# ==========================================
+# CONFIGURACIÓN LOCAL - SERVIDOR DE BASE DE DATOS
+# ==========================================
+DB_NAME=cuidado_eterno
+DB_USER=ce_user
+DB_PASSWORD=ce_pass
+DB_ROOT_PASSWORD=un_password_seguro_root
+
+# ==========================================
+# CONFIGURACIÓN LOCAL - SERVIDOR DE BACKEND
+# ==========================================
+
+# Conexión Directa a la EC2 de Base de Datos
+DB_URL=jdbc:mariadb://<IP_PRIVADA_EC2_BD>:3306/cuidado_eterno
+DB_USER=ce_user
+DB_PASSWORD=ce_pass
+
+# Mapeo obligatorio para consistencia de Docker Compose
+DB_NAME=cuidado_eterno
+DB_ROOT_PASSWORD=un_password_seguro_root
+
+# Configuración de Seguridad de la API
+JWT_SECRET=tuSuperSecretoAqui32CaracteresMinimo
+JWT_EXPIRATION=86400000
+SWAGGER_ENABLED=true
 
 ### 6.5 Destruir la infraestructura (liberar créditos AWS Academy)
 

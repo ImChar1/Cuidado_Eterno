@@ -1,2 +1,6 @@
 .env
 Desarrollo/frontend/.idea
+.terraform.lock.hcl
+.terraform
+terraform.tfstate
+terraform.tfstate.backup

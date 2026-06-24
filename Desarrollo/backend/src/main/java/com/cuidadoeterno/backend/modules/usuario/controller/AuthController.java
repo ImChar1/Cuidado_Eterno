@@ -132,6 +132,17 @@ public class AuthController {
             .body(ApiResponse.ok("Cliente registrado exitosamente", null));
     }
 
+    @Operation(summary = "Registro de cuidador", 
+           description = "El cuidador se auto-registra. Queda en estado 'pendiente' hasta validación del admin.")
+    @PostMapping("/registro/cuidador")
+    public ResponseEntity<ApiResponse<Void>> registrarCuidador(
+            @Valid @RequestBody RegistroCuidadorDTO dto) {
+        authService.registrarCuidador(dto);
+        return ResponseEntity
+            .status(HttpStatus.CREATED)
+            .body(ApiResponse.ok("Cuidador registrado, pendiente de verificación", null));
+    }
+
     // ── ENDPOINTS PROTEGIDOS ────────────────────────────────────────────────────
 
     /**

@@ -188,6 +188,19 @@ resource "aws_instance" "proxy" {
     systemctl start nginx
     systemctl enable nginx
     # Aqui luego se configura el proxy_pass apuntando a la IP privada del Backend
+    # Crear la configuración de Nginx apuntando dinámicamente al Backend
+    cat << 'NYA' > /etc/nginx/default.d/backend_proxy.conf
+    location /api/v1 {
+        proxy_pass http://${aws_instance.backend.private_ip}:8080;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+    NYA
+
+    # Reiniciar Nginx para aplicar los cambios
+    systemctl restart nginx
   EOF
 
   tags = { Name = "${var.project_name}-ec2-proxy" }
@@ -205,7 +218,7 @@ resource "aws_instance" "backend" {
   user_data = <<-EOF
     #!/bin/bash
     yum update -y
-    yum install -y docker aws-cli
+    yum install -y docker aws-cli git
     systemctl start docker
     systemctl enable docker
     usermod -aG docker ec2-user
@@ -215,6 +228,11 @@ resource "aws_instance" "backend" {
     chmod +x /usr/local/bin/docker-compose
     ln -sf /usr/local/bin/docker-compose /usr/bin/docker-compose
     
+    # Instalar Docker Buildx (Requerido por versiones modernas de compose)
+    mkdir -p /usr/libexec/docker/cli-plugins
+    curl -SL "https://github.com/docker/buildx/releases/download/v0.17.1/buildx-v0.17.1.linux-amd64" -o /usr/libexec/docker/cli-plugins/docker-buildx
+    chmod +x /usr/libexec/docker/cli-plugins/docker-buildx
+
     mkdir -p /home/ec2-user/app
     chown -R ec2-user:ec2-user /home/ec2-user/app
   EOF
@@ -238,20 +256,24 @@ resource "aws_instance" "database" {
   user_data = <<-EOF
     #!/bin/bash
     yum update -y
-    yum install -y docker aws-cli cronie
+    yum install -y docker aws-cli git
     systemctl start docker
     systemctl enable docker
-    systemctl start crond
-    systemctl enable crond
     usermod -aG docker ec2-user
     
+    # Instalar Docker Compose v2
     curl -SL "https://github.com/docker/compose/releases/latest/download/docker-compose-linux-x86_64" -o /usr/local/bin/docker-compose
     chmod +x /usr/local/bin/docker-compose
     ln -sf /usr/local/bin/docker-compose /usr/bin/docker-compose
     
-    mkdir -p /home/ec2-user/app/backups
-    chown -R ec2-user:ec2-user /home/ec2-user/app
+    # Instalar Docker Buildx (Requerido por versiones modernas de compose)
+    mkdir -p /usr/libexec/docker/cli-plugins
+    curl -SL "https://github.com/docker/buildx/releases/download/v0.17.1/buildx-v0.17.1.linux-amd64" -o /usr/libexec/docker/cli-plugins/docker-buildx
+    chmod +x /usr/libexec/docker/cli-plugins/docker-buildx
 
+    mkdir -p /home/ec2-user/app
+    chown -R ec2-user:ec2-user /home/ec2-user/app
+    
     # CREACIÓN AUTOMÁTICA DEL CRONJOB DE RESPALDO (A LAS 2 AM)
     echo "0 2 * * * root docker exec cuidado_eterno_db mariadb-dump -u ce_user -pce_pass cuidado_eterno > /home/ec2-user/app/backups/cuidado_eterno_\$(date +\%Y\%m\%d).sql" > /etc/cron.d/db_backup
     chmod 0644 /etc/cron.d/db_backup

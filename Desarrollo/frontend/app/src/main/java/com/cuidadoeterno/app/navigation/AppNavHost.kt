@@ -35,6 +35,13 @@ import com.cuidadoeterno.app.modules.servicio.ui.cuidador.detalle.DetalleOrdenCu
 
 import com.cuidadoeterno.app.modules.usuario.data.remote.AuthApiService
 import com.cuidadoeterno.app.modules.usuario.data.repository.AuthRepository
+import com.cuidadoeterno.app.modules.usuario.ui.login.LoginScreen
+import com.cuidadoeterno.app.modules.usuario.ui.login.LoginViewModel
+import com.cuidadoeterno.app.modules.usuario.ui.registro.SeleccionRegistroScreen
+import com.cuidadoeterno.app.modules.usuario.ui.registro.cliente.RegistroClienteScreen
+import com.cuidadoeterno.app.modules.usuario.ui.registro.cliente.RegistroClienteViewModel
+import com.cuidadoeterno.app.modules.usuario.ui.registro.cuidador.RegistroCuidadorScreen
+import com.cuidadoeterno.app.modules.usuario.ui.registro.cuidador.RegistroCuidadorViewModel
 import com.cuidadoeterno.app.navigation.NavRoutes
 
 @Composable
@@ -62,7 +69,77 @@ fun AppNavHost(navController: NavHostController) {
         navController = navController,
         startDestination = NavRoutes.LOGIN // <-- Asegúrate de que el login esté implementado arriba
     ) {
+        // LOGIN
+        composable(NavRoutes.LOGIN) {
+            val viewModel: LoginViewModel = viewModel(
+                factory = object : ViewModelProvider.Factory {
+                    override fun <T : ViewModel> create(modelClass: Class<T>): T =
+                        LoginViewModel(authRepository) as T
+                }
+            )
+            LoginScreen(
+                viewModel = viewModel,
+                onLoginExitoso = { rol ->
+                    val destino = when (rol) {
+                        "CLIENTE"       -> NavRoutes.HOME_CLIENTE
+                        "CUIDADOR"      -> NavRoutes.HOME_CUIDADOR
+                        "ADMINISTRADOR" -> NavRoutes.HOME_ADMIN
+                        else            -> NavRoutes.HOME_CLIENTE
+                    }
+                    navController.navigate(destino) {
+                        popUpTo(NavRoutes.LOGIN) { inclusive = true }
+                    }
+                },
+                onIrARegistro = { navController.navigate(NavRoutes.SELECCION_REGISTRO) }
+            )
+        }
 
+// SELECCIÓN DE TIPO DE REGISTRO
+        composable(NavRoutes.SELECCION_REGISTRO) {
+            SeleccionRegistroScreen(
+                onIrARegistroCliente  = { navController.navigate(NavRoutes.REGISTRO_CLIENTE) },
+                onIrARegistroCuidador = { navController.navigate(NavRoutes.REGISTRO_CUIDADOR) },
+                onVolver              = { navController.popBackStack() }
+            )
+        }
+
+// REGISTRO CLIENTE
+        composable(NavRoutes.REGISTRO_CLIENTE) {
+            val viewModel: RegistroClienteViewModel = viewModel(
+                factory = object : ViewModelProvider.Factory {
+                    override fun <T : ViewModel> create(modelClass: Class<T>): T =
+                        RegistroClienteViewModel(authRepository) as T
+                }
+            )
+            RegistroClienteScreen(
+                viewModel         = viewModel,
+                onRegistroExitoso = {
+                    navController.navigate(NavRoutes.LOGIN) {
+                        popUpTo(NavRoutes.SELECCION_REGISTRO) { inclusive = true }
+                    }
+                },
+                onVolver = { navController.popBackStack() }
+            )
+        }
+
+// REGISTRO CUIDADOR
+        composable(NavRoutes.REGISTRO_CUIDADOR) {
+            val viewModel: RegistroCuidadorViewModel = viewModel(
+                factory = object : ViewModelProvider.Factory {
+                    override fun <T : ViewModel> create(modelClass: Class<T>): T =
+                        RegistroCuidadorViewModel(authRepository) as T
+                }
+            )
+            RegistroCuidadorScreen(
+                viewModel         = viewModel,
+                onRegistroExitoso = {
+                    navController.navigate(NavRoutes.LOGIN) {
+                        popUpTo(NavRoutes.SELECCION_REGISTRO) { inclusive = true }
+                    }
+                },
+                onVolver = { navController.popBackStack() }
+            )
+        }
         /* ... (MANTÉN TUS RUTAS LOGIN Y REGISTROS IGUAL QUE ANTES) ... */
 
         // =======================================================================
