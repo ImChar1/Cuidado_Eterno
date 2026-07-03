@@ -9,8 +9,8 @@ import com.cuidadoeterno.backend.shared.security.JwtUtil;
 import com.cuidadoeterno.backend.modules.usuario.service.AuthService;
 import com.cuidadoeterno.backend.shared.response.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.http.MediaType;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -133,11 +133,13 @@ public class AuthController {
     }
 
     @Operation(summary = "Registro de cuidador", 
-           description = "El cuidador se auto-registra. Queda en estado 'pendiente' hasta validación del admin.")
-    @PostMapping("/registro/cuidador")
+           description = "El cuidador se auto-registra adjuntando su documento. Queda en estado 'pendiente' hasta validación del admin.")
+    @PostMapping(value = "/registro/cuidador", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ApiResponse<Void>> registrarCuidador(
-            @Valid @RequestBody RegistroCuidadorDTO dto) {
-        authService.registrarCuidador(dto);
+            @Valid @RequestPart("datos") RegistroCuidadorDTO dto,
+            @RequestPart("documento") MultipartFile documento) { // <--- Recibe el archivo
+            
+        authService.registrarCuidador(dto, documento); // <--- Pasamos el archivo al service
         return ResponseEntity
             .status(HttpStatus.CREATED)
             .body(ApiResponse.ok("Cuidador registrado, pendiente de verificación", null));

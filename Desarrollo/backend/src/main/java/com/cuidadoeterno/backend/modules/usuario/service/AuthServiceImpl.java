@@ -11,6 +11,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
  
 import java.time.LocalDate;
  
@@ -25,10 +26,7 @@ public class AuthServiceImpl implements AuthService {
     private final CredencialRepository credencialRepository;
     private final ClienteRepository clienteRepository;
     private final CuidadorRepository cuidadorRepository;
- 
-    // CAMBIO: se eliminó HorarioRepository porque el cuidador
-    // ya no se asigna a un horario fijo al registrarse.
-    // El horario relevante es el del cementerio de cada solicitud.
+    private final S3Service s3Service;
  
     public AuthServiceImpl(
             AuthenticationManager authenticationManager,
@@ -38,7 +36,8 @@ public class AuthServiceImpl implements AuthService {
             PersonaRepository personaRepository,
             CredencialRepository credencialRepository,
             ClienteRepository clienteRepository,
-            CuidadorRepository cuidadorRepository) {
+            CuidadorRepository cuidadorRepository,
+            S3Service s3Service) {
         this.authenticationManager = authenticationManager;
         this.jwtUtil               = jwtUtil;
         this.passwordEncoder       = passwordEncoder;
@@ -47,6 +46,7 @@ public class AuthServiceImpl implements AuthService {
         this.credencialRepository  = credencialRepository;
         this.clienteRepository     = clienteRepository;
         this.cuidadorRepository    = cuidadorRepository;
+        this.s3Service = s3Service;
     }
  
     // ── LOGIN ───────────────────────────────────────────────────────────────────
@@ -122,21 +122,26 @@ public class AuthServiceImpl implements AuthService {
  
     @Override
     @Transactional
-    public void registrarCuidador(RegistroCuidadorDTO dto) {
+    public void registrarCuidador(RegistroCuidadorDTO dto, MultipartFile documento) { // <--- Modificado
         validarDuplicados(dto.rut(), dto.email(), dto.nombreUsuario());
- 
+
         Rol rol = rolRepository.findByNombreRol("CUIDADOR")
             .orElseThrow(() -> new BusinessException(
                 "Rol CUIDADOR no configurado", HttpStatus.INTERNAL_SERVER_ERROR
             ));
- 
+
+        // 1. Subir documento a S3 y obtener la URL pública
+        String urlDocumentoS3 = s3Service.subirArchivo(documento, "documentos/cuidadores/");
+
+        // 2. Crear credencial
         Credencial credencial = new Credencial();
         credencial.setNombreUsuario(dto.nombreUsuario());
         credencial.setClaveHash(passwordEncoder.encode(dto.clave()));
         credencial.setRol(rol);
         credencial.setEstadoCuenta("activa");
         credencial.setIntentosFallidos(0);
- 
+
+        // 3. Crear cuidador
         Cuidador cuidador = new Cuidador();
         cuidador.setRut(dto.rut());
         cuidador.setNombre(dto.nombre());
@@ -150,13 +155,12 @@ public class AuthServiceImpl implements AuthService {
         cuidador.setFechaIngreso(LocalDate.now());
         cuidador.setEstadoVerificacion("pendiente");
         cuidador.setEstadoDisponibilidad("disponible");
- 
- 
-        // NUEVO: documentación de certificación
-        cuidador.setUrlCertificacion(dto.urlCertificacion());
+        
+        // 4. Asignar datos de certificación y la URL de S3
+        cuidador.setUrlCertificacion(urlDocumentoS3); // <--- Usamos la URL generada
         cuidador.setTipoDocumento(dto.tipoDocumento());
         cuidador.setNumeroRegistro(dto.numeroRegistro());
- 
+
         cuidadorRepository.save(cuidador);
     }
  

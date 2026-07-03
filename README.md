@@ -319,11 +319,11 @@ Dado que el backend está en una subred privada, debes conectarte haciendo un sa
 Para que la arquitectura separada funcione correctamente, debes crear un archivo `.env` en la ruta `Cuidado_Eterno/Desarrollo/` en cada servidor según corresponda:
 
 #### 1. En el Servidor de Base de Datos (`db`)
-Este archivo configura las credenciales con las que se inicializará el contenedor de MariaDB en su propia máquina.
+Este archivo configura las credenciales exclusivas con las que se inicializará el contenedor de MariaDB en su propia máquina.
 
 ```properties
 # ==========================================
-# CONFIGURACIÓN LOCAL - SERVIDOR DE BASE DE DATOS
+# CONFIGURACIÓN - SERVIDOR DE BASE DE DATOS
 # ==========================================
 DB_NAME=cuidado_eterno
 DB_USER=ce_user
@@ -331,10 +331,10 @@ DB_PASSWORD=ce_pass
 DB_ROOT_PASSWORD=un_password_seguro_root
 
 # ==========================================
-# CONFIGURACIÓN LOCAL - SERVIDOR DE BACKEND
+# CONFIGURACIÓN - SERVIDOR DE BACKEND
 # ==========================================
 
-# Conexión Directa a la EC2 de Base de Datos
+# Conexión a la BD (Reemplaza con la IP_PRIVADA de tu servidor de BD)
 DB_URL=jdbc:mariadb://<IP_PRIVADA_EC2_BD>:3306/cuidado_eterno
 DB_USER=ce_user
 DB_PASSWORD=ce_pass
@@ -347,6 +347,10 @@ DB_ROOT_PASSWORD=un_password_seguro_root
 JWT_SECRET=tuSuperSecretoAqui32CaracteresMinimo
 JWT_EXPIRATION=86400000
 SWAGGER_ENABLED=true
+
+# Configuración de Amazon S3
+AWS_S3_REGION=us-east-1
+AWS_S3_BUCKET=cuidado-eterno-duoc-puente-bucket-s3-v2
 
 ### 6.5 Destruir la infraestructura (liberar créditos AWS Academy)
 

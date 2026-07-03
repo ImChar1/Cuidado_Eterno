@@ -87,10 +87,6 @@ public record RegistroCuidadorDTO(
 
     // ── Documentación de certificación ─────────────────────────────────────────
 
-    @NotBlank(message = "La URL de certificación es obligatoria")
-    @Size(max = 500)
-    String urlCertificacion,
-
     @NotBlank(message = "El tipo de documento es obligatorio")
     @Pattern(
         regexp = "^(cedula|certificado_municipal|registro_cementerio|otro)$",

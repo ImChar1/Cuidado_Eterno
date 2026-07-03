@@ -117,6 +117,13 @@
 			<artifactId>spring-security-test</artifactId>
 			<scope>test</scope>
 		</dependency>
+
+		<!-- ===================== Amazon AWS S3  ===================== -->
+		<dependency>
+            <groupId>software.amazon.awssdk</groupId>
+            <artifactId>s3</artifactId>
+            <version>2.25.11</version> 
+		</dependency>
  
 	</dependencies>
  

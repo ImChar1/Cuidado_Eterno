@@ -9,9 +9,13 @@ import com.cuidadoeterno.backend.shared.response.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.http.MediaType;
 
 import java.util.List;
 
@@ -60,10 +64,13 @@ public class AdminController {
         return ResponseEntity.ok(ApiResponse.ok("Datos del cuidador actualizados", null));
     }
 
-    @PostMapping("/cuidadores/soporte")
+    @PostMapping(value = "/cuidadores/soporte", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(summary = "Crear cuenta de cuidador desde soporte técnico", security = @SecurityRequirement(name = "bearerAuth"))
-    public ResponseEntity<ApiResponse<Void>> crearCuidadorSoporte(@RequestBody RegistroCuidadorDTO dto) {
-        authService.registrarCuidador(dto); // Reutiliza el registro que ya valida duplicados [source: 13]
+    public ResponseEntity<ApiResponse<Void>> crearCuidadorSoporte(
+            @Valid @RequestPart("datos") RegistroCuidadorDTO dto,
+            @RequestPart("documento") MultipartFile documento) {
+            
+        authService.registrarCuidador(dto, documento); 
         return ResponseEntity.ok(ApiResponse.ok("Cuenta de cuidador creada exitosamente por soporte", null));
     }
 }

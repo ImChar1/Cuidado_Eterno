@@ -13,9 +13,6 @@ data class RegistroCuidadorRequest(
     val genero: String,
     val nombreUsuario: String,
     val clave: String,
-    // idHorario eliminado — el cuidador ya no se asigna a un horario fijo
-    // Documentación
-    val urlCertificacion: String,
     val tipoDocumento: String,
     val numeroRegistro: String?              // nullable — es opcional
 )

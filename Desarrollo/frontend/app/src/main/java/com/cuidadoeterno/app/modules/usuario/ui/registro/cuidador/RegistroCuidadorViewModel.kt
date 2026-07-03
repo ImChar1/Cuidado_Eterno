@@ -17,7 +17,8 @@ data class RegistroCuidadorUiState(
     // Control del flujo de 2 pasos
     val pasoActual: Int = 1,             // 1 = datos personales, 2 = documentación
     // Estado de subida de documento
-    val urlDocumentoSubido: String? = null,
+    val archivoBytes: ByteArray? = null,
+    val nombreArchivo: String? = null,
     val cargandoDocumento: Boolean = false
 )
 
@@ -76,34 +77,12 @@ class RegistroCuidadorViewModel(
     }
 
     // ── Subida de documento (Paso 2) ────────────────────────────────────────────
-    fun subirDocumento(archivoBytes: ByteArray, nombreArchivo: String) {
-        viewModelScope.launch {
-            // Mostramos un loader específico para el documento
-            _uiState.value = _uiState.value.copy(
-                cargandoDocumento = true,
-                error = null
-            )
-
-            // Llamamos a tu repositorio (que internamente usará Retrofit para enviar el archivo)
-            when (val result = repository.subirArchivo(archivoBytes, nombreArchivo)) {
-                is NetworkResult.Success -> {
-                    // El backend nos devuelve la URL final del archivo en S3
-                    _uiState.value = _uiState.value.copy(
-                        urlDocumentoSubido = result.data, // ej: "https://cuidado-eterno-storage.s3.../doc.pdf"
-                        cargandoDocumento = false
-                    )
-                }
-                is NetworkResult.Error -> {
-                    _uiState.value = _uiState.value.copy(
-                        error = "Error al subir documento: ${result.message}",
-                        cargandoDocumento = false
-                    )
-                }
-                is NetworkResult.Loading -> {
-                    _uiState.value = _uiState.value.copy(cargandoDocumento = true)
-                }
-            }
-        }
+    fun setDocumentoSeleccionado(bytes: ByteArray, nombre: String) {
+        _uiState.value = _uiState.value.copy(
+            archivoBytes = bytes,
+            nombreArchivo = nombre,
+            error = null
+        )
     }
 
     // ── Registro final (Paso 2) ─────────────────────────────────────────────────
@@ -124,19 +103,16 @@ class RegistroCuidadorViewModel(
         tipoDocumento: String,
         numeroRegistro: String
     ) {
-        val urlDoc = _uiState.value.urlDocumentoSubido
+        val bytes = _uiState.value.archivoBytes
+        val nombreArc = _uiState.value.nombreArchivo
 
-        if (urlDoc.isNullOrBlank()) {
-            _uiState.value = _uiState.value.copy(
-                error = "Debes subir tu documento de certificación"
-            )
+        if (bytes == null || nombreArc == null) {
+            _uiState.value = _uiState.value.copy(error = "Debes seleccionar tu documento de certificación")
             return
         }
 
         if (tipoDocumento.isBlank()) {
-            _uiState.value = _uiState.value.copy(
-                error = "Selecciona el tipo de documento"
-            )
+            _uiState.value = _uiState.value.copy(error = "Selecciona el tipo de documento")
             return
         }
 
@@ -154,23 +130,16 @@ class RegistroCuidadorViewModel(
                 genero = genero,
                 nombreUsuario = nombreUsuario,
                 clave = clave,
-                urlCertificacion = urlDoc,
                 tipoDocumento = tipoDocumento,
                 numeroRegistro = numeroRegistro.ifBlank { null }
             )
 
-            when (val result = repository.registrarCuidador(request)) {
+            when (val result = repository.registrarCuidador(request, bytes, nombreArc)) {
                 is NetworkResult.Success -> {
-                    _uiState.value = _uiState.value.copy(
-                        isLoading = false,
-                        registroExitoso = true
-                    )
+                    _uiState.value = _uiState.value.copy(isLoading = false, registroExitoso = true)
                 }
                 is NetworkResult.Error -> {
-                    _uiState.value = _uiState.value.copy(
-                        isLoading = false,
-                        error = result.message
-                    )
+                    _uiState.value = _uiState.value.copy(isLoading = false, error = result.message)
                 }
                 is NetworkResult.Loading -> {
                     _uiState.value = _uiState.value.copy(isLoading = true)

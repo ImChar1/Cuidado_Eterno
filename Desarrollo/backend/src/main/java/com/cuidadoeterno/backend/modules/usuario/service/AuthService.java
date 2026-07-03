@@ -1,5 +1,7 @@
 package com.cuidadoeterno.backend.modules.usuario.service;
 
+import org.springframework.web.multipart.MultipartFile;
+
 import com.cuidadoeterno.backend.modules.usuario.dto.LoginRequestDTO;
 import com.cuidadoeterno.backend.modules.usuario.dto.LoginResponseDTO;
 import com.cuidadoeterno.backend.modules.usuario.dto.PerfilDTO;
@@ -30,12 +32,8 @@ public interface AuthService {
      * Registra un nuevo cuidador.
      * Público — el cuidador se auto-registra y queda en estado 'pendiente'.
      * El administrador lo verifica después con cambiarEstadoVerificacion().
-     *
-     * Ya no recibe idHorario. El cuidador declara su disponibilidad
-     * (días y rango horario) y la validación contra el horario del
-     * cementerio ocurre al momento de aceptar una solicitud.
      */
-    void registrarCuidador(RegistroCuidadorDTO dto);
+    void registrarCuidador(RegistroCuidadorDTO dto, MultipartFile documento);
 
     /**
      * Devuelve el perfil completo del usuario autenticado.

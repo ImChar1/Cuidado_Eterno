@@ -15,9 +15,11 @@ interface AuthApiService {
         @Body request: RegistroClienteRequest
     ): Response<ApiResponse<Void>>
 
+    @Multipart
     @POST("auth/registro/cuidador")
     suspend fun registrarCuidador(
-        @Body request: RegistroCuidadorRequest
+        @Part("datos") datos: okhttp3.RequestBody, // Envía el JSON del DTO
+        @Part documento: okhttp3.MultipartBody.Part // Envía el archivo binario
     ): Response<ApiResponse<Void>>
 
     @GET("auth/perfil")

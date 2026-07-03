@@ -4,6 +4,10 @@ import com.cuidadoeterno.app.core.network.NetworkResult
 import com.cuidadoeterno.app.core.session.SessionManager
 import com.cuidadoeterno.app.modules.usuario.data.model.*
 import com.cuidadoeterno.app.modules.usuario.data.remote.AuthApiService
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.MultipartBody
+import okhttp3.RequestBody.Companion.toRequestBody
+import com.google.gson.Gson
 
 class AuthRepository(
     private val api: AuthApiService,
@@ -44,9 +48,24 @@ class AuthRepository(
         }
     }
 
-    suspend fun registrarCuidador(request: RegistroCuidadorRequest): NetworkResult<Unit> {
+    suspend fun registrarCuidador(
+        request: RegistroCuidadorRequest,
+        archivoBytes: ByteArray,
+        nombreArchivo: String
+    ): NetworkResult<Unit> {
         return try {
-            val response = api.registrarCuidador(request)
+            // 1. Convertir el Request JSON a RequestBody
+            // RECUERDA: Elimina el campo "urlCertificacion" de tu RegistroCuidadorRequest local para que coincida con el backend
+            val dtoJson = Gson().toJson(request)
+            val datosBody = dtoJson.toRequestBody("application/json".toMediaTypeOrNull())
+
+            // 2. Convertir los bytes del archivo a MultipartBody.Part
+            val fileBody = archivoBytes.toRequestBody("application/pdf".toMediaTypeOrNull()) // o image/* según corresponda
+            val documentoPart = MultipartBody.Part.createFormData("documento", nombreArchivo, fileBody)
+
+            // 3. Realizar la petición
+            val response = api.registrarCuidador(datosBody, documentoPart)
+
             if (response.isSuccessful) {
                 NetworkResult.Success(Unit)
             } else {
