@@ -1,26 +1,25 @@
 package com.cuidadoeterno.app.modules.usuario.ui.registro.cuidador
 
-import androidx.compose.material3.DatePicker
-import androidx.compose.material3.DatePickerDialog
-import androidx.compose.material3.rememberDatePickerState
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
-import androidx.compose.material3.MenuAnchorType
+import android.provider.OpenableColumns
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -30,8 +29,36 @@ fun RegistroCuidadorScreen(
     onVolver: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val context = LocalContext.current
 
-    // ── Campos del Paso 1 — se mantienen en la Screen para que no se pierdan ──
+    // ── Selector de Archivos (Nativo de Android) ──
+    val filePickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri ->
+        uri?.let {
+            // Extraer el nombre real del archivo
+            var fileName = "documento_adjunto"
+            context.contentResolver.query(it, null, null, null, null)?.use { cursor ->
+                if (cursor.moveToFirst()) {
+                    val nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+                    if (nameIndex != -1) {
+                        fileName = cursor.getString(nameIndex)
+                    }
+                }
+            }
+
+            // Leer los bytes del archivo
+            val inputStream = context.contentResolver.openInputStream(it)
+            val bytes = inputStream?.readBytes()
+            inputStream?.close()
+
+            if (bytes != null) {
+                viewModel.setDocumentoSeleccionado(bytes, fileName)
+            }
+        }
+    }
+
+    // ── Campos del Paso 1 ──
     var rut by remember { mutableStateOf("") }
     var nombre by remember { mutableStateOf("") }
     var apPaterno by remember { mutableStateOf("") }
@@ -48,19 +75,18 @@ fun RegistroCuidadorScreen(
     var mostrarCalendario by remember { mutableStateOf(false) }
     val datePickerState = rememberDatePickerState()
 
-    // ── Campos del Paso 2 ───────────────────────────────────────────────────────
+    // ── Campos del Paso 2 ──
     var tipoDocumento by remember { mutableStateOf("") }
     var numeroRegistro by remember { mutableStateOf("") }
     var tipoDocumentoExpanded by remember { mutableStateOf(false) }
 
     val opcionesTipoDocumento = listOf(
-        "cedula"                to "Cédula de identidad",
+        "cedula" to "Cédula de identidad",
         "certificado_municipal" to "Certificado municipal",
-        "registro_cementerio"   to "Registro del cementerio",
-        "otro"                  to "Otro documento"
+        "registro_cementerio" to "Registro del cementerio",
+        "otro" to "Otro documento"
     )
 
-    // Género
     var generoExpanded by remember { mutableStateOf(false) }
     val opcionesGenero = listOf(
         "M" to "Masculino",
@@ -187,7 +213,7 @@ fun RegistroCuidadorScreen(
 
                 OutlinedTextField(
                     value = fechaNacimiento,
-                    onValueChange = { }, // No permite escribir manualmente
+                    onValueChange = { },
                     readOnly = true,
                     label = { Text("Fecha de nacimiento *") },
                     placeholder = { Text("YYYY-MM-DD") },
@@ -318,7 +344,6 @@ fun RegistroCuidadorScreen(
                     enabled = !uiState.isLoading
                 )
 
-
                 Spacer(modifier = Modifier.height(8.dp))
 
                 Button(
@@ -406,31 +431,27 @@ fun RegistroCuidadorScreen(
 
                 Spacer(modifier = Modifier.height(4.dp))
 
-                // Botón subir documento
-                // Por ahora simula la URL — aquí irá la integración con S3
+                // Botón subir documento (Llama al launcher nativo de Android)
                 OutlinedButton(
                     onClick = {
-                        // Placeholder: cuando integres DocumentoPickerHelper
-                        // este botón abre el selector de archivos del dispositivo
-                        // y sube el archivo a S3 obteniendo la URL real.
-                        // Por ahora simulamos con una URL de prueba:
-                        viewModel.setUrlDocumento("https://s3.amazonaws.com/doc_prueba.pdf")
+                        // Muestra el selector de archivos del teléfono. El "*/*" permite elegir imágenes y PDFs.
+                        filePickerLauncher.launch("*/*")
                     },
                     modifier = Modifier.fillMaxWidth(),
                     enabled = !uiState.isLoading
                 ) {
                     Text(
-                        if (uiState.urlDocumentoSubido != null)
+                        if (uiState.archivoBytes != null)
                             "✓ Documento cargado"
                         else
                             "Seleccionar documento"
                     )
                 }
 
-                // Indicador visual de documento cargado
-                if (uiState.urlDocumentoSubido != null) {
+                // Indicador visual del archivo seleccionado
+                if (uiState.archivoBytes != null) {
                     Text(
-                        text = "Documento listo para enviar",
+                        text = "Archivo: ${uiState.nombreArchivo}",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.primary
                     )

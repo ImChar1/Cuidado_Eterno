@@ -15,7 +15,7 @@ object ApiClient {
     // 10.0.2.2 es la IP que el emulador de Android usa para
     // apuntar al localhost de tu máquina donde corre Docker.
     // En dispositivo físico: usar la IP de tu máquina en la red local.
-    private const val BASE_URL = "http://44.192.131.115/api/v1/"
+    private const val BASE_URL = "http://3.238.41.101/api/v1/"
 
     fun createRetrofit(authInterceptor: AuthInterceptor): Retrofit {
         val okHttpClient = OkHttpClient.Builder()
