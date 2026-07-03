@@ -25,8 +25,7 @@ import java.time.LocalTime;
  *   "fechaNacimiento": "1985-03-20",
  *   "genero": "F",
  *   "nombreUsuario": "maria.lopez",
- *   "clave": "securePass99",
- *   "idHorario": 3
+ *   "clave": "securePass99"
  * }
  */
 public record RegistroCuidadorDTO(
@@ -85,20 +84,6 @@ public record RegistroCuidadorDTO(
     String clave,
 
     // ── Datos de CUIDADOR ───────────────────────────────────────────────────────
-
-    // ── Disponibilidad del cuidador ─────────────────────────────────────────────
-    // Ya no se asigna un horario fijo de cementerio.
-    // El cuidador declara en qué días puede trabajar y en qué horario.
-    // La validación contra el horario del cementerio ocurre al aceptar una solicitud.
-
-    @NotBlank(message = "Los días de disponibilidad son obligatorios")
-    String disponibilidadDias,          // "lunes,martes,miercoles"
-
-    @NotNull(message = "La hora de inicio es obligatoria")
-    LocalTime disponibilidadHoraInicio,
-
-    @NotNull(message = "La hora de fin es obligatoria")
-    LocalTime disponibilidadHoraFin,
 
     // ── Documentación de certificación ─────────────────────────────────────────
 

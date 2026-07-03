@@ -12,9 +12,6 @@ import java.time.LocalDate;
 /**
  * Tabla: CUIDADOR
  * Subtipo de PERSONA. Es el actor que ejecuta los servicios en el cementerio.
- *
- * Relaciones propias:
- * - ManyToOne → HORARIO (el horario en que está disponible para trabajar)
  */
 @Entity
 @Table(name = "cuidador")
@@ -60,12 +57,4 @@ public class Cuidador extends Persona {
     @Column(name = "numero_registro", length = 50)
     private String numeroRegistro;
 
-    @Column(name = "disponibilidad_dias", length = 100)
-    private String disponibilidadDias;
-
-    @Column(name = "disponibilidad_hora_inicio")
-    private java.time.LocalTime disponibilidadHoraInicio;
-
-    @Column(name = "disponibilidad_hora_fin")
-    private java.time.LocalTime disponibilidadHoraFin;
 }

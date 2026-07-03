@@ -199,6 +199,19 @@ resource "aws_instance" "proxy" {
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
     }
+    # NUEVO: Permitir tráfico para la interfaz gráfica de Swagger
+    location /swagger-ui/ {
+        proxy_pass http://${aws_instance.backend.private_ip}:8080/swagger-ui/;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+    }
+
+    # NUEVO: Permitir tráfico para los datos JSON de OpenAPI
+    location /v3/api-docs/ {
+        proxy_pass http://${aws_instance.backend.private_ip}:8080/v3/api-docs/;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+    }
     NYA
 
     # Reiniciar Nginx para aplicar los cambios

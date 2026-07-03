@@ -1,5 +1,11 @@
 package com.cuidadoeterno.app.modules.usuario.ui.registro.cliente
 
+import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDialog
+import androidx.compose.material3.rememberDatePickerState
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 import androidx.compose.material3.MenuAnchorType
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -50,6 +56,9 @@ fun RegistroClienteScreen(
         "F" to "Femenino",
         "O" to "Otro"
     )
+
+    var mostrarCalendario by remember { mutableStateOf(false) }
+    val datePickerState = rememberDatePickerState()
 
     val snackbarHostState = remember { SnackbarHostState() }
 
@@ -162,14 +171,47 @@ fun RegistroClienteScreen(
             // Fecha de nacimiento
             OutlinedTextField(
                 value = fechaNacimiento,
-                onValueChange = { fechaNacimiento = it },
+                onValueChange = { },
+                readOnly = true, // Evita que se escriba con el teclado
                 label = { Text("Fecha de nacimiento *") },
-                placeholder = { Text("1990-03-15") },
-                supportingText = { Text("Formato: AAAA-MM-DD") },
+                placeholder = { Text("YYYY-MM-DD") },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
-                enabled = !uiState.isLoading
+                enabled = !uiState.isLoading,
+                trailingIcon = {
+                    IconButton(onClick = { mostrarCalendario = true }) {
+                        Text("📅") // Puedes cambiarlo por un Icon() de Material si prefieres
+                    }
+                }
             )
+
+// Diálogo del Calendario
+            if (mostrarCalendario) {
+                DatePickerDialog(
+                    onDismissRequest = { mostrarCalendario = false },
+                    confirmButton = {
+                        TextButton(
+                            onClick = {
+                                mostrarCalendario = false
+                                datePickerState.selectedDateMillis?.let { millis ->
+                                    // Convierte los milisegundos al formato que tu backend necesita
+                                    val formatter = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+                                    fechaNacimiento = formatter.format(Date(millis))
+                                }
+                            }
+                        ) {
+                            Text("Aceptar")
+                        }
+                    },
+                    dismissButton = {
+                        TextButton(onClick = { mostrarCalendario = false }) {
+                            Text("Cancelar")
+                        }
+                    }
+                ) {
+                    DatePicker(state = datePickerState)
+                }
+            }
 
             // Género — menú desplegable
             ExposedDropdownMenuBox(

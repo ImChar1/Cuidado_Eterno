@@ -14,10 +14,6 @@ data class RegistroCuidadorRequest(
     val nombreUsuario: String,
     val clave: String,
     // idHorario eliminado — el cuidador ya no se asigna a un horario fijo
-    // Disponibilidad declarada por el cuidador
-    val disponibilidadDias: String,          // "lunes,martes,miercoles"
-    val disponibilidadHoraInicio: String,    // "08:00"
-    val disponibilidadHoraFin: String,       // "18:00"
     // Documentación
     val urlCertificacion: String,
     val tipoDocumento: String,

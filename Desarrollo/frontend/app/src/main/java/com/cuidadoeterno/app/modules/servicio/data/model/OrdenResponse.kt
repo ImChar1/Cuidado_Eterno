@@ -11,7 +11,7 @@ import java.time.LocalDateTime
  * - HistorialScreen: historial completo
  */
 data class OrdenResponse(
-    val idOrden: Int?,
+    val idOrden: Int,
     val idSolicitud: Int,
     val nombreServicio: String,
     val nombreCuidador: String,
@@ -19,7 +19,7 @@ data class OrdenResponse(
     val fechaCreacion: String?,
     val fechaProgramada: String?,
     val estadoOrden: String,
-    val montoTotal: BigDecimal,
+    val montoTotal: Double,
     val tieneEvidencia: Boolean,
     val tieneCalificacion: Boolean,
     val subEstadoOrden: String?

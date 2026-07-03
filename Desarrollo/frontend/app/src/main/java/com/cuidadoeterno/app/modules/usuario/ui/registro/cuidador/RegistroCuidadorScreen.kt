@@ -1,5 +1,11 @@
 package com.cuidadoeterno.app.modules.usuario.ui.registro.cuidador
 
+import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDialog
+import androidx.compose.material3.rememberDatePickerState
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 import androidx.compose.material3.MenuAnchorType
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -39,10 +45,8 @@ fun RegistroCuidadorScreen(
     var confirmarClave by remember { mutableStateOf("") }
     var mostrarClave by remember { mutableStateOf(false) }
 
-    // Disponibilidad
-    var disponibilidadDias by remember { mutableStateOf("") }
-    var disponibilidadHoraInicio by remember { mutableStateOf("") }
-    var disponibilidadHoraFin by remember { mutableStateOf("") }
+    var mostrarCalendario by remember { mutableStateOf(false) }
+    val datePickerState = rememberDatePickerState()
 
     // ── Campos del Paso 2 ───────────────────────────────────────────────────────
     var tipoDocumento by remember { mutableStateOf("") }
@@ -183,14 +187,45 @@ fun RegistroCuidadorScreen(
 
                 OutlinedTextField(
                     value = fechaNacimiento,
-                    onValueChange = { fechaNacimiento = it },
+                    onValueChange = { }, // No permite escribir manualmente
+                    readOnly = true,
                     label = { Text("Fecha de nacimiento *") },
-                    placeholder = { Text("1990-03-15") },
-                    supportingText = { Text("Formato: AAAA-MM-DD") },
+                    placeholder = { Text("YYYY-MM-DD") },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
-                    enabled = !uiState.isLoading
+                    enabled = !uiState.isLoading,
+                    trailingIcon = {
+                        IconButton(onClick = { mostrarCalendario = true }) {
+                            Text("📅")
+                        }
+                    }
                 )
+
+                if (mostrarCalendario) {
+                    DatePickerDialog(
+                        onDismissRequest = { mostrarCalendario = false },
+                        confirmButton = {
+                            TextButton(
+                                onClick = {
+                                    mostrarCalendario = false
+                                    datePickerState.selectedDateMillis?.let { millis ->
+                                        val formatter = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+                                        fechaNacimiento = formatter.format(Date(millis))
+                                    }
+                                }
+                            ) {
+                                Text("Aceptar")
+                            }
+                        },
+                        dismissButton = {
+                            TextButton(onClick = { mostrarCalendario = false }) {
+                                Text("Cancelar")
+                            }
+                        }
+                    ) {
+                        DatePicker(state = datePickerState)
+                    }
+                }
 
                 // Género
                 ExposedDropdownMenuBox(
@@ -283,48 +318,6 @@ fun RegistroCuidadorScreen(
                     enabled = !uiState.isLoading
                 )
 
-                Spacer(modifier = Modifier.height(4.dp))
-
-                Text(
-                    text = "Disponibilidad",
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.primary
-                )
-
-                OutlinedTextField(
-                    value = disponibilidadDias,
-                    onValueChange = { disponibilidadDias = it },
-                    label = { Text("Días disponibles *") },
-                    placeholder = { Text("lunes,martes,miercoles") },
-                    supportingText = { Text("Separados por coma, sin tildes") },
-                    singleLine = true,
-                    modifier = Modifier.fillMaxWidth(),
-                    enabled = !uiState.isLoading
-                )
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    OutlinedTextField(
-                        value = disponibilidadHoraInicio,
-                        onValueChange = { disponibilidadHoraInicio = it },
-                        label = { Text("Hora inicio *") },
-                        placeholder = { Text("08:00") },
-                        singleLine = true,
-                        modifier = Modifier.weight(1f),
-                        enabled = !uiState.isLoading
-                    )
-                    OutlinedTextField(
-                        value = disponibilidadHoraFin,
-                        onValueChange = { disponibilidadHoraFin = it },
-                        label = { Text("Hora fin *") },
-                        placeholder = { Text("18:00") },
-                        singleLine = true,
-                        modifier = Modifier.weight(1f),
-                        enabled = !uiState.isLoading
-                    )
-                }
 
                 Spacer(modifier = Modifier.height(8.dp))
 
@@ -333,8 +326,7 @@ fun RegistroCuidadorScreen(
                         viewModel.avanzarAPaso2(
                             rut, nombre, apPaterno, email, telefono,
                             fechaNacimiento, genero, nombreUsuario,
-                            clave, confirmarClave, disponibilidadDias,
-                            disponibilidadHoraInicio, disponibilidadHoraFin
+                            clave, confirmarClave
                         )
                     },
                     modifier = Modifier
@@ -453,9 +445,6 @@ fun RegistroCuidadorScreen(
                             rut, nombre, apPaterno, apMaterno,
                             email, telefono, fechaNacimiento, genero,
                             nombreUsuario, clave,
-                            disponibilidadDias,
-                            disponibilidadHoraInicio,
-                            disponibilidadHoraFin,
                             tipoDocumento,
                             numeroRegistro
                         )

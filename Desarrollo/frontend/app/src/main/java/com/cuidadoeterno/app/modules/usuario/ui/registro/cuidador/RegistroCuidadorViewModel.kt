@@ -40,10 +40,7 @@ class RegistroCuidadorViewModel(
         genero: String,
         nombreUsuario: String,
         clave: String,
-        confirmarClave: String,
-        disponibilidadDias: String,
-        disponibilidadHoraInicio: String,
-        disponibilidadHoraFin: String
+        confirmarClave: String
     ) {
         // Validaciones del paso 1 antes de avanzar
         if (rut.isBlank() || nombre.isBlank() || apPaterno.isBlank() ||
@@ -70,15 +67,6 @@ class RegistroCuidadorViewModel(
             return
         }
 
-        if (disponibilidadDias.isBlank() || disponibilidadHoraInicio.isBlank() ||
-            disponibilidadHoraFin.isBlank()
-        ) {
-            _uiState.value = _uiState.value.copy(
-                error = "Debes indicar tu disponibilidad horaria"
-            )
-            return
-        }
-
         // Todo ok — avanzar al paso 2
         _uiState.value = _uiState.value.copy(pasoActual = 2, error = null)
     }
@@ -88,9 +76,34 @@ class RegistroCuidadorViewModel(
     }
 
     // ── Subida de documento (Paso 2) ────────────────────────────────────────────
-    // Por ahora guarda la URL simulada — cuando integres S3 aquí va la llamada real
-    fun setUrlDocumento(url: String) {
-        _uiState.value = _uiState.value.copy(urlDocumentoSubido = url)
+    fun subirDocumento(archivoBytes: ByteArray, nombreArchivo: String) {
+        viewModelScope.launch {
+            // Mostramos un loader específico para el documento
+            _uiState.value = _uiState.value.copy(
+                cargandoDocumento = true,
+                error = null
+            )
+
+            // Llamamos a tu repositorio (que internamente usará Retrofit para enviar el archivo)
+            when (val result = repository.subirArchivo(archivoBytes, nombreArchivo)) {
+                is NetworkResult.Success -> {
+                    // El backend nos devuelve la URL final del archivo en S3
+                    _uiState.value = _uiState.value.copy(
+                        urlDocumentoSubido = result.data, // ej: "https://cuidado-eterno-storage.s3.../doc.pdf"
+                        cargandoDocumento = false
+                    )
+                }
+                is NetworkResult.Error -> {
+                    _uiState.value = _uiState.value.copy(
+                        error = "Error al subir documento: ${result.message}",
+                        cargandoDocumento = false
+                    )
+                }
+                is NetworkResult.Loading -> {
+                    _uiState.value = _uiState.value.copy(cargandoDocumento = true)
+                }
+            }
+        }
     }
 
     // ── Registro final (Paso 2) ─────────────────────────────────────────────────
@@ -107,9 +120,6 @@ class RegistroCuidadorViewModel(
         genero: String,
         nombreUsuario: String,
         clave: String,
-        disponibilidadDias: String,
-        disponibilidadHoraInicio: String,
-        disponibilidadHoraFin: String,
         // Datos del paso 2
         tipoDocumento: String,
         numeroRegistro: String
@@ -144,9 +154,6 @@ class RegistroCuidadorViewModel(
                 genero = genero,
                 nombreUsuario = nombreUsuario,
                 clave = clave,
-                disponibilidadDias = disponibilidadDias,
-                disponibilidadHoraInicio = disponibilidadHoraInicio,
-                disponibilidadHoraFin = disponibilidadHoraFin,
                 urlCertificacion = urlDoc,
                 tipoDocumento = tipoDocumento,
                 numeroRegistro = numeroRegistro.ifBlank { null }

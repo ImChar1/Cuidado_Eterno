@@ -1,3 +1,5 @@
+package com.cuidadoeterno.app.modules.servicio.ui.cliente.home
+
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cuidadoeterno.app.core.network.NetworkResult

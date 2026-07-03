@@ -1,8 +1,18 @@
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -24,6 +34,7 @@ import com.cuidadoeterno.app.modules.servicio.data.repository.ServicioRepository
 
 // Imports de UI
 import com.cuidadoeterno.app.modules.servicio.ui.cliente.home.HomeClienteScreen
+import com.cuidadoeterno.app.modules.servicio.ui.cliente.home.HomeClienteViewModel
 import com.cuidadoeterno.app.modules.servicio.ui.cliente.solicitud.DetalleSolicitudScreen
 import com.cuidadoeterno.app.modules.servicio.ui.cliente.solicitud.DetalleSolicitudViewModel
 import com.cuidadoeterno.app.modules.servicio.ui.cliente.seguimiento.CalificacionScreen
@@ -64,10 +75,36 @@ fun AppNavHost(navController: NavHostController) {
     val servicioRepository   = ServicioRepository(servicioApiService)
     val finanzasRepository   = FinanzasRepository(finanzasApiService)
 
+    // En AppNavHost, ANTES del NavHost
+    val token by sessionManager.authToken.collectAsStateWithLifecycle(initialValue = null)
+    val rol by sessionManager.rol.collectAsStateWithLifecycle(initialValue = null)
+
+// Mientras carga el DataStore no sabemos si hay sesión
+    var cargando by remember { mutableStateOf(true) }
+
+    LaunchedEffect(token) {
+        cargando = false
+    }
+
+    if (cargando) {
+        // Pantalla en blanco o splash mientras lee DataStore
+        Box(Modifier.fillMaxSize()) { CircularProgressIndicator(Modifier.align(Alignment.Center)) }
+        return
+    }
+
+// startDestination dinámico según si hay sesión
+    val startDestination = when {
+        token.isNullOrEmpty() -> NavRoutes.LOGIN
+        rol == "CLIENTE"      -> NavRoutes.HOME_CLIENTE
+        rol == "CUIDADOR"     -> NavRoutes.HOME_CUIDADOR
+        rol == "ADMINISTRADOR"-> NavRoutes.HOME_ADMIN
+        else                  -> NavRoutes.LOGIN
+    }
+
     // ── Navegación ──────────────────────────────────────────────────────────────
     NavHost(
         navController = navController,
-        startDestination = NavRoutes.LOGIN // <-- Asegúrate de que el login esté implementado arriba
+        startDestination = startDestination //
     ) {
         // LOGIN
         composable(NavRoutes.LOGIN) {

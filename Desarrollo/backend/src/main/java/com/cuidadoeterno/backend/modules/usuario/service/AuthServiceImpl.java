@@ -151,10 +151,6 @@ public class AuthServiceImpl implements AuthService {
         cuidador.setEstadoVerificacion("pendiente");
         cuidador.setEstadoDisponibilidad("disponible");
  
-        // NUEVO: disponibilidad declarada por el cuidador
-        cuidador.setDisponibilidadDias(dto.disponibilidadDias());
-        cuidador.setDisponibilidadHoraInicio(dto.disponibilidadHoraInicio());
-        cuidador.setDisponibilidadHoraFin(dto.disponibilidadHoraFin());
  
         // NUEVO: documentación de certificación
         cuidador.setUrlCertificacion(dto.urlCertificacion());

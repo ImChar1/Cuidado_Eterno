@@ -151,14 +151,10 @@ CREATE TABLE IF NOT EXISTS cliente (
  
 CREATE TABLE IF NOT EXISTS cuidador (
     id_persona                  INT UNSIGNED    NOT NULL,
-    id_horario                  INT UNSIGNED    NOT NULL,
     calificacion_promedio       DECIMAL(3,2)    NOT NULL DEFAULT 0.00,
     estado_verificacion         VARCHAR(20)     NOT NULL DEFAULT 'pendiente',
     estado_disponibilidad       VARCHAR(20)     NOT NULL DEFAULT 'disponible',
     fecha_ingreso               DATE            NOT NULL,
-    disponibilidad_dias         VARCHAR(100)    NULL,
-    disponibilidad_hora_inicio  TIME            NULL,
-    disponibilidad_hora_fin     TIME            NULL,
     url_certificacion           VARCHAR(500)    NULL,
     tipo_documento              VARCHAR(50)     NULL,
     numero_registro             VARCHAR(50)     NULL,
