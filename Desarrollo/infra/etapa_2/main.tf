@@ -122,6 +122,13 @@ resource "aws_security_group" "sg_backend" {
     security_groups = [aws_security_group.sg_proxy.id]
   }
   ingress {
+    description = "Permitir trafico publico al puerto 8080 (Spring Boot)"
+    from_port   = 8080
+    to_port     = 8080
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+  ingress {
     description     = "SSH desde Proxy (Bastion)"
     from_port       = 22
     to_port         = 22

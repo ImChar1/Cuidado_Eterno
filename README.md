@@ -299,8 +299,7 @@ Dado que el backend está en una subred privada, debes conectarte haciendo un sa
   # Ejemplo conectando a la BD:
   ssh -o ProxyCommand="ssh -W %h:%p -i C:/Ruta/A/Tu/llave.pem ec2-user@<IP_PUBLICA_PROXY>" -i C:/Ruta/A/Tu/llave.pem ec2-user@<IP_PRIVADA_BD>
 
-  ssh -o ProxyCommand="ssh -W %h:%p -i C:/Users/Krlos/Downloads/labsuser.pem ec2-user@18.215.16.75" -i C:/Users/Krlos/Downloads/labsuser.pem ec2-user@10.0.2.55
-
+  ssh -o ProxyCommand="ssh -W %h:%p -i C:/Users/Krlos/Downloads/labsuser.pem ec2-user@44.204.126.180" -i C:/Users/Krlos/Downloads/labsuser.pem ec2-user@10.0.2.27
 
   # En la EC2: clonar el repositorio
   git clone https://github.com/<usuario>/Cuidado_Eterno.git
