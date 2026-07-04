@@ -85,10 +85,10 @@ services:
       AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
       AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
 
-    #depends_on:
-      #db:
+    depends_on:
+      db:
         # El backend no arranca hasta que la BD pase el healthcheck
-        #condition: service_healthy
+        condition: service_healthy
 
     # Red explícita para que ambos servicios se comuniquen por nombre
     networks:

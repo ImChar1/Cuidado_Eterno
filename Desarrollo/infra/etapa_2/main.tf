@@ -232,6 +232,15 @@ resource "aws_instance" "backend" {
 
   user_data = <<-EOF
     #!/bin/bash
+    # --- 1. CREAR MEMORIA SWAP (1.5 GB) ---
+    echo "Configurando Memoria Swap..."
+    sudo dd if=/dev/zero of=/swapfile bs=128M count=12
+    sudo chmod 600 /swapfile
+    sudo mkswap /swapfile
+    sudo swapon /swapfile
+    # Hacer que sea permanente si la máquina se reinicia
+    echo '/swapfile swap swap defaults 0 0' | sudo tee -a /etc/fstab
+    echo "Memoria Swap lista."
     yum update -y
     yum install -y docker aws-cli git
     systemctl start docker
