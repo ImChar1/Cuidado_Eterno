@@ -3,7 +3,6 @@ package com.cuidadoeterno.backend.modules.usuario.dto;
 import jakarta.validation.constraints.*;
 
 import java.time.LocalDate;
-import java.time.LocalTime;
 
 /**
  * DTO de entrada para el endpoint POST /auth/registro/cuidador

@@ -3,22 +3,22 @@ package com.cuidadoeterno.app.modules.servicio.data.model
 import com.google.gson.annotations.SerializedName
 
 data class TipoSolicitudResponse(
-    @SerializedName("id_tipo_solicitud")
+    @SerializedName("idTipoSolicitud")
     val id: Int,
 
-    @SerializedName("nombre_servicio")
+    @SerializedName("nombreServicio")
     val nombre: String,
 
     @SerializedName("descripcion")
     val descripcion: String,
 
-    @SerializedName("precio_base")
+    @SerializedName("nombreServicio")
     val precioBase: Double,
 
     // Datos extra que te servirán para la pantalla explicativa
-    @SerializedName("duracion_estimada_min")
+    @SerializedName("duracionEstimadaMin")
     val duracionEstimadaMin: Int,
 
-    @SerializedName("requiere_insumos")
+    @SerializedName("requiereInsumos")
     val requiereInsumos: Boolean
 )

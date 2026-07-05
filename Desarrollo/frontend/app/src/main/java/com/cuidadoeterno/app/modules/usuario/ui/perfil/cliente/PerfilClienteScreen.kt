@@ -1,4 +1,4 @@
-package com.cuidadoeterno.app.modules.usuario.ui.perfil
+package com.cuidadoeterno.app.modules.usuario.ui.perfil.cliente
 
 
 import androidx.compose.foundation.layout.*

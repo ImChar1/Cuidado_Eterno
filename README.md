@@ -269,6 +269,9 @@ terraform plan
 terraform apply
 # Escribir "yes" cuando lo pida
 
+terraform state rm aws_s3_bucket_ownership_controls.evidencias_acl
+#Para errores de cache sobre los recurso s3 creado en otros intentos.
+
 ### 6.3 Etapa 2 — Instancias EC2 y S3
 
 cd ../etapa_2
@@ -299,11 +302,50 @@ Dado que el backend está en una subred privada, debes conectarte haciendo un sa
   # Ejemplo conectando a la BD:
   ssh -o ProxyCommand="ssh -W %h:%p -i C:/Ruta/A/Tu/llave.pem ec2-user@<IP_PUBLICA_PROXY>" -i C:/Ruta/A/Tu/llave.pem ec2-user@<IP_PRIVADA_BD>
 
-  ssh -o ProxyCommand="ssh -W %h:%p -i C:/Users/Krlos/Downloads/labsuser.pem ec2-user@44.204.126.180" -i C:/Users/Krlos/Downloads/labsuser.pem ec2-user@10.0.2.27
+  ssh -o ProxyCommand="ssh -W %h:%p -i C:/Users/Krlos/Downloads/labsuser.pem ec2-user@44.213.115.196" -i C:/Users/Krlos/Downloads/labsuser.pem ec2-user@10.0.2.235
 
   # En la EC2: clonar el repositorio
   git clone https://github.com/<usuario>/Cuidado_Eterno.git
   cd Cuidado_Eterno/Desarrollo
+  git checkout develop
+
+  ### 📄 Configuración de Archivos `.env`
+
+  Para que la arquitectura separada funcione correctamente, debes crear un archivo `.env` en la ruta `Cuidado_Eterno/Desarrollo/` en cada servidor según corresponda:
+
+  #### 1. En el Servidor de Base de Datos (`db`)
+  Este archivo configura las credenciales exclusivas con las que se inicializará el contenedor de MariaDB en su propia máquina.
+
+  ```properties
+  # ==========================================
+  # CONFIGURACIÓN - SERVIDOR DE BASE DE DATOS
+  # ==========================================
+  DB_NAME=cuidado_eterno
+  DB_USER=ce_user
+  DB_PASSWORD=ce_pass
+  DB_ROOT_PASSWORD=un_password_seguro_root
+
+  # ==========================================
+  # CONFIGURACIÓN - SERVIDOR DE BACKEND
+  # ==========================================
+
+  # Conexión a la BD (Reemplaza con la IP_PRIVADA de tu servidor de BD)
+  DB_URL=jdbc:mariadb://<IP_PRIVADA_EC2_BD>:3306/cuidado_eterno
+  DB_USER=ce_user
+  DB_PASSWORD=ce_pass
+
+  # Mapeo obligatorio para consistencia de Docker Compose
+  DB_NAME=cuidado_eterno
+  DB_ROOT_PASSWORD=un_password_seguro_root
+
+  # Configuración de Seguridad de la API
+  JWT_SECRET=tuSuperSecretoAqui32CaracteresMinimo
+  JWT_EXPIRATION=86400000
+  SWAGGER_ENABLED=true
+
+  # Configuración de Amazon S3
+  AWS_S3_REGION=us-east-1
+  AWS_S3_BUCKET=cuidado-eterno-duoc-puente-bucket-s3-v2
 
   nano .env
 
@@ -314,44 +356,8 @@ Dado que el backend está en una subred privada, debes conectarte haciendo un sa
   Servidor 3 (IP Privada BD) / Base de Datos MariaDB /sudo docker-compose up --build -d db
   Servidor 2 (IP Privada Backend)API / Spring Boot  /sudo docker-compose up --build -d backend
 
-
-### 📄 Configuración de Archivos `.env`
-
-Para que la arquitectura separada funcione correctamente, debes crear un archivo `.env` en la ruta `Cuidado_Eterno/Desarrollo/` en cada servidor según corresponda:
-
-#### 1. En el Servidor de Base de Datos (`db`)
-Este archivo configura las credenciales exclusivas con las que se inicializará el contenedor de MariaDB en su propia máquina.
-
-```properties
-# ==========================================
-# CONFIGURACIÓN - SERVIDOR DE BASE DE DATOS
-# ==========================================
-DB_NAME=cuidado_eterno
-DB_USER=ce_user
-DB_PASSWORD=ce_pass
-DB_ROOT_PASSWORD=un_password_seguro_root
-
-# ==========================================
-# CONFIGURACIÓN - SERVIDOR DE BACKEND
-# ==========================================
-
-# Conexión a la BD (Reemplaza con la IP_PRIVADA de tu servidor de BD)
-DB_URL=jdbc:mariadb://<IP_PRIVADA_EC2_BD>:3306/cuidado_eterno
-DB_USER=ce_user
-DB_PASSWORD=ce_pass
-
-# Mapeo obligatorio para consistencia de Docker Compose
-DB_NAME=cuidado_eterno
-DB_ROOT_PASSWORD=un_password_seguro_root
-
-# Configuración de Seguridad de la API
-JWT_SECRET=tuSuperSecretoAqui32CaracteresMinimo
-JWT_EXPIRATION=86400000
-SWAGGER_ENABLED=true
-
-# Configuración de Amazon S3
-AWS_S3_REGION=us-east-1
-AWS_S3_BUCKET=cuidado-eterno-duoc-puente-bucket-s3-v2
+ssh -i "ruta/a/tu-llave.pem" ec2-user@<TU_IP_PUBLICA_O_DOMINIO> #Para entrar
+#a la instancia del proxy y ver errores.*/
 
 ### 6.5 Destruir la infraestructura (liberar créditos AWS Academy)
 

@@ -101,4 +101,11 @@ class RegistroClienteViewModel(
     fun clearError() {
         _uiState.value = _uiState.value.copy(error = null)
     }
+    fun formatearRutParaBackend(rutIngresado: String): String {
+        val limpio = rutIngresado.replace(".", "").replace("-", "").trim()
+        if (limpio.length < 2) return limpio
+        val cuerpo = limpio.substring(0, limpio.length - 1)
+        val dv = limpio.substring(limpio.length - 1).uppercase()
+        return "$cuerpo-$dv"
+    }
 }

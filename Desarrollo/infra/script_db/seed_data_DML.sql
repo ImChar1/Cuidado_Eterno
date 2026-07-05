@@ -94,11 +94,9 @@ INSERT INTO tipo_espacio (nombre_tipo, descripcion, nivel_complejidad) VALUES
 --    precio_base en CLP, duracion_estimada_min en minutos
 -- ============================================================
 INSERT INTO tipo_solicitud (nombre_servicio, descripcion, precio_base, duracion_estimada_min, requiere_insumos, estado_sv) VALUES
-    ('Limpieza básica',       'Limpieza superficial del espacio: retiro de polvo y desechos',        15000.00,  45, 1, 1),
-    ('Limpieza profunda',     'Limpieza completa con productos especializados y cepillado',           28000.00,  90, 1, 1),
-    ('Ofrenda floral',        'Colocación de arreglo floral fresco en el espacio indicado',           12000.00,  20, 1, 1),
-    ('Pintura y restauración','Repintado de lápida o nicho con pintura resistente a la intemperie',   45000.00, 120, 1, 1),
-    ('Fotografía de estado',  'Registro fotográfico del estado actual del espacio sin intervención',   8000.00,  15, 0, 1);
+    ('Mantenimiento', 'Limpieza general, retiro de escombros y reparaciones menores del espacio', 25000.00, 60, 1, 1),
+    ('Jardinería', 'Corte de pasto, poda de arbustos, riego y cuidado de plantas en la sepultura', 18000.00, 45, 1, 1),
+    ('Ornato y Conmemoración', 'Limpieza profunda, pulido de lápidas y colocación de arreglos florales', 35000.00, 90, 1, 1);
 
 -- ============================================================
 -- 9. TIPO_PAGO (sin dependencias)

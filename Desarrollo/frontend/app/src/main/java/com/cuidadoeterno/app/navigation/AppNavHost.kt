@@ -1,3 +1,5 @@
+package com.cuidadoeterno.app.navigation
+
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.CircularProgressIndicator
@@ -32,7 +34,7 @@ import com.cuidadoeterno.app.modules.finanzas.ui.pago.ConfirmacionPagoScreen
 import com.cuidadoeterno.app.modules.servicio.data.remote.ServicioApiService
 import com.cuidadoeterno.app.modules.servicio.data.repository.ServicioRepository
 
-// Imports de UI
+// Imports de UI (Asegúrate de importar tus nuevas pantallas y ViewModels)
 import com.cuidadoeterno.app.modules.servicio.ui.cliente.home.HomeClienteScreen
 import com.cuidadoeterno.app.modules.servicio.ui.cliente.home.HomeClienteViewModel
 import com.cuidadoeterno.app.modules.servicio.ui.cliente.solicitud.DetalleSolicitudScreen
@@ -43,6 +45,13 @@ import com.cuidadoeterno.app.modules.servicio.ui.cuidador.billetera.BilleteraScr
 import com.cuidadoeterno.app.modules.servicio.ui.cuidador.billetera.BilleteraViewModel
 import com.cuidadoeterno.app.modules.servicio.ui.cuidador.detalle.DetalleOrdenCuidadorScreen
 import com.cuidadoeterno.app.modules.servicio.ui.cuidador.detalle.DetalleOrdenCuidadorViewModel
+import com.cuidadoeterno.app.modules.informacion.ui.NosotrosScreen
+import com.cuidadoeterno.app.modules.informacion.ui.FaqScreen // <-- IMPORT NUEVO
+import com.cuidadoeterno.app.modules.servicio.ui.cliente.servicios.ServiciosScreen // <-- IMPORT NUEVO
+import com.cuidadoeterno.app.modules.servicio.ui.cliente.servicios.ServiciosViewModel // <-- IMPORT NUEVO
+import com.cuidadoeterno.app.modules.servicio.ui.cliente.flow.SolicitudFlowViewModel // <-- IMPORT NUEVO
+import com.cuidadoeterno.app.modules.servicio.ui.cliente.solicitud.DatosEspacioScreen
+import com.cuidadoeterno.app.modules.servicio.ui.cliente.solicitud.DatosEspacioViewModel
 
 import com.cuidadoeterno.app.modules.usuario.data.remote.AuthApiService
 import com.cuidadoeterno.app.modules.usuario.data.repository.AuthRepository
@@ -79,7 +88,7 @@ fun AppNavHost(navController: NavHostController) {
     val token by sessionManager.authToken.collectAsStateWithLifecycle(initialValue = null)
     val rol by sessionManager.rol.collectAsStateWithLifecycle(initialValue = null)
 
-// Mientras carga el DataStore no sabemos si hay sesión
+    // Mientras carga el DataStore no sabemos si hay sesión
     var cargando by remember { mutableStateOf(true) }
 
     LaunchedEffect(token) {
@@ -92,7 +101,7 @@ fun AppNavHost(navController: NavHostController) {
         return
     }
 
-// startDestination dinámico según si hay sesión
+    // startDestination dinámico según si hay sesión
     val startDestination = when {
         token.isNullOrEmpty() -> NavRoutes.LOGIN
         rol == "CLIENTE"      -> NavRoutes.HOME_CLIENTE
@@ -104,7 +113,7 @@ fun AppNavHost(navController: NavHostController) {
     // ── Navegación ──────────────────────────────────────────────────────────────
     NavHost(
         navController = navController,
-        startDestination = startDestination //
+        startDestination = startDestination
     ) {
         // LOGIN
         composable(NavRoutes.LOGIN) {
@@ -131,7 +140,7 @@ fun AppNavHost(navController: NavHostController) {
             )
         }
 
-// SELECCIÓN DE TIPO DE REGISTRO
+        // SELECCIÓN DE TIPO DE REGISTRO
         composable(NavRoutes.SELECCION_REGISTRO) {
             SeleccionRegistroScreen(
                 onIrARegistroCliente  = { navController.navigate(NavRoutes.REGISTRO_CLIENTE) },
@@ -140,7 +149,7 @@ fun AppNavHost(navController: NavHostController) {
             )
         }
 
-// REGISTRO CLIENTE
+        // REGISTRO CLIENTE
         composable(NavRoutes.REGISTRO_CLIENTE) {
             val viewModel: RegistroClienteViewModel = viewModel(
                 factory = object : ViewModelProvider.Factory {
@@ -159,7 +168,7 @@ fun AppNavHost(navController: NavHostController) {
             )
         }
 
-// REGISTRO CUIDADOR
+        // REGISTRO CUIDADOR
         composable(NavRoutes.REGISTRO_CUIDADOR) {
             val viewModel: RegistroCuidadorViewModel = viewModel(
                 factory = object : ViewModelProvider.Factory {
@@ -177,7 +186,6 @@ fun AppNavHost(navController: NavHostController) {
                 onVolver = { navController.popBackStack() }
             )
         }
-        /* ... (MANTÉN TUS RUTAS LOGIN Y REGISTROS IGUAL QUE ANTES) ... */
 
         // =======================================================================
         // ── HOME CLIENTE ───────────────────────────────────────────────────────
@@ -186,22 +194,35 @@ fun AppNavHost(navController: NavHostController) {
             val viewModel: HomeClienteViewModel = viewModel(
                 factory = object : ViewModelProvider.Factory {
                     override fun <T : ViewModel> create(modelClass: Class<T>): T =
-                        HomeClienteViewModel(servicioRepository, sessionManager) as T
+                        HomeClienteViewModel(sessionManager) as T
                 }
             )
 
             HomeClienteScreen(
                 viewModel = viewModel,
-                onNuevaSolicitud = { navController.navigate(NavRoutes.FLUJO_SOLICITUD) },
-                onVerDetalleSolicitud = { idOrden ->
-                    // <-- AHORA VA AL SEGUIMIENTO EN VIVO
-                    navController.navigate(NavRoutes.detalleSolicitud(idOrden))
-                },
+                onServiciosClick = { navController.navigate(NavRoutes.FLUJO_SOLICITUD) },
+                onNosotrosClick = { navController.navigate("nosotros") },
+                onFaqClick = { navController.navigate("faq") }, // <-- AHORA SÍ NAVEGA A FAQ
                 onVerHistorial   = { navController.navigate(NavRoutes.HISTORIAL_CLIENTE) },
-                onVerPerfil      = { navController.navigate(NavRoutes.PERFIL) },
+                onVerPerfil      = { navController.navigate(NavRoutes.PERFIL_CLIENTE) },
                 onCerrarSesion   = {
                     navController.navigate(NavRoutes.LOGIN) { popUpTo(0) { inclusive = true } }
                 }
+            )
+        }
+
+        // =======================================================================
+        // ── INFORMACIÓN: NOSOTROS Y PREGUNTAS FRECUENTES ───────────────────────
+        // =======================================================================
+        composable("nosotros") {
+            NosotrosScreen(
+                onVolver = { navController.popBackStack() }
+            )
+        }
+
+        composable("faq") { // <-- PANTALLA FAQ AGREGADA
+            FaqScreen(
+                onVolver = { navController.popBackStack() }
             )
         }
 
@@ -249,7 +270,6 @@ fun AppNavHost(navController: NavHostController) {
                 viewModel = viewModel,
                 onVolver = { navController.popBackStack() },
                 onCalificacionExitosa = {
-                    // Al terminar de calificar, limpiamos la pila y volvemos al Home
                     navController.navigate(NavRoutes.HOME_CLIENTE) {
                         popUpTo(0) { inclusive = true }
                     }
@@ -267,9 +287,6 @@ fun AppNavHost(navController: NavHostController) {
                         DetalleOrdenCuidadorViewModel(servicioRepository, sessionManager) as T
                 }
             )
-            // Nota: Aquí, el viewModel.inicializarOrden() debería ser llamado
-            // desde la pantalla anterior (Ej: HomeCuidador) pasando los datos por un ViewModel compartido,
-            // o puedes modificar el ViewModel para que busque la orden por ID.
 
             DetalleOrdenCuidadorScreen(
                 viewModel = viewModel,
@@ -298,7 +315,68 @@ fun AppNavHost(navController: NavHostController) {
             startDestination = NavRoutes.STEP_SERVICIOS,
             route = NavRoutes.FLUJO_SOLICITUD
         ) {
-            // ... (MANTÉN TUS PASOS 1, 2, 3 y 4 COMENTADOS COMO LOS TENÍAS) ...
+            // PASO 1: SELECCIÓN DEL SERVICIO
+            composable(NavRoutes.STEP_SERVICIOS) { backStackEntry ->
+                // Este truco permite que el SolicitudFlowViewModel viva durante todo el grafo anidado
+                val parentEntry = remember(backStackEntry) {
+                    navController.getBackStackEntry(NavRoutes.FLUJO_SOLICITUD)
+                }
+                val flowViewModel: SolicitudFlowViewModel = viewModel(
+                    viewModelStoreOwner = parentEntry,
+                    factory = object : ViewModelProvider.Factory {
+                        override fun <T : ViewModel> create(modelClass: Class<T>): T =
+                            SolicitudFlowViewModel(servicioRepository) as T
+                    }
+                )
+
+                val serviciosViewModel: ServiciosViewModel = viewModel(
+                    factory = object : ViewModelProvider.Factory {
+                        override fun <T : ViewModel> create(modelClass: Class<T>): T =
+                            ServiciosViewModel(servicioRepository) as T
+                    }
+                )
+
+                ServiciosScreen(
+                    viewModel = serviciosViewModel,
+                    flowViewModel = flowViewModel,
+                    onBack = { navController.popBackStack() },
+                    onSiguiente = {
+                        navController.navigate(NavRoutes.STEP_DATOS_ESPACIO)
+                    }
+                )
+            }
+
+            // PASO 2: UBICACIÓN DE LA SEPULTURA (La del 3er wireframe, la agregaremos luego)
+            composable(NavRoutes.STEP_DATOS_ESPACIO) { backStackEntry ->
+                val parentEntry = remember(backStackEntry) {
+                    navController.getBackStackEntry(NavRoutes.FLUJO_SOLICITUD)
+                }
+
+                // Recuperamos el MISMO viewModel compartido del Paso 1
+                val flowViewModel: SolicitudFlowViewModel = viewModel(
+                    viewModelStoreOwner = parentEntry,
+                    factory = object : ViewModelProvider.Factory {
+                        override fun <T : ViewModel> create(modelClass: Class<T>): T =
+                            SolicitudFlowViewModel(servicioRepository) as T
+                    }
+                )
+
+                val datosEspacioViewModel: DatosEspacioViewModel = viewModel(
+                    factory = object : ViewModelProvider.Factory {
+                        override fun <T : ViewModel> create(modelClass: Class<T>): T =
+                            DatosEspacioViewModel(servicioRepository) as T
+                    }
+                )
+
+                DatosEspacioScreen(
+                    viewModel = datosEspacioViewModel,
+                    flowViewModel = flowViewModel,
+                    onBack = { navController.popBackStack() },
+                    onSiguiente = {
+                        // navController.navigate(NavRoutes.STEP_CATALOGO) // El paso 3 que harás después
+                    }
+                )
+            }
         }
 
         // ── Historiales (Implementación Futura) ────────────────────────────────

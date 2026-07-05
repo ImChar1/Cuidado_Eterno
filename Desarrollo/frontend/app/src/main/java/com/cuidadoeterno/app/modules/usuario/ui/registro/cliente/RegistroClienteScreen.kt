@@ -25,6 +25,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.ui.focus.onFocusChanged
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -109,9 +110,17 @@ fun RegistroClienteScreen(
                 value = rut,
                 onValueChange = { rut = it },
                 label = { Text("RUT *") },
-                placeholder = { Text("12345678-9") },
+                placeholder = { Text("12345678-9 (Guión Obligatorio)") },
                 singleLine = true,
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .onFocusChanged { focusState ->
+                        // Si el usuario deja de hacer click en el campo y no está vacío
+                        if (!focusState.isFocused && rut.isNotEmpty()) {
+                            // Cambiamos el valor local limpiándolo con la función del ViewModel
+                            rut = viewModel.formatearRutParaBackend(rut)
+                        }
+                    },
                 enabled = !uiState.isLoading
             )
 

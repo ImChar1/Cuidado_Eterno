@@ -116,6 +116,13 @@ class RegistroCuidadorViewModel(
             return
         }
 
+        val tipoDocumentoBackend = when (tipoDocumento) {
+            "Cédula de Identidad" -> "cedula"
+            "Certificado Municipal" -> "certificado_municipal"
+            "Registro de Cementerio" -> "registro_cementerio"
+            else -> "otro" // Si no calza, enviamos "otro" o puedes manejar el error.
+        }
+
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoading = true, error = null)
 
@@ -130,7 +137,7 @@ class RegistroCuidadorViewModel(
                 genero = genero,
                 nombreUsuario = nombreUsuario,
                 clave = clave,
-                tipoDocumento = tipoDocumento,
+                tipoDocumento = tipoDocumentoBackend,
                 numeroRegistro = numeroRegistro.ifBlank { null }
             )
 
@@ -150,5 +157,13 @@ class RegistroCuidadorViewModel(
 
     fun clearError() {
         _uiState.value = _uiState.value.copy(error = null)
+    }
+
+    fun formatearRutParaBackend(rutIngresado: String): String {
+        val limpio = rutIngresado.replace(".", "").replace("-", "").trim()
+        if (limpio.length < 2) return limpio
+        val cuerpo = limpio.substring(0, limpio.length - 1)
+        val dv = limpio.substring(limpio.length - 1).uppercase()
+        return "$cuerpo-$dv"
     }
 }

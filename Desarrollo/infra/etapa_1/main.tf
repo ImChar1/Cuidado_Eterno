@@ -19,7 +19,7 @@ resource "aws_ecr_repository" "backend" {
 
 # S3: Bucket para almacenar las fotos de evidencias
 resource "aws_s3_bucket" "evidencias" {
-  bucket        = "cuidado-eterno-duoc-puente-bucket-s3-v4"
+  bucket        = "cuidado-eterno-duoc-puente-bucket-s3-v2"
   force_destroy = true
 }
 

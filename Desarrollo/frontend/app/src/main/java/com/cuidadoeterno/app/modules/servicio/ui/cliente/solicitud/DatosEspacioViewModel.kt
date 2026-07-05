@@ -2,15 +2,17 @@ package com.cuidadoeterno.app.modules.servicio.ui.cliente.solicitud
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.cuidadoeterno.app.core.network.NetworkResult
+import com.cuidadoeterno.app.modules.servicio.data.model.ElementoDropdown
 import com.cuidadoeterno.app.modules.servicio.data.repository.ServicioRepository
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-// DTOs internos ultra-limpios para los Dropdowns
-data class ElementoDropdown(val id: Int, val nombre: String)
 
+// Eliminamos ubicacionSugerida de aquí
 data class DatosEspacioUiState(
     val isLoading: Boolean = false,
     val cementerios: List<ElementoDropdown> = emptyList(),
@@ -26,30 +28,37 @@ class DatosEspacioViewModel(
     val uiState: StateFlow<DatosEspacioUiState> = _uiState.asStateFlow()
 
     init {
-        cargarCatalogosGeograficos()
+        cargarDatosIniciales()
     }
 
-    private fun cargarCatalogosGeograficos() {
+    fun cargarDatosIniciales() {
         viewModelScope.launch {
-            _uiState.value = DatosEspacioUiState(isLoading = true)
+            _uiState.value = _uiState.value.copy(isLoading = true, error = null)
 
-            // Simulación de la llamada concurrente a tus futuros endpoints de catálogo
-            // repository.obtenerCementerios() y repository.obtenerTiposEspacio()
+            val cementeriosDef = async { repository.obtenerCementerios() }
+            val tiposEspacioDef = async { repository.obtenerTiposEspacio() }
 
-            val listaCementeriosMock = listOf(
-                ElementoDropdown(1, "Cementerio General de Santiago"),
-                ElementoDropdown(2, "Cementerio Municipal de Concepción")
-            )
-            val listaTiposMock = listOf(
-                ElementoDropdown(1, "Mausoleo Monumental"),
-                ElementoDropdown(2, "Nicho en Pabellón"),
-                ElementoDropdown(3, "Sepultura en Tierra")
-            )
+            val resCementerios = cementeriosDef.await()
+            val resTiposEspacio = tiposEspacioDef.await()
 
+            if (resCementerios is NetworkResult.Error || resTiposEspacio is NetworkResult.Error) {
+                val errorMsg = (resCementerios as? NetworkResult.Error)?.message
+                    ?: (resTiposEspacio as? NetworkResult.Error)?.message
+                    ?: "Error al cargar los catálogos del servidor"
+
+                _uiState.value = _uiState.value.copy(isLoading = false, error = errorMsg)
+                return@launch
+            }
+
+            val listaCementerios = (resCementerios as? NetworkResult.Success)?.data ?: emptyList()
+            val listaTipos = (resTiposEspacio as? NetworkResult.Success)?.data ?: emptyList()
+
+            // Estado limpio y directo
             _uiState.value = DatosEspacioUiState(
                 isLoading = false,
-                cementerios = listaCementeriosMock,
-                tiposEspacio = listaTiposMock
+                cementerios = listaCementerios,
+                tiposEspacio = listaTipos,
+                error = null
             )
         }
     }

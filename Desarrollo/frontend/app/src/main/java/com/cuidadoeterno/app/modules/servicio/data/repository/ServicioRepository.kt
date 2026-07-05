@@ -169,4 +169,30 @@ class ServicioRepository(
             NetworkResult.Error("Sin conexión al servidor: ${e.message}")
         }
     }
+
+    suspend fun obtenerCementerios(): NetworkResult<List<ElementoDropdown>> {
+        return try {
+            val response = api.obtenerCementerios()
+            if (response.isSuccessful) {
+                NetworkResult.Success(response.body()?.data ?: emptyList())
+            } else {
+                NetworkResult.Error("Error al cargar cementerios")
+            }
+        } catch (e: Exception) {
+            NetworkResult.Error("Sin conexión: ${e.message}")
+        }
+    }
+
+    suspend fun obtenerTiposEspacio(): NetworkResult<List<ElementoDropdown>> {
+        return try {
+            val response = api.obtenerTiposEspacio()
+            if (response.isSuccessful) {
+                NetworkResult.Success(response.body()?.data ?: emptyList())
+            } else {
+                NetworkResult.Error("Error al cargar tipos de espacio")
+            }
+        } catch (e: Exception) {
+            NetworkResult.Error("Sin conexión: ${e.message}")
+        }
+    }
 }

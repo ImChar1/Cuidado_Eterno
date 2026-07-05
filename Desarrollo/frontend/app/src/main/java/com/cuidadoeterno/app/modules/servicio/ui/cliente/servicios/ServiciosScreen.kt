@@ -31,9 +31,6 @@ fun ServiciosScreen(
                 title = { Text("Servicios", modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center) },
                 navigationIcon = {
                     IconButton(onClick = onBack) { Text("←", style = MaterialTheme.typography.titleLarge) }
-                },
-                actions = {
-                    IconButton(onClick = { /* Menú hamburguesa */ }) { Text("≡", style = MaterialTheme.typography.titleLarge) }
                 }
             )
         }
@@ -55,6 +52,24 @@ fun ServiciosScreen(
             if (uiState.isLoading) {
                 Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) {
                     CircularProgressIndicator()
+                }
+            } else if (uiState.error != null) {
+                // 🛑 AQUÍ ESTÁ EL GRITO
+                Column(
+                    modifier = Modifier.weight(1f).fillMaxWidth(),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text("🚨 Ocurrió un error:", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.error)
+                    Text("${uiState.error}", textAlign = TextAlign.Center, modifier = Modifier.padding(16.dp))
+                    Button(onClick = { viewModel.cargarTiposDeServicio() }) {
+                        Text("Reintentar")
+                    }
+                }
+            } else if (uiState.tiposServicio.isEmpty()) {
+                // 📭 POR SI LA BASE DE DATOS ESTÁ VACÍA
+                Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) {
+                    Text("No hay servicios disponibles en este momento.")
                 }
             } else {
                 LazyColumn(

@@ -111,4 +111,10 @@ interface ServicioApiService {
     suspend fun finalizarServicio(
         @Path("idOrden") idOrden: Int
     ): Response<ApiResponse<OrdenResponse>>
+
+    @GET("cementerios")
+    suspend fun obtenerCementerios(): Response<ApiResponse<List<ElementoDropdown>>>
+
+    @GET("tipos-espacio")
+    suspend fun obtenerTiposEspacio(): Response<ApiResponse<List<ElementoDropdown>>>
 }

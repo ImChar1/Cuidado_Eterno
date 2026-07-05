@@ -20,6 +20,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import androidx.compose.ui.focus.onFocusChanged
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -159,7 +160,14 @@ fun RegistroCuidadorScreen(
                     label = { Text("RUT *") },
                     placeholder = { Text("12345678-9") },
                     singleLine = true,
-                    modifier = Modifier.fillMaxWidth(),
+                    // 👇 EL MODIFICADOR MÁGICO 👇
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .onFocusChanged { focusState ->
+                            if (!focusState.isFocused && rut.isNotEmpty()) {
+                                rut = viewModel.formatearRutParaBackend(rut)
+                            }
+                        },
                     enabled = !uiState.isLoading
                 )
 

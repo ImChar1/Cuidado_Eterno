@@ -11,8 +11,11 @@ object NavRoutes {
     const val HOME_CUIDADOR       = "home_cuidador"
     const val HOME_ADMIN          = "home_admin"
 
-    // ── Perfil (compartido entre roles) ────────────────────────────────────────
-    const val PERFIL              = "perfil"
+    // ── Perfil (cliente) ────────────────────────────────────────
+    const val PERFIL_CLIENTE              = "perfil_cliente"
+
+    const val NOSOTROS = "nosotros"
+    const val FAQ = "faq"
 
     // ── Módulo Servicio — Grafo Anidado (Wizard de 4 pasos) ────────────────────
     const val FLUJO_SOLICITUD     = "flujo_solicitud"
