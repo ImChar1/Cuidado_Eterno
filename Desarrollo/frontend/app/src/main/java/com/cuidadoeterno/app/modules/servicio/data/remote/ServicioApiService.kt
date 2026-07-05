@@ -115,6 +115,6 @@ interface ServicioApiService {
     @GET("cementerios")
     suspend fun obtenerCementerios(): Response<ApiResponse<List<ElementoDropdown>>>
 
-    @GET("tipos-espacio")
+    @GET("cementerios/tipos-espacio")
     suspend fun obtenerTiposEspacio(): Response<ApiResponse<List<ElementoDropdown>>>
 }

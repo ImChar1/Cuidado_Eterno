@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import com.cuidadoeterno.backend.shared.response.ApiResponse;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -51,18 +52,18 @@ public class CementerioController {
     }
 
     @GetMapping("/tipos-espacio")
-    public ResponseEntity<List<CatalogDTO>> listarTiposEspacio() {
+    public ResponseEntity<ApiResponse<List<CatalogDTO>>> listarTiposEspacio() {
         List<CatalogDTO> dtos = cementerioService.obtenerTiposDeEspacio().stream()
                 .map(t -> new CatalogDTO(t.getIdTipoEspacio(), t.getNombreTipo()))
                 .collect(Collectors.toList());
-        return ResponseEntity.ok(dtos);
+        return ResponseEntity.ok(ApiResponse.ok("Tipos de Espacios obtenidos con éxito", dtos));
     }
 
     // ============================================================
     // ENDPOINTS DE BÚSQUEDA Y CEMENTERIOS
     // ============================================================
     @GetMapping
-    public ResponseEntity<List<CementerioResponseDTO>> listarTodos() {
+    public ResponseEntity<ApiResponse<List<CementerioResponseDTO>>> listarTodos() {
         List<CementerioResponseDTO> dtos = cementerioService.obtenerTodosCementerios()
             .stream()
             .map(c -> new CementerioResponseDTO(
@@ -71,7 +72,7 @@ public class CementerioController {
                 c.getDireccion(),
                 c.getComuna().getNombreComuna()
             )).collect(Collectors.toList());
-        return ResponseEntity.ok(dtos);
+        return ResponseEntity.ok(ApiResponse.ok("Cementerios obtenidos con éxito", dtos));
     }
 
     @GetMapping("/buscar")
