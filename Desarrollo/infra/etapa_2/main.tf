@@ -199,6 +199,7 @@ resource "aws_instance" "proxy" {
     # Aqui luego se configura el proxy_pass apuntando a la IP privada del Backend
     # Crear la configuración de Nginx apuntando dinámicamente al Backend
     cat << 'NYA' > /etc/nginx/default.d/backend_proxy.conf
+    client_max_body_size 15M;
     location /api/v1 {
         proxy_pass http://${aws_instance.backend.private_ip}:8080;
         proxy_set_header Host $host;
@@ -220,6 +221,8 @@ resource "aws_instance" "proxy" {
         proxy_set_header X-Real-IP $remote_addr;
     }
     NYA
+    # Asegurar permisos correctos sobre el directorio de Nginx
+    chown -R nginx:nginx /var/lib/nginx
 
     # Reiniciar Nginx para aplicar los cambios
     systemctl restart nginx

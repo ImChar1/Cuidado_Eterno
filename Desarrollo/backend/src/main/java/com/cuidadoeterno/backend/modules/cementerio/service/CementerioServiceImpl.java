@@ -58,6 +58,6 @@ public class CementerioServiceImpl implements CementerioService {
     @Override
     @Transactional(readOnly = true)
     public List<Cementerio> obtenerTodosCementerios() {
-        return cementerioRepository.findAll();
+        return cementerioRepository.findAllConComuna();
     }
 }

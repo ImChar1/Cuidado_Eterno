@@ -11,7 +11,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-
 // Eliminamos ubicacionSugerida de aquí
 data class DatosEspacioUiState(
     val isLoading: Boolean = false,
@@ -50,10 +49,11 @@ class DatosEspacioViewModel(
                 return@launch
             }
 
+            // 1. Extraemos las listas (Ya vienen como ElementoDropdown desde el Repository)
             val listaCementerios = (resCementerios as? NetworkResult.Success)?.data ?: emptyList()
             val listaTipos = (resTiposEspacio as? NetworkResult.Success)?.data ?: emptyList()
 
-            // Estado limpio y directo
+            // 2. Actualizamos el estado limpio y directo
             _uiState.value = DatosEspacioUiState(
                 isLoading = false,
                 cementerios = listaCementerios,
@@ -62,4 +62,6 @@ class DatosEspacioViewModel(
             )
         }
     }
+
+    private fun Any.map(function: Any) {}
 }

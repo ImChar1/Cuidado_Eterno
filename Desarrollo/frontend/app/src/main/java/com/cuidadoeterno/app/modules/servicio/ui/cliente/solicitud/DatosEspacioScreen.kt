@@ -12,6 +12,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.cuidadoeterno.app.modules.servicio.data.model.ElementoDropdown
 import com.cuidadoeterno.app.modules.servicio.ui.cliente.flow.SolicitudFlowViewModel
+import com.cuidadoeterno.app.modules.servicio.ui.cliente.solicitud.DatosEspacioViewModel
 import com.cuidadoeterno.app.modules.servicio.ui.shared.StepperSolicitud
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -41,14 +42,27 @@ fun DatosEspacioScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Ubicación", modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center) },
-                navigationIcon = { IconButton(onClick = onBack) { Text("←", style = MaterialTheme.typography.titleLarge) } }
+                title = {
+                    Text(
+                        text = "Ubicación",
+                        modifier = Modifier.fillMaxWidth(),
+                        textAlign = TextAlign.Center
+                    )
+                },
+                navigationIcon = {
+                    IconButton(onClick = onBack) {
+                        Text("←", style = MaterialTheme.typography.titleLarge)
+                    }
+                }
             )
         }
     ) { paddingValues ->
 
-        Box(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
-
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+        ) {
             // ── MANEJO DE ESTADOS DE CARGA Y ERROR ────────────────────────────────
             if (uiState.isLoading) {
                 CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
@@ -57,11 +71,21 @@ fun DatosEspacioScreen(
 
             if (uiState.error != null) {
                 Column(
-                    modifier = Modifier.align(Alignment.Center).padding(16.dp),
+                    modifier = Modifier
+                        .align(Alignment.Center)
+                        .padding(16.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Text("🚨 Ocurrió un error:", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.error)
-                    Text("${uiState.error}", textAlign = TextAlign.Center, modifier = Modifier.padding(16.dp))
+                    Text(
+                        text = "🚨 Ocurrió un error:",
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.error
+                    )
+                    Text(
+                        text = "${uiState.error}",
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.padding(16.dp)
+                    )
                     Button(onClick = { viewModel.cargarDatosIniciales() }) {
                         Text("Reintentar")
                     }
@@ -78,76 +102,170 @@ fun DatosEspacioScreen(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Spacer(modifier = Modifier.height(8.dp))
+
+                // Stepper Visual
                 StepperSolicitud(pasoActual = 2)
+
                 Spacer(modifier = Modifier.height(16.dp))
 
-                Text("Ingresa los datos de ubicación en terreno", style = MaterialTheme.typography.titleMedium)
+                Text(
+                    text = "Ingresa los datos de ubicación en terreno",
+                    style = MaterialTheme.typography.titleMedium
+                )
+
                 Spacer(modifier = Modifier.height(16.dp))
-
-
 
                 // ── CAMPOS DE TEXTO NORMALES ──
-                OutlinedTextField(value = nombresDifunto, onValueChange = { nombresDifunto = it }, label = { Text("Nombres del difunto *") }, modifier = Modifier.fillMaxWidth())
+                OutlinedTextField(
+                    value = nombresDifunto,
+                    onValueChange = { nombresDifunto = it },
+                    label = { Text("Nombres del difunto *") },
+                    modifier = Modifier.fillMaxWidth()
+                )
+
                 Spacer(modifier = Modifier.height(8.dp))
-                OutlinedTextField(value = apellidosDifunto, onValueChange = { apellidosDifunto = it }, label = { Text("Apellidos del difunto *") }, modifier = Modifier.fillMaxWidth())
+
+                OutlinedTextField(
+                    value = apellidosDifunto,
+                    onValueChange = { apellidosDifunto = it },
+                    label = { Text("Apellidos del difunto *") },
+                    modifier = Modifier.fillMaxWidth()
+                )
+
                 Spacer(modifier = Modifier.height(12.dp))
 
-                // Dropdown Cementerio
+                // ── DROPDOWN CEMENTERIO ──
                 var expandidoCem by remember { mutableStateOf(false) }
-                ExposedDropdownMenuBox(expanded = expandidoCem, onExpandedChange = { expandidoCem = it }) {
+                ExposedDropdownMenuBox(
+                    expanded = expandidoCem,
+                    onExpandedChange = { expandidoCem = it }
+                ) {
                     OutlinedTextField(
                         value = cementerioSeleccionado?.nombre ?: "Seleccione el cementerio *",
-                        onValueChange = {}, readOnly = true,
+                        onValueChange = {},
+                        readOnly = true,
                         trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandidoCem) },
-                        modifier = Modifier.menuAnchor().fillMaxWidth()
+                        modifier = Modifier
+                            .menuAnchor()
+                            .fillMaxWidth()
                     )
-                    ExposedDropdownMenu(expanded = expandidoCem, onDismissRequest = { expandidoCem = false }) {
+                    ExposedDropdownMenu(
+                        expanded = expandidoCem,
+                        onDismissRequest = { expandidoCem = false }
+                    ) {
                         uiState.cementerios.forEach { c ->
-                            DropdownMenuItem(text = { Text(c.nombre) }, onClick = { cementerioSeleccionado = c; expandidoCem = false })
+                            DropdownMenuItem(
+                                text = { Text(c.nombre) },
+                                onClick = {
+                                    cementerioSeleccionado = c
+                                    expandidoCem = false
+                                }
+                            )
                         }
                     }
                 }
+
                 Spacer(modifier = Modifier.height(12.dp))
 
-                // Dropdown Tipo Espacio
+                // ── DROPDOWN TIPO ESPACIO ──
                 var expandidoTipo by remember { mutableStateOf(false) }
-                ExposedDropdownMenuBox(expanded = expandidoTipo, onExpandedChange = { expandidoTipo = it }) {
+                ExposedDropdownMenuBox(
+                    expanded = expandidoTipo,
+                    onExpandedChange = { expandidoTipo = it }
+                ) {
                     OutlinedTextField(
                         value = tipoEspacioSeleccionado?.nombre ?: "Seleccione el tipo de construcción *",
-                        onValueChange = {}, readOnly = true,
+                        onValueChange = {},
+                        readOnly = true,
                         trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandidoTipo) },
-                        modifier = Modifier.menuAnchor().fillMaxWidth()
+                        modifier = Modifier
+                            .menuAnchor()
+                            .fillMaxWidth()
                     )
-                    ExposedDropdownMenu(expanded = expandidoTipo, onDismissRequest = { expandidoTipo = false }) {
+                    ExposedDropdownMenu(
+                        expanded = expandidoTipo,
+                        onDismissRequest = { expandidoTipo = false }
+                    ) {
                         uiState.tiposEspacio.forEach { t ->
-                            DropdownMenuItem(text = { Text(t.nombre) }, onClick = { tipoEspacioSeleccionado = t; expandidoTipo = false })
+                            DropdownMenuItem(
+                                text = { Text(t.nombre) },
+                                onClick = {
+                                    tipoEspacioSeleccionado = t
+                                    expandidoTipo = false
+                                }
+                            )
                         }
                     }
                 }
+
                 Spacer(modifier = Modifier.height(12.dp))
 
-                OutlinedTextField(value = sectorPatio, onValueChange = { sectorPatio = it }, label = { Text("Patio principal / Sector *") }, modifier = Modifier.fillMaxWidth())
-                Spacer(modifier = Modifier.height(8.dp))
-                OutlinedTextField(value = pabellonCalle, onValueChange = { pabellonCalle = it }, label = { Text("Pabellón o Calle de la sepultura") }, modifier = Modifier.fillMaxWidth())
+                OutlinedTextField(
+                    value = sectorPatio,
+                    onValueChange = { sectorPatio = it },
+                    label = { Text("Patio principal / Sector *") },
+                    modifier = Modifier.fillMaxWidth()
+                )
+
                 Spacer(modifier = Modifier.height(8.dp))
 
-                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    OutlinedTextField(value = pisoNivel, onValueChange = { pisoNivel = it }, label = { Text("Piso/Nivel") }, modifier = Modifier.weight(1f))
-                    OutlinedTextField(value = pasillo, onValueChange = { pasillo = it }, label = { Text("Pasillo") }, modifier = Modifier.weight(1f))
+                OutlinedTextField(
+                    value = pabellonCalle,
+                    onValueChange = { pabellonCalle = it },
+                    label = { Text("Pabellón o Calle de la sepultura") },
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    OutlinedTextField(
+                        value = pisoNivel,
+                        onValueChange = { pisoNivel = it },
+                        label = { Text("Piso/Nivel") },
+                        modifier = Modifier.weight(1f)
+                    )
+                    OutlinedTextField(
+                        value = pasillo,
+                        onValueChange = { pasillo = it },
+                        label = { Text("Pasillo") },
+                        modifier = Modifier.weight(1f)
+                    )
                 }
-                Spacer(modifier = Modifier.height(8.dp))
-                OutlinedTextField(value = numEspacio, onValueChange = { numEspacio = it }, label = { Text("Número de Sepultura/Nicho *") }, modifier = Modifier.fillMaxWidth())
 
+                Spacer(modifier = Modifier.height(8.dp))
+
+                OutlinedTextField(
+                    value = numEspacio,
+                    onValueChange = { numEspacio = it },
+                    label = { Text("Número de Sepultura/Nicho *") },
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                // ── MENSAJE DE ERROR DE VALIDACIÓN ──
                 errorValidacion?.let {
                     Spacer(modifier = Modifier.height(8.dp))
-                    Text(it, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
+                    Text(
+                        text = it,
+                        color = MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.bodySmall
+                    )
                 }
 
                 Spacer(modifier = Modifier.height(24.dp))
 
+                // ── BOTÓN SIGUIENTE ──
                 Button(
                     onClick = {
-                        if (nombresDifunto.isBlank() || apellidosDifunto.isBlank() || cementerioSeleccionado == null || sectorPatio.isBlank() || numEspacio.isBlank()) {
+                        if (nombresDifunto.isBlank() ||
+                            apellidosDifunto.isBlank() ||
+                            cementerioSeleccionado == null ||
+                            sectorPatio.isBlank() ||
+                            numEspacio.isBlank()
+                        ) {
                             errorValidacion = "Por favor completa todos los campos obligatorios (*)"
                         } else {
                             errorValidacion = null
@@ -161,10 +279,13 @@ fun DatosEspacioScreen(
                             onSiguiente()
                         }
                     },
-                    modifier = Modifier.fillMaxWidth().height(56.dp)
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(56.dp)
                 ) {
                     Text("Siguiente", style = MaterialTheme.typography.titleMedium)
                 }
+
                 Spacer(modifier = Modifier.height(32.dp))
             }
         }

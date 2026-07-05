@@ -173,10 +173,13 @@ class ServicioRepository(
     suspend fun obtenerCementerios(): NetworkResult<List<ElementoDropdown>> {
         return try {
             val response = api.obtenerCementerios()
-            if (response.isSuccessful) {
-                NetworkResult.Success(response.body()?.data ?: emptyList())
+            if (response.isSuccessful && response.body() != null) {
+                // ── AQUÍ HACEMOS EL MAPEO (De Backend a UI) ──
+                val listaLista = response.body()!!.data ?: emptyList()
+
+                NetworkResult.Success(listaLista)
             } else {
-                NetworkResult.Error("Error al cargar cementerios")
+                NetworkResult.Error(response.body()?.message ?: "Error al cargar cementerios")
             }
         } catch (e: Exception) {
             NetworkResult.Error("Sin conexión: ${e.message}")
