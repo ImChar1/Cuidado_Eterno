@@ -25,10 +25,13 @@ import java.util.List;
 public class OrdenController {
  
     private final OrdenService ordenService;
-    private final CatalogoService catalogoService;
  
     // ── CLIENTE ─────────────────────────────────────────────────────────────────
- 
+    @GetMapping("tipos-solicitud")
+    public ResponseEntity<ApiResponse<List<TipoSolicitudResponseDTO>>> obtenerTiposSolicitud() {
+        List<TipoSolicitudResponseDTO> tipos = ordenService.obtenerTodosLosTipos();
+        return ResponseEntity.ok(ApiResponse.ok("Tipos de solicitud obtenidos", tipos));
+    }
     /**
      * POST /api/v1/ordenes
      *
