@@ -199,43 +199,44 @@ public class AuthServiceImpl implements AuthService {
     // ── Métodos privados ────────────────────────────────────────────────────────
  
     private PerfilDTO construirPerfil(Persona persona, Credencial credencial) {
-        String rol = credencial.getRol().getNombreRol();
- 
-        PerfilDTO.Builder builder = PerfilDTO.builder()
-            .idPersona(persona.getIdPersona())
-            .nombre(persona.getNombre())
-            .apPaterno(persona.getApPaterno())
-            .apMaterno(persona.getApMaterno())
-            .email(persona.getEmail())
-            .telefono(persona.getTelefono())
-            .fechaNacimiento(persona.getFechaNacimiento())
-            .genero(persona.getGenero())
-            .rol(rol)
-            .nombreUsuario(credencial.getNombreUsuario())
-            .estadoCuenta(credencial.getEstadoCuenta());
- 
-        if (persona instanceof Cliente c) {
-            builder
-                .fechaRegistro(c.getFechaRegistro())
-                .prefNotificacion(c.getPrefNotificacion())
-                .estadoCliente(c.getEstadoCliente());
- 
-        } else if (persona instanceof Cuidador c) {
-            builder
-                .calificacionPromedio(c.getCalificacionPromedio())
-                .estadoVerificacion(c.getEstadoVerificacion())
-                .estadoDisponibilidad(c.getEstadoDisponibilidad())
-                .fechaIngresoCuidador(c.getFechaIngreso());
- 
-        } else if (persona instanceof Administrador a) {
-            builder
-                .nivelAcceso(a.getNivelAcceso())
-                .cargo(a.getCargo())
-                .fechaIngresoAdmin(a.getFechaIngreso());
-        }
- 
-        return builder.build();
+    String rol = credencial.getRol().getNombreRol();
+
+    // Inicializamos el Builder manual de tu PerfilDTO
+    PerfilDTO.PerfilDTOBuilder builder = PerfilDTO.builder()
+        .idPersona(persona.getIdPersona())
+        .nombre(persona.getNombre())
+        .apPaterno(persona.getApPaterno())
+        .apMaterno(persona.getApMaterno())
+        .email(persona.getEmail())
+        .telefono(persona.getTelefono())
+        .fechaNacimiento(persona.getFechaNacimiento())
+        .genero(persona.getGenero())
+        .rol(rol)
+        .nombreUsuario(credencial.getNombreUsuario())
+        .estadoCuenta(credencial.getEstadoCuenta());
+
+    if (persona instanceof Cliente c) {
+        builder
+            .fechaRegistro(c.getFechaRegistro())
+            .prefNotificacion(c.getPrefNotificacion())
+            .estadoCliente(c.getEstadoCliente());
+
+    } else if (persona instanceof Cuidador c) {
+        builder
+            .calificacionPromedio(c.getCalificacionPromedio())
+            .estadoVerificacion(c.getEstadoVerificacion())
+            .estadoDisponibilidad(c.getEstadoDisponibilidad())
+            .fechaIngresoCuidador(c.getFechaIngreso());
+
+    } else if (persona instanceof Administrador a) {
+        builder
+            .nivelAcceso(a.getNivelAcceso())
+            .cargo(a.getCargo())
+            .fechaIngresoAdmin(a.getFechaIngreso());
     }
+
+    return builder.build();
+}
  
     private void validarDuplicados(String rut, String email, String nombreUsuario) {
         if (personaRepository.existsByRut(rut)) {

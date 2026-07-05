@@ -12,7 +12,7 @@ data class TipoSolicitudResponse(
     @SerializedName("descripcion")
     val descripcion: String,
 
-    @SerializedName("nombreServicio")
+    @SerializedName("precioBase")
     val precioBase: Double,
 
     // Datos extra que te servirán para la pantalla explicativa

@@ -12,7 +12,7 @@ object NavRoutes {
     const val HOME_ADMIN          = "home_admin"
 
     // ── Perfil (cliente) ────────────────────────────────────────
-    const val PERFIL_CLIENTE              = "perfil_cliente"
+    const val PERFIL              = "perfil"
 
     const val NOSOTROS = "nosotros"
     const val FAQ = "faq"

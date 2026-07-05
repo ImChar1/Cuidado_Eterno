@@ -25,6 +25,7 @@ import java.util.List;
 public class OrdenController {
  
     private final OrdenService ordenService;
+    private final CatalogoService catalogoService;
  
     // ── CLIENTE ─────────────────────────────────────────────────────────────────
  

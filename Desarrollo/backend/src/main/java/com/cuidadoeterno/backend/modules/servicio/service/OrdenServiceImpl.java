@@ -39,6 +39,7 @@ public class OrdenServiceImpl implements OrdenService {
     private final EspacioService espacioService;
     private final PuestoVentaRepository puestoVentaRepository;
     private final BilleteraService billeteraService;
+    
 
     // ── CLIENTE: crea la solicitud ──────────────────────────────────────────────
 
@@ -142,6 +143,22 @@ public class OrdenServiceImpl implements OrdenService {
         solicitudRepository.save(solicitud);
 
         return orden;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<TipoSolicitudResponseDTO> obtenerTodosLosTipos() {
+        // Obtenemos todas las entidades de la BD y las transformamos a DTO
+        return tipoSolicitudRepository.findAll().stream()
+                .map(tipo -> new TipoSolicitudResponseDTO(
+                        tipo.getIdTipoSolicitud(),
+                        tipo.getNombreServicio(),
+                        tipo.getDescripcion(),
+                        tipo.getPrecioBase(),
+                        tipo.getDuracionEstimadaMin(),
+                        tipo.isRequiereInsumos()
+                ))
+                .collect(Collectors.toList());
     }
 
     // ── LECTURAS Y LISTADOS ─────────────────────────────────────────────────────

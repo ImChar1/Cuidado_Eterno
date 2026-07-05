@@ -11,10 +11,10 @@ interface ServicioApiService {
     // ── CLIENTE ─────────────────────────────────────────────────────────────────
 
     /**
-     * GET /api/v1/tipos-solicitud
+     * GET /api/v1/ordenes/tipos-solicitud
      * Obtiene el catálogo de tipos de servicio disponibles.
      */
-    @GET("tipos-solicitud")
+    @GET("ordenes/tipos-solicitud")
     suspend fun obtenerTiposSolicitud(): Response<ApiResponse<List<TipoSolicitudResponse>>>
     /**
      * POST /api/v1/ordenes

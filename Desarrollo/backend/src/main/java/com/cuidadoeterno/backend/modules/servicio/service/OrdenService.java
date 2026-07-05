@@ -18,4 +18,5 @@ public interface OrdenService {
     List<OrdenResponseDTO> obtenerHistorialCuidador(Integer idCuidador);
     DetalleOrden finalizarServicioCuidador(Integer idOrden);
     DetalleOrden actualizarSubEstado(Integer idOrden, Integer idCuidador, SubEstadoOrden nuevoSubEstado);
+    List<TipoSolicitudResponseDTO> obtenerTodosLosTipos();
 }

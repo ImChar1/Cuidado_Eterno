@@ -57,6 +57,8 @@ import com.cuidadoeterno.app.modules.usuario.data.remote.AuthApiService
 import com.cuidadoeterno.app.modules.usuario.data.repository.AuthRepository
 import com.cuidadoeterno.app.modules.usuario.ui.login.LoginScreen
 import com.cuidadoeterno.app.modules.usuario.ui.login.LoginViewModel
+import com.cuidadoeterno.app.modules.usuario.ui.perfil.cliente.PerfilScreen
+import com.cuidadoeterno.app.modules.usuario.ui.perfil.cliente.PerfilViewModel
 import com.cuidadoeterno.app.modules.usuario.ui.registro.SeleccionRegistroScreen
 import com.cuidadoeterno.app.modules.usuario.ui.registro.cliente.RegistroClienteScreen
 import com.cuidadoeterno.app.modules.usuario.ui.registro.cliente.RegistroClienteViewModel
@@ -204,7 +206,7 @@ fun AppNavHost(navController: NavHostController) {
                 onNosotrosClick = { navController.navigate("nosotros") },
                 onFaqClick = { navController.navigate("faq") }, // <-- AHORA SÍ NAVEGA A FAQ
                 onVerHistorial   = { navController.navigate(NavRoutes.HISTORIAL_CLIENTE) },
-                onVerPerfil      = { navController.navigate(NavRoutes.PERFIL_CLIENTE) },
+                onVerPerfil      = { navController.navigate(NavRoutes.PERFIL) },
                 onCerrarSesion   = {
                     navController.navigate(NavRoutes.LOGIN) { popUpTo(0) { inclusive = true } }
                 }
@@ -382,5 +384,30 @@ fun AppNavHost(navController: NavHostController) {
         // ── Historiales (Implementación Futura) ────────────────────────────────
         composable(NavRoutes.HISTORIAL_CLIENTE) { }
         composable(NavRoutes.HISTORIAL_CUIDADOR) { }
+
+        // =======================================================================
+        // ── PERFIL DE USUARIO ──────────────────────────────────────────────────
+        // =======================================================================
+        composable(NavRoutes.PERFIL) {
+            val viewModel: PerfilViewModel = viewModel(
+                factory = object : ViewModelProvider.Factory {
+                    override fun <T : ViewModel> create(modelClass: Class<T>): T =
+                        // Solo pasamos el authRepository, eliminamos el sessionManager
+                        PerfilViewModel(authRepository) as T
+                }
+            )
+
+            PerfilScreen(
+                viewModel = viewModel,
+                // Usamos el nombre exacto del parámetro que definiste: onLogout
+                onLogout = {
+                    navController.navigate(NavRoutes.LOGIN) {
+                        popUpTo(0) { inclusive = true }
+                    }
+                }
+            )
+        }
     }
+
+
 }

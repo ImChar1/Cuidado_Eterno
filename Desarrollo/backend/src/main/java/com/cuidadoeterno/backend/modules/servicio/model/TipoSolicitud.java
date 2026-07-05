@@ -1,5 +1,7 @@
 package com.cuidadoeterno.backend.modules.servicio.model;
 
+import java.math.BigDecimal;
+
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -22,6 +24,9 @@ public class TipoSolicitud {
 
     @Column(name = "descripcion", length = 255)
     private String descripcion;
+
+    @Column(name = "precio_base", precision = 10, scale = 2)
+    private BigDecimal precioBase;
 
     @Column(name = "duracion_estimada_min", nullable = false)
     private Short duracionEstimadaMin;

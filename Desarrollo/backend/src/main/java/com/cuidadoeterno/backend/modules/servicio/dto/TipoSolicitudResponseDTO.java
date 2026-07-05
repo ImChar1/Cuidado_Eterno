@@ -10,11 +10,11 @@ import lombok.Setter;
 @AllArgsConstructor
 public class TipoSolicitudResponseDTO {
     
-    private Long idTipoSolicitud;
+    private Integer idTipoSolicitud;
     private String nombreServicio;
     private String descripcion;
     private BigDecimal precioBase;
-    private Integer duracionEstimadaMin;
+    private Short duracionEstimadaMin;
     private Boolean requiereInsumos;
 
 }
