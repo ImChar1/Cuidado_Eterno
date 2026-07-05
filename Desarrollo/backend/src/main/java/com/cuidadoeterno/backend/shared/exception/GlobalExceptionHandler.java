@@ -23,14 +23,6 @@ import java.util.stream.Collectors;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<ApiResponse<String>> atraparErrores(Exception ex) {
-        // Esto captura CUALQUIER error 500 y te lo devuelve como texto en el JSON
-        ex.printStackTrace(); // Lo imprime en consola
-        return ResponseEntity
-                .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(ApiResponse.error("Error interno del servidor: " + ex.getMessage()));
-    }
     /**
      * Errores de validación de DTOs (@Valid en el controller).
      * Spring lanza esto cuando @NotBlank, @Pattern, @Size, etc. fallan.
