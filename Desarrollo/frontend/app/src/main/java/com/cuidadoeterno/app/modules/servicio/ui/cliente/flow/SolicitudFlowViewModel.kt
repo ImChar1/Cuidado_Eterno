@@ -47,21 +47,6 @@ class SolicitudFlowViewModel(
         }
     }
 
-    // Paso 3: Catálogo de insumos
-    fun agregarInsumo(insumo: InsumoSeleccionado) {
-        _draft.update { actual ->
-            val lista = actual.productosAdicionales.toMutableList().apply { add(insumo) }
-            actual.copy(productosAdicionales = lista).apply { actualizarTotales() }
-        }
-    }
-
-    fun quitarInsumo(idProducto: Int) {
-        _draft.update { actual ->
-            val lista = actual.productosAdicionales.filterNot { it.idProducto == idProducto }
-            actual.copy(productosAdicionales = lista).apply { actualizarTotales() }
-        }
-    }
-
     fun calcularTotal(): Double {
         _draft.value.actualizarTotales()
         return _draft.value.montoTotal
@@ -123,5 +108,84 @@ class SolicitudFlowViewModel(
             }
         }
 
+    }
+
+    // =======================================================================
+    // ── GESTIÓN DEL CATÁLOGO DE PRODUCTOS (CARRITO) ────────────────────────
+    // =======================================================================
+
+    /**
+     * Agrega un nuevo producto o incrementa su cantidad si ya está en la lista.
+     */
+    fun agregarInsumo(nuevoInsumo: InsumoSeleccionado) {
+        val currentDraft = _draft.value
+        val listaActual = currentDraft.productosAdicionales.toMutableList()
+
+        val index = listaActual.indexOfFirst { it.idProducto == nuevoInsumo.idProducto }
+
+        if (index != -1) {
+            // El producto ya está en el carrito, incrementamos su cantidad
+            val itemExistente = listaActual[index]
+            listaActual[index] = itemExistente.copy(
+                cantidad = itemExistente.cantidad + 1,
+                // Sumamos el precio unitario (que viene en nuevoInsumo.montoTotal) al total del item
+                montoTotal = itemExistente.montoTotal + nuevoInsumo.montoTotal
+            )
+        } else {
+            // Es un producto nuevo, lo agregamos a la lista
+            listaActual.add(nuevoInsumo)
+        }
+
+        // Recalculamos el total a pagar por los insumos
+        val nuevoMontoTotal = listaActual.sumOf { it.montoTotal }
+
+        _draft.value = currentDraft.copy(
+            productosAdicionales = listaActual,
+            montoInsumos = nuevoMontoTotal
+        )
+    }
+
+    /**
+     * Disminuye la cantidad de un producto. Si llega a 0, lo elimina del carrito.
+     */
+    fun removerInsumo(idProducto: Int, precioUnitario: Double) {
+        val currentDraft = _draft.value
+        val listaActual = currentDraft.productosAdicionales.toMutableList()
+
+        val index = listaActual.indexOfFirst { it.idProducto == idProducto }
+
+        if (index != -1) {
+            val itemExistente = listaActual[index]
+
+            if (itemExistente.cantidad > 1) {
+                // Restamos 1 a la cantidad y descontamos el precio unitario
+                listaActual[index] = itemExistente.copy(
+                    cantidad = itemExistente.cantidad - 1,
+                    montoTotal = itemExistente.montoTotal - precioUnitario
+                )
+            } else {
+                // Si solo quedaba 1, eliminamos el producto de la lista
+                listaActual.removeAt(index)
+            }
+
+            // Recalculamos el total
+            val nuevoMontoTotal = listaActual.sumOf { it.montoTotal }
+
+            _draft.value = currentDraft.copy(
+                productosAdicionales = listaActual,
+                montoInsumos = nuevoMontoTotal
+            )
+        }
+    }
+
+    /**
+     * Limpia completamente la selección de productos.
+     * Útil si el cliente retrocede y decide presionar "No".
+     */
+    fun limpiarInsumos() {
+        _draft.value = _draft.value.copy(
+            productosAdicionales = emptyList(),
+            montoInsumos = 0.0
+        )
     }
 }

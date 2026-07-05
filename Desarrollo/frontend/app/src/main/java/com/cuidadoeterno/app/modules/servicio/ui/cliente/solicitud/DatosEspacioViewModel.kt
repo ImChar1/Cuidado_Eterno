@@ -49,6 +49,7 @@ class DatosEspacioViewModel(
                 return@launch
             }
 
+
             // 1. Extraemos las listas (Ya vienen como ElementoDropdown desde el Repository)
             val listaCementerios = (resCementerios as? NetworkResult.Success)?.data ?: emptyList()
             val listaTipos = (resTiposEspacio as? NetworkResult.Success)?.data ?: emptyList()

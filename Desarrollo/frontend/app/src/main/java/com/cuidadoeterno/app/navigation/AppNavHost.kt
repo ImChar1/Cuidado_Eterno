@@ -47,11 +47,20 @@ import com.cuidadoeterno.app.modules.servicio.ui.cuidador.detalle.DetalleOrdenCu
 import com.cuidadoeterno.app.modules.servicio.ui.cuidador.detalle.DetalleOrdenCuidadorViewModel
 import com.cuidadoeterno.app.modules.informacion.ui.NosotrosScreen
 import com.cuidadoeterno.app.modules.informacion.ui.FaqScreen // <-- IMPORT NUEVO
+import com.cuidadoeterno.app.modules.servicio.data.remote.InventarioApiService
+import com.cuidadoeterno.app.modules.servicio.data.repository.InventarioRepository
+import com.cuidadoeterno.app.modules.servicio.ui.cliente.catalogo.CatalogoProductoScreen
+import com.cuidadoeterno.app.modules.servicio.ui.cliente.catalogo.CatalogoProductoViewModel
+import com.cuidadoeterno.app.modules.servicio.ui.cliente.catalogo.CatalogoViewModelFactory
+import com.cuidadoeterno.app.modules.servicio.ui.cliente.catalogo.ResumenCarritoScreen
 import com.cuidadoeterno.app.modules.servicio.ui.cliente.servicios.ServiciosScreen // <-- IMPORT NUEVO
 import com.cuidadoeterno.app.modules.servicio.ui.cliente.servicios.ServiciosViewModel // <-- IMPORT NUEVO
 import com.cuidadoeterno.app.modules.servicio.ui.cliente.flow.SolicitudFlowViewModel // <-- IMPORT NUEVO
 import com.cuidadoeterno.app.modules.servicio.ui.cliente.solicitud.DatosEspacioScreen
 import com.cuidadoeterno.app.modules.servicio.ui.cliente.solicitud.DatosEspacioViewModel
+import com.cuidadoeterno.app.modules.servicio.ui.cliente.solicitud.PreguntaProductosScreen
+import com.cuidadoeterno.app.modules.servicio.ui.cuidador.home.HomeCuidadorScreen
+import com.cuidadoeterno.app.modules.servicio.ui.cuidador.home.HomeCuidadorViewModel
 
 import com.cuidadoeterno.app.modules.usuario.data.remote.AuthApiService
 import com.cuidadoeterno.app.modules.usuario.data.repository.AuthRepository
@@ -209,6 +218,41 @@ fun AppNavHost(navController: NavHostController) {
                 onVerPerfil      = { navController.navigate(NavRoutes.PERFIL) },
                 onCerrarSesion   = {
                     navController.navigate(NavRoutes.LOGIN) { popUpTo(0) { inclusive = true } }
+                }
+            )
+        }
+
+        // =======================================================================
+        // ── HOME CUIDADOR ──────────────────────────────────────────────────────
+        // =======================================================================
+        composable(NavRoutes.HOME_CUIDADOR) {
+            val viewModel: HomeCuidadorViewModel = viewModel(
+                factory = object : ViewModelProvider.Factory {
+                    override fun <T : ViewModel> create(modelClass: Class<T>): T =
+                        HomeCuidadorViewModel(
+                            servicioRepository = servicioRepository,
+                            cementerioRepository = cementerioRepository,
+                            sessionManager = sessionManager
+                        ) as T
+                }
+            )
+
+            HomeCuidadorScreen(
+                viewModel = viewModel,
+                onVerHistorial = {
+                    navController.navigate(NavRoutes.HISTORIAL_CUIDADOR)
+                },
+                onVerPagos = {
+                    navController.navigate(NavRoutes.BILLETERA_CUIDADOR)
+                },
+                onVerPerfil = {
+                    // Asegúrate de que esta ruta coincida con la que usas en tu app para el perfil
+                    navController.navigate(NavRoutes.PERFIL)
+                },
+                onCerrarSesion = {
+                    navController.navigate(NavRoutes.LOGIN) {
+                        popUpTo(0) { inclusive = true }
+                    }
                 }
             )
         }
@@ -375,10 +419,81 @@ fun AppNavHost(navController: NavHostController) {
                     flowViewModel = flowViewModel,
                     onBack = { navController.popBackStack() },
                     onSiguiente = {
-                        // navController.navigate(NavRoutes.STEP_CATALOGO) // El paso 3 que harás después
+                        navController.navigate(NavRoutes.STEP_PREGUNTA_PRODUCTOS)
                     }
                 )
             }
+        }
+
+        // INTERSTICIAL DE PREGUNTA
+        composable(NavRoutes.STEP_PREGUNTA_PRODUCTOS) { backStackEntry ->
+            // Recuperamos el FlowViewModel compartido
+            val parentEntry = remember(backStackEntry) {
+                navController.getBackStackEntry(NavRoutes.FLUJO_SOLICITUD)
+            }
+            val flowViewModel: SolicitudFlowViewModel = viewModel(viewModelStoreOwner = parentEntry)
+
+            PreguntaProductosScreen(
+                onSi = {
+                    navController.navigate(NavRoutes.STEP_CATALOGO)
+                },
+                onNo = {
+                    // LIMPIEZA CLAVE: Si dice que no, aseguramos que el carrito quede vacío
+                    flowViewModel.limpiarInsumos()
+                    // Si dice que NO, vamos directo al detalle final del flujo
+                    // (Asegúrate de que STEP_RESUMEN o similar sea tu pantalla de confirmación final)
+                    navController.navigate(NavRoutes.STEP_RESUMEN)
+                },
+                onBack = { navController.popBackStack() }
+            )
+        }
+
+        // PASO 3: CATÁLOGO DE PRODUCTOS
+        composable(NavRoutes.STEP_CATALOGO) { backStackEntry ->
+            val parentEntry = remember(backStackEntry) {
+                navController.getBackStackEntry(NavRoutes.FLUJO_SOLICITUD)
+            }
+            val flowViewModel: SolicitudFlowViewModel = viewModel(viewModelStoreOwner = parentEntry)
+
+            // 2. Preparamos Retrofit usando TU ApiClient
+            // NOTA: Asegúrate de instanciar o traer tu AuthInterceptor como lo hagas normalmente en tu app
+            // (Ejemplo: val authInterceptor = AuthInterceptor(tokenManager))
+            val retrofit = ApiClient.createRetrofit(authInterceptor)
+
+            // 3. Creamos el servicio específico del inventario
+            val inventarioApi = retrofit.create(InventarioApiService::class.java)
+
+            // 4. Instanciamos el ViewModel inyectando la API real
+            val catalogoViewModel: CatalogoProductoViewModel = viewModel(
+                factory = CatalogoViewModelFactory(InventarioRepository(inventarioApi))
+            )
+
+            CatalogoProductoScreen(
+                viewModel = catalogoViewModel,
+                flowViewModel = flowViewModel,
+                onBack = { navController.popBackStack() },
+                onVerCarrito = {
+                    // El usuario tocó el botón inferior "Ver Carrito (x)"
+                    navController.navigate(NavRoutes.STEP_CARRITO)
+                }
+            )
+        }
+
+        // PASO INTERMEDIO: REVISIÓN DEL CARRITO
+        composable(NavRoutes.STEP_CARRITO) { backStackEntry ->
+            val parentEntry = remember(backStackEntry) {
+                navController.getBackStackEntry(NavRoutes.FLUJO_SOLICITUD)
+            }
+            val flowViewModel: SolicitudFlowViewModel = viewModel(viewModelStoreOwner = parentEntry)
+
+            ResumenCarritoScreen(
+                flowViewModel = flowViewModel,
+                onBack = { navController.popBackStack() },
+                onContinuar = {
+                    // Confirma el carrito y se va al resumen general de toda la orden
+                    navController.navigate(NavRoutes.STEP_RESUMEN)
+                }
+            )
         }
 
         // ── Historiales (Implementación Futura) ────────────────────────────────

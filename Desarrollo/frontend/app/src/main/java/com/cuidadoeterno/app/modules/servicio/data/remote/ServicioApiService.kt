@@ -113,7 +113,7 @@ interface ServicioApiService {
     ): Response<ApiResponse<OrdenResponse>>
 
     @GET("cementerios")
-    suspend fun obtenerCementerios(): Response<ApiResponse<List<ElementoDropdown>>>
+    suspend fun obtenerCementerios(): Response<ApiResponse<List<CementerioResponse>>>
 
     @GET("cementerios/tipos-espacio")
     suspend fun obtenerTiposEspacio(): Response<ApiResponse<List<ElementoDropdown>>>

@@ -174,10 +174,19 @@ class ServicioRepository(
         return try {
             val response = api.obtenerCementerios()
             if (response.isSuccessful && response.body() != null) {
-                // ── AQUÍ HACEMOS EL MAPEO (De Backend a UI) ──
-                val listaLista = response.body()!!.data ?: emptyList()
+                // 1. Extraemos la lista original de CementerioResponse que viene del backend
+                val listaBackend = response.body()!!.data ?: emptyList()
 
-                NetworkResult.Success(listaLista)
+                // 2. ── AQUÍ HACEMOS EL MAPEO (Transformamos de Backend a UI) ──
+                val listaMapeada = listaBackend.map { cementerio ->
+                    ElementoDropdown(
+                        id = cementerio.idCementerio,     // Mapea idCementerio al id genérico
+                        nombre = cementerio.nombreCementerio // Mapea nombreCementerio al nombre genérico
+                    )
+                }
+
+                // 3. Devolvemos la lista ya transformada
+                NetworkResult.Success(listaMapeada)
             } else {
                 NetworkResult.Error(response.body()?.message ?: "Error al cargar cementerios")
             }

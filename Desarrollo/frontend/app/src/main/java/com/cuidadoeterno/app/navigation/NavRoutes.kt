@@ -22,6 +22,8 @@ object NavRoutes {
     const val STEP_SERVICIOS      = "step_servicios"
     const val STEP_DATOS_ESPACIO  = "step_datos_espacio"
     const val STEP_CATALOGO       = "step_catalogo"
+    const val STEP_CARRITO = "step_carrito"
+    const val STEP_PREGUNTA_PRODUCTOS = "step_pregunta_productos"
     const val STEP_RESUMEN        = "step_resumen"
 
     // ── Módulo Finanzas (Pago y Billetera) ─────────────────────────────────────
