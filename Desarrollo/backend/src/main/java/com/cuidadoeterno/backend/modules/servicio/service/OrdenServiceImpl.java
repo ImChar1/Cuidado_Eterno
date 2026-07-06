@@ -86,10 +86,12 @@ public class OrdenServiceImpl implements OrdenService {
         orden.setObservaciones(request.getObservaciones());
         orden.setEstadoOrden("pendiente");
         orden.setSubEstadoOrden(SubEstadoOrden.SIN_ASIGNAR); // <-- CORRECCIÓN: Inicialización
-        orden = detalleOrdenRepository.save(orden);
         orden.setSubtotal(BigDecimal.ZERO);
         orden.setPrecioUnitario(BigDecimal.ZERO);
         orden.setCantidadProductos(0);
+
+        orden = detalleOrdenRepository.save(orden);
+    
 
         if (request.getInsumos() != null && !request.getInsumos().isEmpty()) {
             for (InsumoRequestDTO insumoDto : request.getInsumos()) {
