@@ -11,11 +11,14 @@ data class SolicitudDraft(
     var apellidoFallecido: String = "",
 
     // 3. Ubicación del Espacio (Sepultura)
-    var idEspacio: Int? = null,
-    var sector: String = "",
+    var idCementerio: Int? = null,
+    var idTipoEspacio: Int? = null,
+    var sectorPabellon: String = "",
+    var pisoNivel: String? = null,
+    var pasillo: String? = null,
     var numeroSepultura: String = "",
 
-    // 4. Productos Adicionales Opacionales
+    // 4. Productos Adicionales Opcionales
     var productosAdicionales: List<InsumoSeleccionado> = emptyList(),
 
     // 5. Totales Consolidados (Para resumen de Transbank)

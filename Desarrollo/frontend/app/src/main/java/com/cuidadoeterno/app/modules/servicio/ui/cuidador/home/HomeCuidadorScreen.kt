@@ -19,6 +19,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun HomeCuidadorScreen(
     viewModel: HomeCuidadorViewModel,
+    onVerOrdenActiva: (Int) -> Unit,
     onVerHistorial: () -> Unit,
     onVerPagos: () -> Unit,
     onVerPerfil: () -> Unit,
@@ -110,7 +111,9 @@ fun HomeCuidadorScreen(
                             color = MaterialTheme.colorScheme.primary
                         )
                         Spacer(modifier = Modifier.height(8.dp))
-                        TarjetaOrdenEnProceso(orden = orden)
+                        TarjetaOrdenEnProceso(orden = orden,
+                            onClick = { onVerOrdenActiva(orden.idOrden ?: 0) }
+                        )
                         Spacer(modifier = Modifier.height(16.dp))
                     }
                 }
@@ -240,9 +243,11 @@ fun HomeCuidadorScreen(
 // ── Componentes privados ────────────────────────────────────────────────────────
 
 @Composable
-private fun TarjetaOrdenEnProceso(orden: OrdenResponse) {
+private fun TarjetaOrdenEnProceso(orden: OrdenResponse, onClick: () -> Unit) {
     Card(
+        onClick = onClick, // <-- Haz la tarjeta clickeable
         modifier = Modifier.fillMaxWidth(),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.primaryContainer
         )

@@ -7,10 +7,10 @@ data class TipoSolicitudResponse(
     val id: Int,
 
     @SerializedName("nombreServicio")
-    val nombre: String,
+    val nombre: String?,
 
     @SerializedName("descripcion")
-    val descripcion: String,
+    val descripcion: String?,
 
     @SerializedName("precioBase")
     val precioBase: Double,

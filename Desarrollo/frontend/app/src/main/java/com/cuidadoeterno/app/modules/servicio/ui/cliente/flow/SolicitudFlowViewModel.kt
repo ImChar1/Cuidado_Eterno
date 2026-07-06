@@ -1,8 +1,8 @@
 package com.cuidadoeterno.app.modules.servicio.ui.cliente.flow
-
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cuidadoeterno.app.core.network.NetworkResult
+import com.cuidadoeterno.app.modules.servicio.data.model.InsumoRequest
 import com.cuidadoeterno.app.modules.servicio.data.model.InsumoSeleccionado
 import com.cuidadoeterno.app.modules.servicio.data.model.OrdenRequest
 import com.cuidadoeterno.app.modules.servicio.data.model.SolicitudDraft
@@ -33,22 +33,33 @@ class SolicitudFlowViewModel(
 
     // Paso 2: Guardar los datos del formulario de la sepultura
     fun setDatosEspacio(
-        nombreF: String, apellidoF: String,
-        idEspacio: Int, sector: String, numSepultura: String
+        nombreF: String,
+        apellidoF: String,
+        idCementerio: Int,
+        idTipoEspacio: Int,
+        sector: String,
+        pisoNivel: String?,
+        pasillo: String?,
+        numSepultura: String
     ) {
         _draft.update { actual ->
             actual.copy(
                 nombreFallecido = nombreF,
                 apellidoFallecido = apellidoF,
-                idEspacio = idEspacio,
-                sector = sector,
+                idCementerio = idCementerio,
+                idTipoEspacio = idTipoEspacio,
+                sectorPabellon = sector,
+                pisoNivel = pisoNivel,
+                pasillo = pasillo,
                 numeroSepultura = numSepultura
             )
         }
     }
 
     fun calcularTotal(): Double {
-        _draft.value.actualizarTotales()
+        _draft.update { actual ->
+            actual.copy().apply { actualizarTotales() }
+        }
         return _draft.value.montoTotal
     }
 
@@ -60,40 +71,51 @@ class SolicitudFlowViewModel(
         viewModelScope.launch {
             val draft = _draft.value
 
-            // 1. Construimos la petición EXACTAMENTE como la pide tu data class
+            // MAPEO DEL CARRITO: Transformamos los insumos seleccionados al formato que pide el backend
+            val insumosParaBackend = if (draft.productosAdicionales.isNotEmpty()) {
+                draft.productosAdicionales.map { insumo ->
+                    InsumoRequest(
+                        idPuesto = insumo.idPuesto,
+                        montoTotal = insumo.montoTotal.toBigDecimal() // El backend exige BigDecimal
+                    )
+                }
+            } else {
+                null // Si no hay productos, enviamos null
+            }
+
+            // Construimos la petición EXACTAMENTE como la pide tu data class
             val request = OrdenRequest(
                 idCliente = idCliente,
-                idTipoSolicitud = draft.idTipoSolicitud ?: 0, // Usamos ?: 0 para evitar nulos
-                fechaProgramada = "2024-12-31T10:00:00",      // TODO: Reemplazar por la fecha real elegida si la hay
-                montoTotalServicio = draft.montoTotal.toBigDecimal(), // Convertimos de Double a BigDecimal
-                observaciones = "Solicitud desde App Cliente",
+                idTipoSolicitud = draft.idTipoSolicitud ?: 0,
+                // Nota: Si luego añades un DatePicker en la app, cambias este texto por la fecha elegida
+                fechaProgramada = "2026-12-31T10:00:00",
+                montoTotalServicio = draft.montoTotal.toBigDecimal(),
+                observaciones = "Solicitud generada desde la App Móvil",
 
                 // Datos del Espacio
-                idCementerio = 1, // TODO: Si tienes este id en el draft, ponlo aquí (ej: draft.idCementerio ?: 1)
-                idTipoEspacio = 1, // TODO: Igual que arriba
-                sectorPabellon = draft.sector ?: "S/N",
-                numeroSepultura = draft.numeroSepultura ?: "S/N",
-                pisoNivel = null,
-                pasillo = null,
+                idCementerio = draft.idCementerio ?: 0,
+                idTipoEspacio = draft.idTipoEspacio ?: 0,
+                sectorPabellon = draft.sectorPabellon.ifBlank { "S/N" },
+                numeroSepultura = draft.numeroSepultura.ifBlank { "S/N" },
+                pisoNivel = draft.pisoNivel,
+                pasillo = draft.pasillo,
                 materialPrincipal = null,
 
                 // Datos del Fallecido
-                nombres = draft.nombreFallecido ?: "Desconocido",
-                apellidos = draft.apellidoFallecido ?: "",
+                nombres = draft.nombreFallecido.ifBlank { "Desconocido" },
+                apellidos = draft.apellidoFallecido,
                 fechaNacimiento = null,
                 fechaDefuncion = null,
                 epitafio = null,
 
-                // Insumos
-                insumos = null // TODO: Aquí debes mapear draft.productosAdicionales a InsumoRequest si es necesario
+                // Insumos listos para el backend
+                insumos = insumosParaBackend
             )
 
-            // 2. Evaluamos la respuesta de forma clara (sin anidar lets)
+            // Evaluamos la respuesta
             when (val result = repository.crearOrden(request)) {
                 is NetworkResult.Success -> {
-                    // result.data YA ES el Int (el ID de la orden) gracias a tu excelente Repository
                     val idNuevo = result.data
-
                     if (idNuevo != null) {
                         onExito(idNuevo)
                         _draft.value = SolicitudDraft() // Limpiamos la memoria
@@ -107,85 +129,68 @@ class SolicitudFlowViewModel(
                 is NetworkResult.Loading -> { }
             }
         }
-
     }
 
     // =======================================================================
     // ── GESTIÓN DEL CATÁLOGO DE PRODUCTOS (CARRITO) ────────────────────────
     // =======================================================================
 
-    /**
-     * Agrega un nuevo producto o incrementa su cantidad si ya está en la lista.
-     */
     fun agregarInsumo(nuevoInsumo: InsumoSeleccionado) {
         val currentDraft = _draft.value
         val listaActual = currentDraft.productosAdicionales.toMutableList()
-
         val index = listaActual.indexOfFirst { it.idProducto == nuevoInsumo.idProducto }
 
         if (index != -1) {
-            // El producto ya está en el carrito, incrementamos su cantidad
             val itemExistente = listaActual[index]
             listaActual[index] = itemExistente.copy(
                 cantidad = itemExistente.cantidad + 1,
-                // Sumamos el precio unitario (que viene en nuevoInsumo.montoTotal) al total del item
                 montoTotal = itemExistente.montoTotal + nuevoInsumo.montoTotal
             )
         } else {
-            // Es un producto nuevo, lo agregamos a la lista
             listaActual.add(nuevoInsumo)
         }
 
-        // Recalculamos el total a pagar por los insumos
-        val nuevoMontoTotal = listaActual.sumOf { it.montoTotal }
-
+        // Corregido: Se cambia el nombre a nuevoMontoInsumos
+        val nuevoMontoInsumos = listaActual.sumOf { it.montoTotal }
         _draft.value = currentDraft.copy(
             productosAdicionales = listaActual,
-            montoInsumos = nuevoMontoTotal
+            montoInsumos = nuevoMontoInsumos,
+            montoTotal = currentDraft.precioBase + nuevoMontoInsumos
         )
     }
 
-    /**
-     * Disminuye la cantidad de un producto. Si llega a 0, lo elimina del carrito.
-     */
     fun removerInsumo(idProducto: Int, precioUnitario: Double) {
         val currentDraft = _draft.value
         val listaActual = currentDraft.productosAdicionales.toMutableList()
-
         val index = listaActual.indexOfFirst { it.idProducto == idProducto }
 
         if (index != -1) {
             val itemExistente = listaActual[index]
-
             if (itemExistente.cantidad > 1) {
-                // Restamos 1 a la cantidad y descontamos el precio unitario
                 listaActual[index] = itemExistente.copy(
                     cantidad = itemExistente.cantidad - 1,
                     montoTotal = itemExistente.montoTotal - precioUnitario
                 )
             } else {
-                // Si solo quedaba 1, eliminamos el producto de la lista
                 listaActual.removeAt(index)
             }
 
-            // Recalculamos el total
-            val nuevoMontoTotal = listaActual.sumOf { it.montoTotal }
-
+            // Corregido: Se cambia el nombre a nuevoMontoInsumos
+            val nuevoMontoInsumos = listaActual.sumOf { it.montoTotal }
             _draft.value = currentDraft.copy(
                 productosAdicionales = listaActual,
-                montoInsumos = nuevoMontoTotal
+                montoInsumos = nuevoMontoInsumos,
+                montoTotal = currentDraft.precioBase + nuevoMontoInsumos
             )
         }
     }
 
-    /**
-     * Limpia completamente la selección de productos.
-     * Útil si el cliente retrocede y decide presionar "No".
-     */
     fun limpiarInsumos() {
-        _draft.value = _draft.value.copy(
+        val currentDraft = _draft.value
+        _draft.value = currentDraft.copy(
             productosAdicionales = emptyList(),
-            montoInsumos = 0.0
+            montoInsumos = 0.0,
+            montoTotal = currentDraft.precioBase
         )
     }
 }

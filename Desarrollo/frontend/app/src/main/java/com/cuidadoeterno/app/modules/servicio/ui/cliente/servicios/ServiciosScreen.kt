@@ -79,11 +79,11 @@ fun ServiciosScreen(
                 ) {
                     items(uiState.tiposServicio) { servicio ->
                         BotonServicioPill(
-                            texto = servicio.nombre,
+                            texto = servicio.nombre ?: "",
                             onClick = {
                                 flowViewModel.setTipoServicio(
                                     id = servicio.id,
-                                    nombre = servicio.nombre,
+                                    nombre = servicio.nombre ?: "Servicio sin nombre",
                                     precioBase = servicio.precioBase
                                 )
                                 onSiguiente()
@@ -117,8 +117,8 @@ fun ServiciosScreen(
                     items(uiState.tiposServicio) { serv ->
                         Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)) {
                             Column(modifier = Modifier.padding(12.dp)) {
-                                Text(serv.nombre, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
-                                Text(serv.descripcion, style = MaterialTheme.typography.bodyMedium)
+                                Text(serv.nombre ?: "Servicio sin nombre", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
+                                Text(serv.descripcion ?: "Sin descripcion", style = MaterialTheme.typography.bodyMedium)
                                 Spacer(modifier = Modifier.height(4.dp))
                                 Text("Tiempo estimado: ${serv.duracionEstimadaMin} min | Precio base: $${serv.precioBase.toInt()}",
                                     style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.outline)

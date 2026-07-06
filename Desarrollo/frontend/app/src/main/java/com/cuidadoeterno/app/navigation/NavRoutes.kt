@@ -22,9 +22,10 @@ object NavRoutes {
     const val STEP_SERVICIOS      = "step_servicios"
     const val STEP_DATOS_ESPACIO  = "step_datos_espacio"
     const val STEP_CATALOGO       = "step_catalogo"
-    const val STEP_CARRITO = "step_carrito"
     const val STEP_PREGUNTA_PRODUCTOS = "step_pregunta_productos"
     const val STEP_RESUMEN        = "step_resumen"
+
+    const val SOLICITUDES_ACTIVAS = "solicitudes_activas"
 
     // ── Módulo Finanzas (Pago y Billetera) ─────────────────────────────────────
     const val PAGO_WEBPAY         = "pago_webpay/{url}/{token}"
@@ -38,11 +39,12 @@ object NavRoutes {
 
     // ── Historiales ─────────────────────────────────────────────────────────────
     const val HISTORIAL_CLIENTE   = "historial_cliente"
-    const val HISTORIAL_CUIDADOR  = "historial_cuidador"
+    const val HISTORIAL_CUIDADOR  = "historial_cuidador/{idOrden}"
 
     // ── Helpers para construir rutas con parámetros ─────────────────────────────
     fun detalleSolicitud(idOrden: Int) = "detalle_solicitud/$idOrden"
     fun calificacion(idOrden: Int) = "calificacion/$idOrden"
+    fun detalleCuidador(idOrden: Int) = "detalle_cuidador/$idOrden"
 
     fun pagoWebpay(url: String, token: String): String {
         val encodedUrl = java.net.URLEncoder.encode(url, "UTF-8")

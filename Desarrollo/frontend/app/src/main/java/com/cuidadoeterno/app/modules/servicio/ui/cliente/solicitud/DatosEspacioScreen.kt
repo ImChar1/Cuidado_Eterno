@@ -1,5 +1,4 @@
 package com.cuidadoeterno.app.modules.servicio.ui.cliente.solicitud
-
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -12,7 +11,6 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.cuidadoeterno.app.modules.servicio.data.model.ElementoDropdown
 import com.cuidadoeterno.app.modules.servicio.ui.cliente.flow.SolicitudFlowViewModel
-import com.cuidadoeterno.app.modules.servicio.ui.cliente.solicitud.DatosEspacioViewModel
 import com.cuidadoeterno.app.modules.servicio.ui.shared.StepperSolicitud
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -31,10 +29,11 @@ fun DatosEspacioScreen(
     var cementerioSeleccionado by remember { mutableStateOf<ElementoDropdown?>(null) }
     var tipoEspacioSeleccionado by remember { mutableStateOf<ElementoDropdown?>(null) }
 
-    var sectorPatio by remember { mutableStateOf(draftActual.sector) }
+    // CORRECCIÓN: Ahora lee 'sectorPabellon', 'pisoNivel' y 'pasillo' del nuevo Draft
+    var sectorPatio by remember { mutableStateOf(draftActual.sectorPabellon) }
     var pabellonCalle by remember { mutableStateOf("") }
-    var pisoNivel by remember { mutableStateOf("") }
-    var pasillo by remember { mutableStateOf("") }
+    var pisoNivel by remember { mutableStateOf(draftActual.pisoNivel ?: "") }
+    var pasillo by remember { mutableStateOf(draftActual.pasillo ?: "") }
     var numEspacio by remember { mutableStateOf(draftActual.numeroSepultura) }
 
     var errorValidacion by remember { mutableStateOf<String?>(null) }
@@ -260,20 +259,27 @@ fun DatosEspacioScreen(
                 // ── BOTÓN SIGUIENTE ──
                 Button(
                     onClick = {
+                        // Verificamos que no falte nada
                         if (nombresDifunto.isBlank() ||
                             apellidosDifunto.isBlank() ||
                             cementerioSeleccionado == null ||
+                            tipoEspacioSeleccionado == null ||
                             sectorPatio.isBlank() ||
                             numEspacio.isBlank()
                         ) {
                             errorValidacion = "Por favor completa todos los campos obligatorios (*)"
                         } else {
                             errorValidacion = null
+
+                            // Guardamos los datos en el draft
                             flowViewModel.setDatosEspacio(
                                 nombreF = nombresDifunto,
                                 apellidoF = apellidosDifunto,
-                                idEspacio = cementerioSeleccionado!!.id,
-                                sector = "$sectorPatio (Pab: $pabellonCalle, Piso: $pisoNivel, Pas: $pasillo)",
+                                idCementerio = cementerioSeleccionado!!.id,
+                                idTipoEspacio = tipoEspacioSeleccionado!!.id,
+                                sector = if (pabellonCalle.isNotBlank()) "$sectorPatio - $pabellonCalle" else sectorPatio,
+                                pisoNivel = pisoNivel.takeIf { it.isNotBlank() },
+                                pasillo = pasillo.takeIf { it.isNotBlank() },
                                 numSepultura = numEspacio
                             )
                             onSiguiente()

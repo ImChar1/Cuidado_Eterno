@@ -74,7 +74,14 @@ import com.cuidadoeterno.app.modules.usuario.ui.registro.cliente.RegistroCliente
 import com.cuidadoeterno.app.modules.usuario.ui.registro.cliente.RegistroClienteViewModel
 import com.cuidadoeterno.app.modules.usuario.ui.registro.cuidador.RegistroCuidadorScreen
 import com.cuidadoeterno.app.modules.usuario.ui.registro.cuidador.RegistroCuidadorViewModel
-import com.cuidadoeterno.app.navigation.NavRoutes
+import android.net.Uri
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.navArgument
+import com.cuidadoeterno.app.modules.finanzas.ui.pago.PagoWebpayScreen
+import com.cuidadoeterno.app.modules.finanzas.ui.pago.PagoWebpayViewModel
+import com.cuidadoeterno.app.modules.servicio.ui.cliente.solicitud.SolicitudesActivasScreen
+import com.cuidadoeterno.app.modules.servicio.ui.cliente.solicitud.SolicitudesActivasViewModel
 
 @Composable
 fun AppNavHost(navController: NavHostController) {
@@ -206,7 +213,7 @@ fun AppNavHost(navController: NavHostController) {
             val viewModel: HomeClienteViewModel = viewModel(
                 factory = object : ViewModelProvider.Factory {
                     override fun <T : ViewModel> create(modelClass: Class<T>): T =
-                        HomeClienteViewModel(sessionManager) as T
+                        HomeClienteViewModel(sessionManager, servicioRepository) as T
                 }
             )
 
@@ -214,7 +221,8 @@ fun AppNavHost(navController: NavHostController) {
                 viewModel = viewModel,
                 onServiciosClick = { navController.navigate(NavRoutes.FLUJO_SOLICITUD) },
                 onNosotrosClick = { navController.navigate("nosotros") },
-                onFaqClick = { navController.navigate("faq") }, // <-- AHORA SÍ NAVEGA A FAQ
+                onFaqClick = { navController.navigate("faq") },
+                onVerSolicitudesActivas = { navController.navigate(NavRoutes.SOLICITUDES_ACTIVAS) }, // <-- CAMBIO
                 onVerHistorial   = { navController.navigate(NavRoutes.HISTORIAL_CLIENTE) },
                 onVerPerfil      = { navController.navigate(NavRoutes.PERFIL) },
                 onCerrarSesion   = {
@@ -240,6 +248,11 @@ fun AppNavHost(navController: NavHostController) {
 
             HomeCuidadorScreen(
                 viewModel = viewModel,
+                onVerOrdenActiva = { idOrden ->
+                    // Redirige a la pantalla donde el cuidador sube fotos y cambia estados
+                    // IMPORTANTE: Asegúrate de que en NavRoutes DETALLE_CUIDADOR acepte /{idOrden}
+                    navController.navigate(NavRoutes.detalleCuidador(idOrden))
+                },
                 onVerHistorial = {
                     navController.navigate(NavRoutes.HISTORIAL_CUIDADOR)
                 },
@@ -481,10 +494,11 @@ fun AppNavHost(navController: NavHostController) {
             }
             val flowViewModel: SolicitudFlowViewModel = viewModel(viewModelStoreOwner = parentEntry)
 
-            // IMPORTANTE: Recuerda inyectar tu ServicioRepository aquí para el ResumenSolicitudViewModel
-            // (Usa un Factory al igual que hiciste con el catálogo si no usas Hilt/Koin)
             val resumenViewModel: ResumenSolicitudViewModel = viewModel(
-                // factory = ResumenViewModelFactory(servicioRepository) // Descomenta y ajusta según tu proyecto
+                factory = object : ViewModelProvider.Factory {
+                    override fun <T : ViewModel> create(modelClass: Class<T>): T =
+                        ResumenSolicitudViewModel(servicioRepository, finanzasRepository) as T
+                }
             )
 
             ResumenSolicitudScreen(
@@ -492,13 +506,95 @@ fun AppNavHost(navController: NavHostController) {
                 flowViewModel = flowViewModel,
                 onBack = { navController.popBackStack() },
                 onNavegarAWebpay = { token, url ->
-                    // Aquí navegas a tu WebView o abres el navegador con Transbank
-                    // Ejemplo: navController.navigate("webpay_screen/$token/${Uri.encode(url)}")
+                    // Usamos tu helper de NavRoutes que ya hace el URLEncoder por dentro
+                    navController.navigate(NavRoutes.pagoWebpay(url = url, token = token))
                 }
             )
         }
 
+        // 2. Pantalla con el WebView de Transbank Webpay
+        composable(
+            route = NavRoutes.PAGO_WEBPAY, // "pago_webpay/{url}/{token}"
+            arguments = listOf(
+                navArgument("url") { type = NavType.StringType },
+                navArgument("token") { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
+            // Rescatamos los argumentos y decodificamos la URL
+            val urlCodificada = backStackEntry.arguments?.getString("url") ?: ""
+            val urlWebpay = java.net.URLDecoder.decode(urlCodificada, "UTF-8")
+            val token = backStackEntry.arguments?.getString("token") ?: ""
 
+            // ¡AQUÍ ESTÁ LA CORRECCIÓN! Usamos el Factory manual en lugar de hiltViewModel()
+            val pagoViewModel: PagoWebpayViewModel = viewModel(
+                factory = object : ViewModelProvider.Factory {
+                    override fun <T : ViewModel> create(modelClass: Class<T>): T =
+                        PagoWebpayViewModel(finanzasRepository) as T // <--- Pasa tu repositorio de finanzas aquí
+                }
+            )
+
+            PagoWebpayScreen(
+                urlWebpay = urlWebpay,
+                token = token,
+                viewModel = pagoViewModel,
+                onIrAConfirmacion = { esExitoso, numOrden, codAuth ->
+                    // Usamos tu helper para ir a la confirmación
+                    navController.navigate(NavRoutes.confirmacionPago(esExitoso, numOrden, codAuth)) {
+                        // Limpiamos todo el flujo de solicitud para que no pueda volver atrás al pago
+                        popUpTo(NavRoutes.FLUJO_SOLICITUD) { inclusive = true }
+                    }
+                }
+            )
+        }
+
+        // 3. Pantalla Final de Confirmación de Pago
+        composable(
+            route = NavRoutes.CONFIRMACION_PAGO,
+            arguments = listOf(
+                navArgument("esExitoso") { type = NavType.BoolType },
+                navArgument("numOrden") { type = NavType.StringType },
+                navArgument("codAuth") { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
+            val esExitoso = backStackEntry.arguments?.getBoolean("esExitoso") ?: false
+            val numOrden = backStackEntry.arguments?.getString("numOrden") ?: ""
+            val codAuth = backStackEntry.arguments?.getString("codAuth") ?: ""
+
+            ConfirmacionPagoScreen(
+                esExitoso = esExitoso,
+                numeroOrden = numOrden,
+                codigoAutorizacion = codAuth,
+                onVerMisSolicitudes = {
+                    navController.navigate(NavRoutes.HOME_CLIENTE) {
+                        popUpTo(navController.graph.startDestinationId) { inclusive = false }
+                    }
+                }
+            )
+        }
+
+        // =======================================================================
+        // ── CLIENTE: SOLICITUDES ACTIVAS (redirige al detalle si hay 1) ────────
+        // =======================================================================
+        composable(NavRoutes.SOLICITUDES_ACTIVAS) {
+            val viewModel: SolicitudesActivasViewModel = viewModel(
+                factory = object : ViewModelProvider.Factory {
+                    override fun <T : ViewModel> create(modelClass: Class<T>): T =
+                        SolicitudesActivasViewModel(servicioRepository, sessionManager) as T
+                }
+            )
+
+            SolicitudesActivasScreen(
+                viewModel = viewModel,
+                onVolver = { navController.popBackStack() },
+                onIrADetalle = { idOrden ->
+                    navController.navigate(NavRoutes.detalleSolicitud(idOrden)) {
+                        // Sacamos SOLICITUDES_ACTIVAS del backstack para que
+                        // "atrás" desde el detalle vuelva directo al Home
+                        popUpTo(NavRoutes.SOLICITUDES_ACTIVAS) { inclusive = true }
+                    }
+                }
+            )
+        }
 
         // ── Historiales (Implementación Futura) ────────────────────────────────
         composable(NavRoutes.HISTORIAL_CLIENTE) { }

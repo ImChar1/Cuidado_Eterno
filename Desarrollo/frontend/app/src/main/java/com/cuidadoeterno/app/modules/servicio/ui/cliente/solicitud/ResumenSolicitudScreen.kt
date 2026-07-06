@@ -1,21 +1,28 @@
 package com.cuidadoeterno.app.modules.servicio.ui.cliente.solicitud
 
-import androidx.compose.ui.graphics.Color
-import androidx.compose.material3.HorizontalDivider
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.*
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.cuidadoeterno.app.modules.servicio.ui.cliente.flow.SolicitudFlowViewModel
-import com.cuidadoeterno.app.modules.servicio.ui.shared.StepperSolicitud
+import java.text.NumberFormat
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -28,7 +35,14 @@ fun ResumenSolicitudScreen(
     val draft by flowViewModel.draft.collectAsStateWithLifecycle()
     val checkoutState by viewModel.uiState.collectAsStateWithLifecycle()
 
-    // Escuchamos el éxito de la orden para gatillar la navegación a Transbank
+    // Formateador de moneda (Peso Chileno)
+    val formatoMoneda = remember {
+        NumberFormat.getCurrencyInstance(Locale("es", "CL")).apply {
+            maximumFractionDigits = 0
+        }
+    }
+
+    // Escuchamos el cambio de estado del ViewModel para navegar a Webpay
     LaunchedEffect(checkoutState) {
         if (checkoutState is CheckoutUiState.Success) {
             val data = checkoutState as CheckoutUiState.Success
@@ -39,106 +53,209 @@ fun ResumenSolicitudScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Resumen de Solicitud", modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center) },
-                navigationIcon = { IconButton(onClick = onBack) { Text("←", style = MaterialTheme.typography.titleLarge) } }
+                title = { Text("Resumen de Solicitud", fontWeight = FontWeight.Bold) },
+                navigationIcon = {
+                    IconButton(
+                        onClick = onBack,
+                        enabled = checkoutState !is CheckoutUiState.Loading
+                    ) {
+                        Icon(Icons.Default.ArrowBack, contentDescription = "Volver")
+                    }
+                }
             )
-        }
-    ) { paddingValues ->
-        Column(
-            modifier = Modifier.fillMaxSize().padding(paddingValues).padding(horizontal = 16.dp).verticalScroll(rememberScrollState())
-        ) {
-            Spacer(modifier = Modifier.height(8.dp))
-            StepperSolicitud(pasoActual = 4)
-            Spacer(modifier = Modifier.height(24.dp))
+        },
+        bottomBar = {
+            Surface(
+                color = MaterialTheme.colorScheme.surface,
+                shadowElevation = 16.dp
+            ) {
+                Column(
+                    modifier = Modifier
+                        .navigationBarsPadding()
+                        .padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 24.dp)
+                ) {
+                    // Mostrar error si la conexión falla
+                    if (checkoutState is CheckoutUiState.Error) {
+                        Text(
+                            text = (checkoutState as CheckoutUiState.Error).mensaje,
+                            color = MaterialTheme.colorScheme.error,
+                            style = MaterialTheme.typography.bodySmall,
+                            modifier = Modifier.padding(bottom = 8.dp).fillMaxWidth(),
+                            textAlign = TextAlign.Center
+                        )
+                    }
 
-            Text("Verifica los datos antes de pagar", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // 1. Tarjeta Servicio
-            Card(modifier = Modifier.fillMaxWidth(), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)) {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    Text("Servicio Contratado", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.primary)
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                        Text(draft.nombreServicio ?: "Sin definir", style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Bold)
-                        Text("$${draft.precioBase.toInt()}", style = MaterialTheme.typography.bodyLarge)
+                    Button(
+                        onClick = { viewModel.confirmarOrden(draft = draft, idCliente = 1) },
+                        modifier = Modifier.fillMaxWidth().height(56.dp),
+                        shape = RoundedCornerShape(12.dp),
+                        enabled = checkoutState !is CheckoutUiState.Loading
+                    ) {
+                        if (checkoutState is CheckoutUiState.Loading) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(24.dp),
+                                color = MaterialTheme.colorScheme.onPrimary,
+                                strokeWidth = 2.5.dp
+                            )
+                            Spacer(modifier = Modifier.width(12.dp))
+                            Text("Generando orden segura...")
+                        } else {
+                            Text(
+                                text = "Proceder al pago con Webpay",
+                                fontWeight = FontWeight.Bold,
+                                style = MaterialTheme.typography.titleMedium
+                            )
+                        }
                     }
                 }
             }
-            Spacer(modifier = Modifier.height(12.dp))
-
-            // 2. Tarjeta Sepultura
-            Card(modifier = Modifier.fillMaxWidth(), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)) {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    Text("Beneficiario y Ubicación", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.primary)
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text("Q.E.P.D: ${draft.nombreFallecido} ${draft.apellidoFallecido}", fontWeight = FontWeight.Bold)
-                    Text("Sector: ${draft.sector}", style = MaterialTheme.typography.bodyMedium)
-                    Text("Sepultura N°: ${draft.numeroSepultura}", style = MaterialTheme.typography.bodyMedium)
-                }
-            }
-            Spacer(modifier = Modifier.height(12.dp))
-
-            // 3. Tarjeta Insumos Adicionales
-            if (draft.productosAdicionales.isNotEmpty()) {
-                Card(modifier = Modifier.fillMaxWidth(), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)) {
+        }
+    ) { paddingValues ->
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+                .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.2f)),
+            contentPadding = PaddingValues(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            // Sección 1: Detalles del Servicio
+            item {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+                ) {
                     Column(modifier = Modifier.padding(16.dp)) {
-                        Text("Productos Adicionales", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.primary)
-                        Spacer(modifier = Modifier.height(8.dp))
-                        draft.productosAdicionales.forEach { insumo ->
-                            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                                Text("Producto ID #${insumo.idProducto} (x${insumo.cantidad})", style = MaterialTheme.typography.bodyMedium)
-                                Text("$${insumo.montoTotal.toInt()}", style = MaterialTheme.typography.bodyMedium)
-                            }
-                            Spacer(modifier = Modifier.height(4.dp))
+                        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(bottom = 12.dp)) {
+                            Icon(Icons.Default.CheckCircle, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(20.dp))
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text("Servicio Seleccionado", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                        }
+
+                        Text(text = draft.nombreServicio ?: "Servicio sin definir", style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Medium)
+
+                        Spacer(modifier = Modifier.height(12.dp))
+                        HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant)
+                        Spacer(modifier = Modifier.height(12.dp))
+
+                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                            Text("Valor Base del Servicio", style = MaterialTheme.typography.bodyMedium)
+                            Text(formatoMoneda.format(draft.precioBase), style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold)
                         }
                     }
                 }
             }
 
-            Spacer(modifier = Modifier.height(24.dp))
-            HorizontalDivider(Modifier, DividerDefaults.Thickness, DividerDefaults.color)
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // TOTALES
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                Text("Subtotal Servicio:", style = MaterialTheme.typography.bodyMedium)
-                Text("$${draft.precioBase.toInt()}", style = MaterialTheme.typography.bodyMedium)
-            }
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                Text("Subtotal Insumos:", style = MaterialTheme.typography.bodyMedium)
-                Text("$${draft.montoInsumos.toInt()}", style = MaterialTheme.typography.bodyMedium)
-            }
-            Spacer(modifier = Modifier.height(8.dp))
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                Text("TOTAL A PAGAR:", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-                Text("$${draft.montoTotal.toInt()}", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
-            }
-
-            if (checkoutState is CheckoutUiState.Error) {
-                Spacer(modifier = Modifier.height(12.dp))
-                Text((checkoutState as CheckoutUiState.Error).mensaje, color = MaterialTheme.colorScheme.error)
-            }
-
-            Spacer(modifier = Modifier.height(32.dp))
-
-            // Botón de Pago Transbank
-            Button(
-                onClick = { viewModel.confirmarOrden(draft) },
-                modifier = Modifier.fillMaxWidth().height(56.dp),
-                enabled = checkoutState !is CheckoutUiState.Loading,
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFE0004D)) // Color Carmesí/Corporativo de Webpay
-            ) {
-                if (checkoutState is CheckoutUiState.Loading) {
-                    CircularProgressIndicator(color = Color.White, modifier = Modifier.size(24.dp))
-                    Spacer(modifier = Modifier.width(12.dp))
-                    Text("Generando orden segura...")
-                } else {
-                    Text("Proceder al pago con Webpay", style = MaterialTheme.typography.titleMedium, color = Color.White)
+            item {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+                ) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(bottom = 12.dp)) {
+                            Icon(Icons.Default.Person, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(20.dp))
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text("Datos del Fallecido", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                        }
+                        Text("${draft.nombreFallecido} ${draft.apellidoFallecido}", style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Medium)
+                    }
                 }
             }
 
-            Spacer(modifier = Modifier.height(24.dp))
+            // NUEVA SECCIÓN 1.2: Ubicación del Espacio
+            item {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+                ) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(bottom = 12.dp)) {
+                            Icon(Icons.Default.LocationOn, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(20.dp))
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text("Ubicación del Espacio", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                        }
+                        Text("Sector/Pabellón: ${draft.sectorPabellon}", style = MaterialTheme.typography.bodyMedium)
+                        Text("Sepultura: ${draft.numeroSepultura}", style = MaterialTheme.typography.bodyMedium)
+
+                        // Validamos que los datos opcionales existan para mostrarlos
+                        if (!draft.pisoNivel.isNullOrBlank()) {
+                            Text("Piso/Nivel: ${draft.pisoNivel}", style = MaterialTheme.typography.bodyMedium)
+                        }
+                        if (!draft.pasillo.isNullOrBlank()) {
+                            Text("Pasillo: ${draft.pasillo}", style = MaterialTheme.typography.bodyMedium)
+                        }
+                    }
+                }
+            }
+
+            // Sección 2: Productos Adicionales
+            if (draft.productosAdicionales.isNotEmpty()) {
+                item {
+                    Text("Insumos Adicionales", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, modifier = Modifier.padding(horizontal = 4.dp, vertical = 4.dp))
+                }
+
+                items(draft.productosAdicionales) { insumo ->
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                        shape = RoundedCornerShape(12.dp)
+                    ) {
+                        Row(modifier = Modifier.fillMaxWidth().padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
+                            Box(
+                                modifier = Modifier.size(48.dp).clip(RoundedCornerShape(8.dp)).background(MaterialTheme.colorScheme.surfaceVariant),
+                                contentAlignment = Alignment.Center
+                            ) { Text("📦") }
+                            Spacer(modifier = Modifier.width(12.dp))
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text("Producto ID #${insumo.idProducto}", style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Medium)
+                                Text("Cantidad: ${insumo.cantidad}", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            }
+                            Text(formatoMoneda.format(insumo.montoTotal), style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.SemiBold)
+                        }
+                    }
+                }
+            }
+
+            // Sección 3: Desglose Total
+            item {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f)),
+                    shape = RoundedCornerShape(16.dp)
+                ) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        Text("Desglose del Total", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onPrimaryContainer)
+                        Spacer(modifier = Modifier.height(12.dp))
+                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                            Text("Subtotal Servicio", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onPrimaryContainer)
+                            Text(formatoMoneda.format(draft.precioBase), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onPrimaryContainer)
+                        }
+                        if (draft.montoInsumos > 0) {
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                                Text("Subtotal Insumos", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onPrimaryContainer)
+                                Text(formatoMoneda.format(draft.montoInsumos), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onPrimaryContainer)
+                            }
+                        }
+                        Spacer(modifier = Modifier.height(12.dp))
+                        HorizontalDivider(color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.2f))
+                        Spacer(modifier = Modifier.height(12.dp))
+                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                            Text("TOTAL A PAGAR", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Black, color = MaterialTheme.colorScheme.onPrimaryContainer)
+                            Text(formatoMoneda.format(draft.montoTotal), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Black, color = MaterialTheme.colorScheme.primary)
+                        }
+                    }
+                }
+            }
+
+            // Información extra
+            item {
+                Row(modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp), verticalAlignment = Alignment.Top) {
+                    Icon(Icons.Default.Info, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(16.dp).padding(top = 2.dp))
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("Al presionar el botón serás redirigido a la pasarela segura de Webpay.", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+            }
         }
     }
 }

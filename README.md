@@ -302,7 +302,7 @@ Dado que el backend está en una subred privada, debes conectarte haciendo un sa
   # Ejemplo conectando a la BD:
   ssh -o ProxyCommand="ssh -W %h:%p -i C:/Ruta/A/Tu/llave.pem ec2-user@<IP_PUBLICA_PROXY>" -i C:/Ruta/A/Tu/llave.pem ec2-user@<IP_PRIVADA_BD>
 
-  ssh -o ProxyCommand="ssh -W %h:%p -i C:/Users/Krlos/Downloads/labsuser.pem ec2-user@44.213.115.196" -i C:/Users/Krlos/Downloads/labsuser.pem ec2-user@10.0.2.235
+  ssh -o ProxyCommand="ssh -W %h:%p -i C:/Users/Krlos/Downloads/labsuser.pem ec2-user@3.220.231.217" -i C:/Users/Krlos/Downloads/labsuser.pem ec2-user@10.0.2.111
 
   # En la EC2: clonar el repositorio
   git clone https://github.com/<usuario>/Cuidado_Eterno.git
@@ -358,9 +358,22 @@ Dado que el backend está en una subred privada, debes conectarte haciendo un sa
 
 ssh -i "ruta/a/tu-llave.pem" ec2-user@<TU_IP_PUBLICA_O_DOMINIO> #Para entrar
 #a la instancia del proxy y ver errores.*/
+sudo tail -f /var/log/nginx/error.log
+sudo tail -f /var/log/nginx/access.log
+
+###Comandos para navegar la bd
+
+docker exec -it nombre_de_tu_contenedor_db mysql -u root -p
+
+SHOW DATABASES;
+
+USE nombre_de_tu_base_de_datos;
+
+SHOW TABLES;
+
+DESCRIBE usuario;
 
 ### 6.5 Destruir la infraestructura (liberar créditos AWS Academy)
-
 ```bash
 # Primero etapa 2, luego etapa 1 (orden inverso al aprovisionamiento)
 cd infra/etapa_2 && terraform destroy

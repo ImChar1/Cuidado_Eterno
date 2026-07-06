@@ -6,9 +6,9 @@ import retrofit2.Response
 import retrofit2.http.*
 
 interface FinanzasApiService {
-    @POST("finanzas/init")
+    @POST("finanzas/iniciar")
     suspend fun iniciarTransaccion(@Body request: WebpayInitRequest): Response<ApiResponse<WebpayInitResponse>>
 
-    @POST("finanzas/commit")
+    @POST("finanzas/confirmar")
     suspend fun confirmarTransaccion(@Query("token_ws") token: String): Response<ApiResponse<WebpayCommitResponse>>
 }

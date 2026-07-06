@@ -1,26 +1,29 @@
 package com.cuidadoeterno.app.modules.servicio.ui.shared
-
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 
 @Composable
 fun StepperSolicitud(
     pasoActual: Int,
-    totalPasos: Int = 5,
     modifier: Modifier = Modifier
 ) {
+    // Definimos los 4 pasos exactos de tu flujo actual
+    val pasos = listOf("Servicio", "Sepultura", "Insumos", "Resumen")
+    val totalPasos = pasos.size
+
     Column(
-        modifier = modifier.fillMaxWidth().padding(horizontal = 24.dp),
+        modifier = modifier.fillMaxWidth().padding(horizontal = 16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         // FILA 1: Círculos y líneas conectoras
@@ -53,24 +56,28 @@ fun StepperSolicitud(
             }
         }
 
-        // FILA 2: Cajas fantasma con el mismo peso para auto-alinear la flecha
+        Spacer(modifier = Modifier.height(8.dp))
+
+        // FILA 2: Textos auto-alineados con los círculos
         Row(
             modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.Top
         ) {
             for (i in 1..totalPasos) {
+                val isActual = i == pasoActual
+
                 Box(
-                    modifier = Modifier.size(16.dp),
+                    // Un ancho fijo pequeño para que el texto quede centrado bajo el círculo
+                    modifier = Modifier.width(64.dp),
                     contentAlignment = Alignment.Center
                 ) {
-                    if (i == pasoActual) {
-                        Icon(
-                            imageVector = Icons.Default.KeyboardArrowUp,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.size(24.dp)
-                        )
-                    }
+                    Text(
+                        text = pasos[i - 1],
+                        style = MaterialTheme.typography.labelSmall.copy(fontSize = 11.sp),
+                        color = if (isActual || i < pasoActual) MaterialTheme.colorScheme.primary else Color.Gray,
+                        fontWeight = if (isActual) FontWeight.Bold else FontWeight.Normal,
+                        textAlign = TextAlign.Center
+                    )
                 }
 
                 if (i < totalPasos) {

@@ -181,7 +181,7 @@ class ServicioRepository(
                 val listaMapeada = listaBackend.map { cementerio ->
                     ElementoDropdown(
                         id = cementerio.idCementerio,     // Mapea idCementerio al id genérico
-                        nombre = cementerio.nombreCementerio // Mapea nombreCementerio al nombre genérico
+                        nombre = cementerio.nombreCementerio ?: "" // Mapea nombreCementerio al nombre genérico
                     )
                 }
 

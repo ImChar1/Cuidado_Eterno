@@ -1,9 +1,10 @@
 package com.cuidadoeterno.app.modules.servicio.ui.cliente.home
-
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -13,7 +14,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.compose.collectAsStateWithLifecycle // <-- Importante para leer el ViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.cuidadoeterno.app.shared.ui.DrawerMenu
 import kotlinx.coroutines.launch
 
@@ -24,11 +25,11 @@ fun HomeClienteScreen(
     onServiciosClick: () -> Unit,
     onNosotrosClick: () -> Unit,
     onFaqClick: () -> Unit,
+    onVerSolicitudesActivas: () -> Unit, // <-- REEMPLAZA a onVerSeguimiento
     onVerHistorial: () -> Unit = {},
     onVerPerfil: () -> Unit = {},
     onCerrarSesion: () -> Unit = {}
 ) {
-    // Leemos el estado del ViewModel para sacar el nombre del usuario
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
@@ -37,11 +38,10 @@ fun HomeClienteScreen(
     ModalNavigationDrawer(
         drawerState = drawerState,
         drawerContent = {
-            // Nota: Cuando descomentes tu DrawerMenu real, pásale el uiState.nombreUsuario
             ModalDrawerSheet {
                 DrawerMenu(
                     nombreUsuario = uiState.nombreUsuario,
-                    rol = uiState.rol, // <-- Asegúrate de pasar el rol del ViewModel
+                    rol = uiState.rol,
                     onInicio = { scope.launch { drawerState.close() } },
                     onHistorial = onVerHistorial,
                     onPerfil = onVerPerfil,
@@ -54,10 +54,8 @@ fun HomeClienteScreen(
         Scaffold(
             topBar = {
                 TopAppBar(
-                    title = { Text("") }, // Sin título en la barra según el wireframe
-
+                    title = { Text("") },
                     actions = {
-                        // Botón de menú hamburguesa al lado DERECHO
                         IconButton(onClick = { scope.launch { drawerState.open() } }) {
                             Icon(imageVector = Icons.Default.Menu, contentDescription = "Menú")
                         }
@@ -73,12 +71,12 @@ fun HomeClienteScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(paddingValues)
-                    .padding(horizontal = 32.dp), // Margen lateral amplio como en el wireframe
+                    .padding(horizontal = 32.dp)
+                    .verticalScroll(rememberScrollState()),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Spacer(modifier = Modifier.height(24.dp))
 
-                // Título grande y centrado
                 Text(
                     text = "¡Bienvenido!",
                     fontSize = 32.sp,
@@ -86,9 +84,15 @@ fun HomeClienteScreen(
                     color = Color.Black
                 )
 
-                Spacer(modifier = Modifier.height(64.dp)) // Espacio grande antes de los botones
+                Spacer(modifier = Modifier.height(32.dp))
 
-                // Botones principales (Grises, anchos y con bordes redondeados)
+                // =========================================================
+                // ── BOTÓN: SOLICITUDES ACTIVAS (reemplaza la lista inline) ─
+                // =========================================================
+                MenuButton(texto = "Solicitudes Activas", onClick = onVerSolicitudesActivas)
+
+                Spacer(modifier = Modifier.height(24.dp))
+
                 MenuButton(texto = "Servicios", onClick = onServiciosClick)
                 Spacer(modifier = Modifier.height(24.dp))
 
@@ -96,22 +100,23 @@ fun HomeClienteScreen(
                 Spacer(modifier = Modifier.height(24.dp))
 
                 MenuButton(texto = "Preguntas frecuentes", onClick = onFaqClick)
+
+                Spacer(modifier = Modifier.height(32.dp))
             }
         }
     }
 }
 
-// Componente reutilizable para los botones grises del wireframe
 @Composable
 private fun MenuButton(texto: String, onClick: () -> Unit) {
     Button(
         onClick = onClick,
         modifier = Modifier
             .fillMaxWidth()
-            .height(60.dp), // Botones altos y cómodos
+            .height(60.dp),
         shape = RoundedCornerShape(16.dp),
         colors = ButtonDefaults.buttonColors(
-            containerColor = Color(0xFFAAAAAA), // Color gris tipo wireframe
+            containerColor = Color(0xFFAAAAAA),
             contentColor = Color.White
         )
     ) {

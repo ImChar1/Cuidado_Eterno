@@ -36,8 +36,8 @@ fun CatalogoProductoScreen(
     var textoBusqueda by remember { mutableStateOf("") }
 
     // Al iniciar la pantalla, cargamos el catálogo del cementerio que el usuario eligió en el paso anterior
-    LaunchedEffect(draft.idEspacio) {
-        val id = draft.idEspacio
+    LaunchedEffect(draft.idCementerio ?: 0) {
+        val id = draft.idCementerio
         if (id != null && id != 0) {
             viewModel.cargarCatalogo(id)
         }
@@ -65,13 +65,16 @@ fun CatalogoProductoScreen(
                     color = MaterialTheme.colorScheme.surface,
                     shadowElevation = 8.dp
                 ) {
-                    Box(modifier = Modifier.padding(16.dp)) {
+                    Box(modifier = Modifier
+                            .navigationBarsPadding()
+                            .padding(16.dp, end = 16.dp, top = 16.dp, bottom = 32.dp)
+                    ) {
                         Button(
                             onClick = onVerCarrito,
                             modifier = Modifier.fillMaxWidth().height(56.dp),
                             shape = RoundedCornerShape(12.dp)
                         ) {
-                            Text("Ver Carrito", modifier = Modifier.weight(1f), textAlign = TextAlign.Center)
+                            Text("Ver Resumen", modifier = Modifier.weight(1f), textAlign = TextAlign.Center)
                             Icon(Icons.Default.ShoppingCart, contentDescription = "Carrito")
                             Spacer(modifier = Modifier.width(8.dp))
                             Text("($totalItemsCarrito)")
@@ -147,7 +150,7 @@ fun CatalogoProductoScreen(
                 // Lista de productos
                 LazyColumn(
                     verticalArrangement = Arrangement.spacedBy(16.dp),
-                    contentPadding = PaddingValues(bottom = 80.dp) // Espacio para el botón inferior
+                    contentPadding = PaddingValues(bottom = 110.dp) // Espacio para el botón inferior
                 ) {
                     items(productosFiltrados) { producto ->
                         ProductoItemRow(
