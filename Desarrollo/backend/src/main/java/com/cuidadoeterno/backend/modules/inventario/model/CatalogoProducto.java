@@ -29,12 +29,12 @@ public class CatalogoProducto {
     private Boolean hayStock = true;
 
     // Relación: Este registro pertenece a un Puesto de Venta específico
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "id_puesto", nullable = false)
     private PuestoVenta puestoVenta;
 
     // Relación: Este registro hace referencia a un Producto global
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "id_producto", nullable = false)
     private Producto producto;
 }

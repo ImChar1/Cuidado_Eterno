@@ -52,13 +52,14 @@ import com.cuidadoeterno.app.modules.servicio.data.repository.InventarioReposito
 import com.cuidadoeterno.app.modules.servicio.ui.cliente.catalogo.CatalogoProductoScreen
 import com.cuidadoeterno.app.modules.servicio.ui.cliente.catalogo.CatalogoProductoViewModel
 import com.cuidadoeterno.app.modules.servicio.ui.cliente.catalogo.CatalogoViewModelFactory
-import com.cuidadoeterno.app.modules.servicio.ui.cliente.catalogo.ResumenCarritoScreen
 import com.cuidadoeterno.app.modules.servicio.ui.cliente.servicios.ServiciosScreen // <-- IMPORT NUEVO
 import com.cuidadoeterno.app.modules.servicio.ui.cliente.servicios.ServiciosViewModel // <-- IMPORT NUEVO
 import com.cuidadoeterno.app.modules.servicio.ui.cliente.flow.SolicitudFlowViewModel // <-- IMPORT NUEVO
 import com.cuidadoeterno.app.modules.servicio.ui.cliente.solicitud.DatosEspacioScreen
 import com.cuidadoeterno.app.modules.servicio.ui.cliente.solicitud.DatosEspacioViewModel
 import com.cuidadoeterno.app.modules.servicio.ui.cliente.solicitud.PreguntaProductosScreen
+import com.cuidadoeterno.app.modules.servicio.ui.cliente.solicitud.ResumenSolicitudScreen
+import com.cuidadoeterno.app.modules.servicio.ui.cliente.solicitud.ResumenSolicitudViewModel
 import com.cuidadoeterno.app.modules.servicio.ui.cuidador.home.HomeCuidadorScreen
 import com.cuidadoeterno.app.modules.servicio.ui.cuidador.home.HomeCuidadorViewModel
 
@@ -455,15 +456,9 @@ fun AppNavHost(navController: NavHostController) {
             }
             val flowViewModel: SolicitudFlowViewModel = viewModel(viewModelStoreOwner = parentEntry)
 
-            // 2. Preparamos Retrofit usando TU ApiClient
-            // NOTA: Asegúrate de instanciar o traer tu AuthInterceptor como lo hagas normalmente en tu app
-            // (Ejemplo: val authInterceptor = AuthInterceptor(tokenManager))
+            // Instancias tu ApiClient y el ViewModel del catálogo como lo tenías
             val retrofit = ApiClient.createRetrofit(authInterceptor)
-
-            // 3. Creamos el servicio específico del inventario
             val inventarioApi = retrofit.create(InventarioApiService::class.java)
-
-            // 4. Instanciamos el ViewModel inyectando la API real
             val catalogoViewModel: CatalogoProductoViewModel = viewModel(
                 factory = CatalogoViewModelFactory(InventarioRepository(inventarioApi))
             )
@@ -473,28 +468,37 @@ fun AppNavHost(navController: NavHostController) {
                 flowViewModel = flowViewModel,
                 onBack = { navController.popBackStack() },
                 onVerCarrito = {
-                    // El usuario tocó el botón inferior "Ver Carrito (x)"
-                    navController.navigate(NavRoutes.STEP_CARRITO)
+                    // AHORA ESTE BOTÓN TE LLEVA DIRECTO AL RESUMEN FINAL
+                    navController.navigate(NavRoutes.STEP_RESUMEN)
                 }
             )
         }
 
-        // PASO INTERMEDIO: REVISIÓN DEL CARRITO
-        composable(NavRoutes.STEP_CARRITO) { backStackEntry ->
+        // PASO 4: RESUMEN FINAL Y PAGO (Ruta que unifica todo)
+        composable(NavRoutes.STEP_RESUMEN) { backStackEntry ->
             val parentEntry = remember(backStackEntry) {
                 navController.getBackStackEntry(NavRoutes.FLUJO_SOLICITUD)
             }
             val flowViewModel: SolicitudFlowViewModel = viewModel(viewModelStoreOwner = parentEntry)
 
-            ResumenCarritoScreen(
+            // IMPORTANTE: Recuerda inyectar tu ServicioRepository aquí para el ResumenSolicitudViewModel
+            // (Usa un Factory al igual que hiciste con el catálogo si no usas Hilt/Koin)
+            val resumenViewModel: ResumenSolicitudViewModel = viewModel(
+                // factory = ResumenViewModelFactory(servicioRepository) // Descomenta y ajusta según tu proyecto
+            )
+
+            ResumenSolicitudScreen(
+                viewModel = resumenViewModel,
                 flowViewModel = flowViewModel,
                 onBack = { navController.popBackStack() },
-                onContinuar = {
-                    // Confirma el carrito y se va al resumen general de toda la orden
-                    navController.navigate(NavRoutes.STEP_RESUMEN)
+                onNavegarAWebpay = { token, url ->
+                    // Aquí navegas a tu WebView o abres el navegador con Transbank
+                    // Ejemplo: navController.navigate("webpay_screen/$token/${Uri.encode(url)}")
                 }
             )
         }
+
+
 
         // ── Historiales (Implementación Futura) ────────────────────────────────
         composable(NavRoutes.HISTORIAL_CLIENTE) { }
