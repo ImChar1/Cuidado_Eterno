@@ -376,7 +376,7 @@ CREATE TABLE IF NOT EXISTS solicitud_servicio (
 CREATE TABLE IF NOT EXISTS detalle_orden (
     id_orden                INT UNSIGNED    NOT NULL AUTO_INCREMENT,
     id_solicitud            INT UNSIGNED    NOT NULL,
-    id_persona_cuidador     INT UNSIGNED    NOT NULL,
+    id_persona_cuidador     INT UNSIGNED    NULL,
     id_producto             INT UNSIGNED    NULL,
     id_pago_cuidador        INT UNSIGNED    NULL,
     id_espacio              INT UNSIGNED    NOT NULL,
