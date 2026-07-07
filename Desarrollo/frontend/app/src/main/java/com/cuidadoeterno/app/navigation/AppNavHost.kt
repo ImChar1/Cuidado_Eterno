@@ -244,6 +244,40 @@ fun AppNavHost(navController: NavHostController) {
         }
 
         // =======================================================================
+        // ── HOME ADMIN ─────────────────────────────────────────────────────────
+        // =======================================================================
+        composable(NavRoutes.HOME_ADMIN) {
+            HomeAdminScreen(
+                onIrAGestionCuidadores = { navController.navigate(NavRoutes.GESTION_CUIDADORES) },
+                onIrASolicitudes = { /* Implementación futura */ },
+                onIrAEspacios = { /* Implementación futura */ },
+                onCerrarSesion = {
+                    navController.navigate(NavRoutes.LOGIN) { popUpTo(0) { inclusive = true } }
+                }
+            )
+        }
+
+        // =======================================================================
+        // ── ADMIN: GESTIÓN DE CUIDADORES ───────────────────────────────────────
+        // =======================================================================
+        composable(NavRoutes.GESTION_CUIDADORES) {
+            val viewModel: GestionCuidadoresViewModel = viewModel(
+                factory = object : ViewModelProvider.Factory {
+                    override fun <T : ViewModel> create(modelClass: Class<T>): T =
+                        GestionCuidadoresViewModel(adminRepository) as T
+                }
+            )
+
+            GestionCuidadoresScreen(
+                viewModel = viewModel,
+                onBack = { navController.popBackStack() },
+                onIrASoporteTecnicoCreacion = {
+                    // Implementación futura si decides crear cuentas desde el móvil
+                }
+            )
+        }
+
+        // =======================================================================
         // ── HOME CUIDADOR ──────────────────────────────────────────────────────
         // =======================================================================
         composable(NavRoutes.HOME_CUIDADOR) {
