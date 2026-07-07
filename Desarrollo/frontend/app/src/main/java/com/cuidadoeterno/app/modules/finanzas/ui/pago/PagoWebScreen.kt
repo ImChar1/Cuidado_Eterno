@@ -41,7 +41,11 @@ fun PagoWebpayScreen(
     LaunchedEffect(uiState) {
         when (val state = uiState) {
             is PagoWebpayUiState.Exitoso -> {
-                onIrAConfirmacion(true, "ORD-${state.data.codigoAutorizacion}", state.data.codigoAutorizacion)
+                onIrAConfirmacion(
+                    true,
+                    state.data.numeroOrden,
+                    state.data.codigoAutorizacion
+                )
             }
             is PagoWebpayUiState.Fallido -> {
                 onIrAConfirmacion(false, "", "")

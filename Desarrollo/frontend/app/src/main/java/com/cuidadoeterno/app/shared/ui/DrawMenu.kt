@@ -64,33 +64,29 @@ fun DrawerMenu(
         HorizontalDivider()
 
         Spacer(modifier = Modifier.height(8.dp))
+        if (rol != "CUIDADOR") {
+            // Inicio
+            NavigationDrawerItem(
+                label = { Text("Inicio") },
+                selected = false,
+                onClick = {
+                    onCloseDrawer()
+                    onInicio()
+                },
+                modifier = Modifier.padding(horizontal = 12.dp)
+            )
 
-        // Inicio
-        NavigationDrawerItem(
-            label = { Text("Inicio") },
-            selected = false,
-            onClick = {
-                onCloseDrawer()
-                onInicio()
-            },
-            modifier = Modifier.padding(horizontal = 12.dp)
-        )
-
-        // Historial — nombre varía según rol
-        NavigationDrawerItem(
-            label = {
-                Text(
-                    if (rol == "CLIENTE") "Mis solicitudes"
-                    else "Mis órdenes"
-                )
-            },
-            selected = false,
-            onClick = {
-                onCloseDrawer()
-                onHistorial()
-            },
-            modifier = Modifier.padding(horizontal = 12.dp)
-        )
+            // Historial — nombre varía según rol (por si en un futuro hay otros roles que lo usen)
+            NavigationDrawerItem(
+                label = { Text(if (rol == "CLIENTE") "Mis solicitudes" else "Historial") },
+                selected = false,
+                onClick = {
+                    onCloseDrawer()
+                    onHistorial()
+                },
+                modifier = Modifier.padding(horizontal = 12.dp)
+            )
+        }
 
         // Mis pagos — solo para el cuidador
         if (rol == "CUIDADOR" && onPagos != null) {
@@ -117,7 +113,6 @@ fun DrawerMenu(
         )
 
         Spacer(modifier = Modifier.weight(1f))
-
         HorizontalDivider()
 
         // Cerrar sesión al fondo del drawer

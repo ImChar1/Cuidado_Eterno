@@ -62,7 +62,11 @@ import com.cuidadoeterno.app.modules.servicio.ui.cliente.solicitud.ResumenSolici
 import com.cuidadoeterno.app.modules.servicio.ui.cliente.solicitud.ResumenSolicitudViewModel
 import com.cuidadoeterno.app.modules.servicio.ui.cuidador.home.HomeCuidadorScreen
 import com.cuidadoeterno.app.modules.servicio.ui.cuidador.home.HomeCuidadorViewModel
-
+import com.cuidadoeterno.app.modules.admin.data.remote.AdminApiService
+import com.cuidadoeterno.app.modules.admin.data.repository.AdminRepository
+import com.cuidadoeterno.app.modules.admin.ui.home.HomeAdminScreen
+import com.cuidadoeterno.app.modules.admin.ui.cuidador.GestionCuidadoresScreen
+import com.cuidadoeterno.app.modules.admin.ui.cuidador.GestionCuidadoresViewModel
 import com.cuidadoeterno.app.modules.usuario.data.remote.AuthApiService
 import com.cuidadoeterno.app.modules.usuario.data.repository.AuthRepository
 import com.cuidadoeterno.app.modules.usuario.ui.login.LoginScreen
@@ -80,8 +84,13 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.cuidadoeterno.app.modules.finanzas.ui.pago.PagoWebpayScreen
 import com.cuidadoeterno.app.modules.finanzas.ui.pago.PagoWebpayViewModel
+import com.cuidadoeterno.app.modules.servicio.data.model.OrdenResponse
 import com.cuidadoeterno.app.modules.servicio.ui.cliente.solicitud.SolicitudesActivasScreen
 import com.cuidadoeterno.app.modules.servicio.ui.cliente.solicitud.SolicitudesActivasViewModel
+import com.cuidadoeterno.app.modules.servicio.ui.cuidador.disponibles.SolicitudesDisponiblesScreen
+import com.cuidadoeterno.app.modules.servicio.ui.cuidador.disponibles.SolicitudesDisponiblesViewModel
+import com.cuidadoeterno.app.modules.servicio.ui.cuidador.evaluacion.EvaluacionSolicitudScreen
+import com.cuidadoeterno.app.modules.servicio.ui.cuidador.evaluacion.EvaluacionSolicitudViewModel
 
 @Composable
 fun AppNavHost(navController: NavHostController) {
@@ -107,6 +116,9 @@ fun AppNavHost(navController: NavHostController) {
     val token by sessionManager.authToken.collectAsStateWithLifecycle(initialValue = null)
     val rol by sessionManager.rol.collectAsStateWithLifecycle(initialValue = null)
 
+    val adminApiService      = retrofit.create(AdminApiService::class.java)
+    val adminRepository      = AdminRepository(adminApiService)
+    
     // Mientras carga el DataStore no sabemos si hay sesión
     var cargando by remember { mutableStateOf(true) }
 
@@ -238,34 +250,95 @@ fun AppNavHost(navController: NavHostController) {
             val viewModel: HomeCuidadorViewModel = viewModel(
                 factory = object : ViewModelProvider.Factory {
                     override fun <T : ViewModel> create(modelClass: Class<T>): T =
-                        HomeCuidadorViewModel(
-                            servicioRepository = servicioRepository,
-                            cementerioRepository = cementerioRepository,
-                            sessionManager = sessionManager
-                        ) as T
+                        HomeCuidadorViewModel(sessionManager, authRepository) as T
+                }
+            )
+            HomeCuidadorScreen(
+                viewModel = viewModel,
+                onVerSolicitudesDisponibles = { navController.navigate(NavRoutes.SOLICITUDES_DISPONIBLES) },
+                onVerHistorial = { navController.navigate(NavRoutes.HISTORIAL_CUIDADOR) },
+                onVerPagos = { /* Futura implementación */ },
+                onVerPerfil = { navController.navigate(NavRoutes.PERFIL) },
+                onCerrarSesion = {
+                    navController.navigate(NavRoutes.LOGIN) { popUpTo(0) { inclusive = true } }
+                }
+            )
+        }
+
+        composable(NavRoutes.SOLICITUDES_DISPONIBLES) {
+            val viewModel: SolicitudesDisponiblesViewModel = viewModel(
+                factory = object : ViewModelProvider.Factory {
+                    override fun <T : ViewModel> create(modelClass: Class<T>): T =
+                        SolicitudesDisponiblesViewModel(servicioRepository) as T
                 }
             )
 
-            HomeCuidadorScreen(
+            // Obtenemos el SavedStateHandle de la RUTA DESTINO (Evaluacion) para pasar la orden seleccionada.
+            // Compose Navigation no pasa objetos complejos por URL, así que usamos currentBackStackEntry
+            SolicitudesDisponiblesScreen(
                 viewModel = viewModel,
-                onVerOrdenActiva = { idOrden ->
-                    // Redirige a la pantalla donde el cuidador sube fotos y cambia estados
-                    // IMPORTANTE: Asegúrate de que en NavRoutes DETALLE_CUIDADOR acepte /{idOrden}
-                    navController.navigate(NavRoutes.detalleCuidador(idOrden))
-                },
-                onVerHistorial = {
-                    navController.navigate(NavRoutes.HISTORIAL_CUIDADOR)
-                },
-                onVerPagos = {
-                    navController.navigate(NavRoutes.BILLETERA_CUIDADOR)
-                },
-                onVerPerfil = {
-                    // Asegúrate de que esta ruta coincida con la que usas en tu app para el perfil
-                    navController.navigate(NavRoutes.PERFIL)
-                },
-                onCerrarSesion = {
-                    navController.navigate(NavRoutes.LOGIN) {
-                        popUpTo(0) { inclusive = true }
+                onVolver = { navController.popBackStack() },
+                onSolicitudSeleccionada = { ordenCompleta ->
+                    navController.currentBackStackEntry?.savedStateHandle?.set("orden_seleccionada", ordenCompleta)
+                    navController.navigate(NavRoutes.EVALUACION_SOLICITUD)
+                }
+            )
+        }
+
+    // 3. PANTALLA DE EVALUACIÓN (La del botón "ACEPTAR TRABAJO")
+        composable(NavRoutes.EVALUACION_SOLICITUD) {
+            // Recuperamos la orden desde el stateHandle que seteamos en el paso anterior
+            val orden = navController.previousBackStackEntry?.savedStateHandle?.get<OrdenResponse>("orden_seleccionada")
+
+            val viewModel: EvaluacionSolicitudViewModel = viewModel(
+                factory = object : ViewModelProvider.Factory {
+                    override fun <T : ViewModel> create(modelClass: Class<T>): T =
+                        EvaluacionSolicitudViewModel(servicioRepository, sessionManager) as T
+                }
+            )
+
+            // Le inyectamos la orden al viewmodel
+            LaunchedEffect(orden) {
+                orden?.let { viewModel.cargarDetalleOrden(it) }
+            }
+
+            EvaluacionSolicitudScreen(
+                viewModel = viewModel,
+                onBack = { navController.popBackStack() },
+                onIrAEjecucion = { idOrden ->
+                    // Al aceptar, limpiamos el stack hasta el Home y navegamos al detalle activo
+                    navController.navigate("detalle_orden/$idOrden") {
+                        popUpTo(NavRoutes.HOME_CUIDADOR) { inclusive = false }
+                    }
+                }
+            )
+        }
+
+// 4. PANTALLA DE DETALLE/TRABAJO (Donde se cambia "En Camino", "En Sitio", etc)
+        composable(
+            route = "detalle_orden/{idOrden}",
+            arguments = listOf(navArgument("idOrden") { type = NavType.IntType })
+        ) { backStackEntry ->
+            val idOrden = backStackEntry.arguments?.getInt("idOrden") ?: 0
+
+            val viewModel: DetalleOrdenCuidadorViewModel = viewModel(
+                factory = object : ViewModelProvider.Factory {
+                    override fun <T : ViewModel> create(modelClass: Class<T>): T =
+                        DetalleOrdenCuidadorViewModel(servicioRepository, sessionManager) as T
+                }
+            )
+
+            // Necesitamos cargar la orden desde el backend por su ID
+            // (Asumo que tienes un método obtenerOrdenPorId en tu repository/API)
+            LaunchedEffect(idOrden) {
+                // viewModel.cargarOrden(idOrden) <-- Deberás agregar este método si no lo tienes
+            }
+
+            DetalleOrdenCuidadorScreen(
+                viewModel = viewModel,
+                onVolver = {
+                    navController.navigate(NavRoutes.HOME_CUIDADOR) {
+                        popUpTo(NavRoutes.HOME_CUIDADOR) { inclusive = true }
                     }
                 }
             )

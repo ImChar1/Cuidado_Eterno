@@ -1,5 +1,4 @@
 package com.cuidadoeterno.app.modules.finanzas.data.repository
-
 import com.cuidadoeterno.app.core.network.NetworkResult
 import com.cuidadoeterno.app.modules.finanzas.data.model.WebpayCommitResponse
 import com.cuidadoeterno.app.modules.finanzas.data.model.WebpayInitRequest
@@ -18,7 +17,7 @@ class FinanzasRepository(
                 NetworkResult.Error(response.body()?.message ?: "Error al iniciar conexión con Webpay")
             }
         } catch (e: Exception) {
-            NetworkResult.Error("Sin conexión a internet o error de servidor: ${e.message}")
+            NetworkResult.Error("Excepción al iniciar pago: ${e.message}")
         }
     }
 
@@ -31,7 +30,7 @@ class FinanzasRepository(
                 NetworkResult.Error(response.body()?.message ?: "Transacción rechazada o inválida")
             }
         } catch (e: Exception) {
-            NetworkResult.Error("Sin conexión al confirmar pago: ${e.message}")
+            NetworkResult.Error("Excepción al confirmar pago: ${e.message}")
         }
     }
 }

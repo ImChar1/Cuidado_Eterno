@@ -302,7 +302,7 @@ Dado que el backend está en una subred privada, debes conectarte haciendo un sa
   # Ejemplo conectando a la BD:
   ssh -o ProxyCommand="ssh -W %h:%p -i C:/Ruta/A/Tu/llave.pem ec2-user@<IP_PUBLICA_PROXY>" -i C:/Ruta/A/Tu/llave.pem ec2-user@<IP_PRIVADA_BD>
 
-  ssh -o ProxyCommand="ssh -W %h:%p -i C:/Users/Krlos/Downloads/labsuser.pem ec2-user@3.220.231.217" -i C:/Users/Krlos/Downloads/labsuser.pem ec2-user@10.0.2.111
+  ssh -o ProxyCommand="ssh -W %h:%p -i C:/Users/Krlos/Downloads/labsuser.pem ec2-user@18.213.246.178" -i C:/Users/Krlos/Downloads/labsuser.pem ec2-user@10.0.2.202
 
   # En la EC2: clonar el repositorio
   git clone https://github.com/<usuario>/Cuidado_Eterno.git
@@ -356,14 +356,23 @@ Dado que el backend está en una subred privada, debes conectarte haciendo un sa
   Servidor 3 (IP Privada BD) / Base de Datos MariaDB /sudo docker-compose up --build -d db
   Servidor 2 (IP Privada Backend)API / Spring Boot  /sudo docker-compose up --build -d backend
 
-ssh -i "ruta/a/tu-llave.pem" ec2-user@<TU_IP_PUBLICA_O_DOMINIO> #Para entrar
+ssh -i "C:/Users/Krlos/Downloads/labsuser.pem" ec2-user@3.235.137.2 #Para entrar
 #a la instancia del proxy y ver errores.*/
 sudo tail -f /var/log/nginx/error.log
 sudo tail -f /var/log/nginx/access.log
 
+#Datos de prueba para la pasarela de pago
+num tarjeta: 4051885600446623
+cvv: cualquiera
+clave 123
+
+transbank banco falso
+rut: 11.111.111.1
+clave: 123
+
 ###Comandos para navegar la bd
 
-docker exec -it nombre_de_tu_contenedor_db mysql -u root -p
+docker exec -it nombre_de_tu_contenedor_db mariadb -u root -p
 
 SHOW DATABASES;
 

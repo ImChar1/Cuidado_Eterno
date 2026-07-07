@@ -11,6 +11,8 @@ object NavRoutes {
     const val HOME_CUIDADOR       = "home_cuidador"
     const val HOME_ADMIN          = "home_admin"
 
+    const val GESTION_CUIDADORES  = "gestion_cuidadores"
+
     // ── Perfil (cliente) ────────────────────────────────────────
     const val PERFIL              = "perfil"
 
@@ -33,6 +35,10 @@ object NavRoutes {
     const val BILLETERA_CUIDADOR  = "billetera_cuidador" // <-- NUEVA
 
     // ── Módulo Servicio — Flujos Dinámicos ──────────────────────────────────────
+    const val SOLICITUDES_DISPONIBLES = "solicitudes_disponibles"
+    const val EVALUACION_SOLICITUD = "evaluacion_solicitud"
+
+    const val DETALLE_ORDEN = "detalle_orden/{idOrden}"
     const val DETALLE_SOLICITUD   = "detalle_solicitud/{idOrden}" // Cliente ve en vivo
     const val CALIFICACION        = "calificacion/{idOrden}"      // Cliente evalúa
     const val DETALLE_CUIDADOR    = "detalle_cuidador"            // Cuidador ejecuta
