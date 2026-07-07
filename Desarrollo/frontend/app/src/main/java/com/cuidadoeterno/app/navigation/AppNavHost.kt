@@ -118,7 +118,7 @@ fun AppNavHost(navController: NavHostController) {
 
     val adminApiService      = retrofit.create(AdminApiService::class.java)
     val adminRepository      = AdminRepository(adminApiService)
-    
+
     // Mientras carga el DataStore no sabemos si hay sesión
     var cargando by remember { mutableStateOf(true) }
 

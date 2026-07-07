@@ -56,29 +56,28 @@ public class JwtFilter extends OncePerRequestFilter {
 
         try {
             nombreUsuario = jwtUtil.extraerNombreUsuario(token);
+            // Solo procesamos si hay usuario en el token y aún no está autenticado en el contexto
+            if (nombreUsuario != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+
+                UserDetails userDetails = userDetailsService.loadUserByUsername(nombreUsuario);
+
+                if (jwtUtil.esValido(token, userDetails.getUsername())) {
+                    UsernamePasswordAuthenticationToken authToken =
+                        new UsernamePasswordAuthenticationToken(
+                            userDetails,
+                            null,                        // credentials: null porque ya validamos con JWT
+                            userDetails.getAuthorities()
+                        );
+                    authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+
+                    // Registramos la autenticación en el contexto de seguridad
+                    SecurityContextHolder.getContext().setAuthentication(authToken);
+                }
+            }
         } catch (Exception e) {
             // Token malformado: dejamos pasar, Spring Security rechazará el acceso
             filterChain.doFilter(request, response);
             return;
-        }
-
-        // Solo procesamos si hay usuario en el token y aún no está autenticado en el contexto
-        if (nombreUsuario != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-
-            UserDetails userDetails = userDetailsService.loadUserByUsername(nombreUsuario);
-
-            if (jwtUtil.esValido(token, userDetails.getUsername())) {
-                UsernamePasswordAuthenticationToken authToken =
-                    new UsernamePasswordAuthenticationToken(
-                        userDetails,
-                        null,                        // credentials: null porque ya validamos con JWT
-                        userDetails.getAuthorities()
-                    );
-                authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-
-                // Registramos la autenticación en el contexto de seguridad
-                SecurityContextHolder.getContext().setAuthentication(authToken);
-            }
         }
 
         filterChain.doFilter(request, response);
