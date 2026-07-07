@@ -55,8 +55,8 @@ fun GestionCuidadoresScreen(
                 }
             } else {
                 val listaFiltrada = when (tabSeleccionada) {
-                    0 -> uiState.listaCuidadores.filter { it.estadoValidacion == "PENDIENTE" }
-                    1 -> uiState.listaCuidadores.filter { it.estadoValidacion == "VALIDADO" }
+                    0 -> uiState.listaCuidadores.filter { it.estadoVerificacion == "PENDIENTE" }
+                    1 -> uiState.listaCuidadores.filter { it.estadoVerificacion == "VALIDADO" }
                     else -> uiState.listaCuidadores
                 }
 
@@ -67,9 +67,9 @@ fun GestionCuidadoresScreen(
                     items(listaFiltrada) { cuidador ->
                         TarjetaCuidadorAdmin(
                             cuidador = cuidador,
-                            onApropar = { viewModel.procesarValidacion(cuidador.idCuidador, true) },
-                            onRechazar = { viewModel.procesarValidacion(cuidador.idCuidador, false) },
-                            onEliminar = { viewModel.eliminarCuidador(cuidador.idCuidador) }
+                            onApropar = { viewModel.procesarValidacion(cuidador.idPersona, true) },
+                            onRechazar = { viewModel.procesarValidacion(cuidador.idPersona, false) },
+                            onEliminar = { viewModel.eliminarCuidador(cuidador.idPersona) }
                         )
                     }
                 }
@@ -89,10 +89,10 @@ private fun TarjetaCuidadorAdmin(
         Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                 Text(text = cuidador.nombre, style = MaterialTheme.typography.titleMedium)
-                Badge { Text(cuidador.estadoValidacion) }
+                Badge { Text(cuidador.estadoVerificacion) }
             }
             Text("RUT: ${cuidador.rut}", style = MaterialTheme.typography.bodySmall)
-            Text("Email: ${cuidador.correo}", style = MaterialTheme.typography.bodySmall)
+            Text("Email: ${cuidador.email}", style = MaterialTheme.typography.bodySmall)
 
             // Simulación de revisión documental (requisito de tesis)
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -104,7 +104,7 @@ private fun TarjetaCuidadorAdmin(
 
             // Acciones Operativas según el estado
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End, verticalAlignment = Alignment.CenterVertically) {
-                if (cuidador.estadoValidacion == "PENDIENTE") {
+                if (cuidador.estadoVerificacion == "PENDIENTE") {
                     TextButton(onClick = onRechazar, colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)) {
                         Text("Rechazar")
                     }

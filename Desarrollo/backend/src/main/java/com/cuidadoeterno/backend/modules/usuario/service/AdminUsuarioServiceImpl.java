@@ -35,7 +35,7 @@ public class AdminUsuarioServiceImpl implements AdminUsuarioService {
                         .email(c.getEmail())
                         .telefono(c.getTelefono())
                         .estadoVerificacion(c.getEstadoVerificacion())
-                        .fechaRegistro(c.getFechaIngreso() != null ? c.getFechaIngreso().toString() : null) // <-- CORREGIDO AQUÍ
+                        .fechaRegistro(c.getFechaIngreso()) // <-- CORREGIDO AQUÍ
                         .build())
                 .collect(Collectors.toList());
     }
